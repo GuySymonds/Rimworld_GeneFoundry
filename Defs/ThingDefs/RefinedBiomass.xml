@@ -26,7 +26,7 @@ Contains concentrated biological compounds suitable for manufacturing synthetic 
     </statBases>
 
     <thingCategories>
-      <li>ResourcesRaw</li>
+      <li>Manufactured</li>
     </thingCategories>
 
   </ThingDef>

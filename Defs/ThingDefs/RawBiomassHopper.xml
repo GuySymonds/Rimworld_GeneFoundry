@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef ParentName="BuildingBase">
+
+    <defName>GF_BiomassHopper</defName>
+    <label>raw biomass hopper</label>
+
+    <description>A specialised storage hopper that supplies raw biomass to an adjacent biomass refinery.
+
+Colonists automatically deliver raw biomass to the hopper. The connected refinery consumes the material during automated processing.</description>
+
+    <thingClass>Building_Storage</thingClass>
+
+    <!-- Temporary vanilla hopper artwork -->
+    <graphicData>
+      <texPath>Things/Building/Production/Hopper</texPath>
+      <graphicClass>Graphic_Multi</graphicClass>
+    </graphicData>
+
+    <size>(1,1)</size>
+
+    <!-- Construction -->
+    <costList>
+      <Steel>30</Steel>
+      <ComponentIndustrial>1</ComponentIndustrial>
+    </costList>
+
+    <statBases>
+      <WorkToBuild>500</WorkToBuild>
+      <MaxHitPoints>120</MaxHitPoints>
+      <Flammability>0.5</Flammability>
+    </statBases>
+
+    <useHitPoints>true</useHitPoints>
+
+    <!-- Placement -->
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>42</pathCost>
+    <fillPercent>0.5</fillPercent>
+
+    <designationCategory>Production</designationCategory>
+    <surfaceType>Item</surfaceType>
+
+    <!-- Storage configuration -->
+    <building>
+
+      <blueprintClass>Blueprint_Storage</blueprintClass>
+
+      <fixedStorageSettings>
+        <priority>Important</priority>
+        <filter>
+          <thingDefs>
+            <li>GF_RawBiomass</li>
+          </thingDefs>
+        </filter>
+      </fixedStorageSettings>
+
+      <defaultStorageSettings>
+        <priority>Important</priority>
+        <filter>
+          <thingDefs>
+            <li>GF_RawBiomass</li>
+          </thingDefs>
+        </filter>
+      </defaultStorageSettings>
+
+    </building>
+
+    <inspectorTabs>
+      <li>ITab_Storage</li>
+    </inspectorTabs>
+
+    <tickerType>Never</tickerType>
+
+  </ThingDef>
+
+</Defs>

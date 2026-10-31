@@ -14,14 +14,16 @@ Colonists manually process biological matter, optionally using herbal medicine t
 
     <!-- Temporary vanilla artwork -->
     <graphicData>
-      <texPath>Things/Building/Production/TableDrugLab</texPath>
+      <texPath>GeneFoundry/Buildings/GeneVat</texPath>
       <graphicClass>Graphic_Multi</graphicClass>
       <shaderType>CutoutComplex</shaderType>
-      <drawSize>(3.5,1.5)</drawSize>
+      <drawSize>(3,4)</drawSize>
+      <drawRotated>false</drawRotated>
     </graphicData>
 
     <!-- Construction -->
-    <size>(3,1)</size>
+    <size>(3,3)</size>
+    <rotatable>false</rotatable>
 
     <costList>
       <Steel>150</Steel>
@@ -45,7 +47,7 @@ Colonists manually process biological matter, optionally using herbal medicine t
     <designationCategory>Production</designationCategory>
 
     <hasInteractionCell>true</hasInteractionCell>
-    <interactionCellOffset>(0,0,-1)</interactionCellOffset>
+    <interactionCellOffset>(0,0,-2)</interactionCellOffset>
     <surfaceType>Item</surfaceType>
 
     <!-- Available recipes -->
