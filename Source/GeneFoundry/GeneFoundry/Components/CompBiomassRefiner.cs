@@ -7,7 +7,11 @@ namespace GeneFoundry.Components
 {
     public class CompBiomassRefiner : ThingComp
     {
+        private const int MaxPowerOutageTicks = 5000;
+
         private int progressTicks;
+        private int powerOutageTicks;
+
         private bool processing;
 
         private CompProperties_BiomassRefiner Props =>
@@ -28,47 +32,85 @@ namespace GeneFoundry.Components
             base.PostExposeData();
 
             Scribe_Values.Look(ref progressTicks, "gfProgressTicks", 0);
+            Scribe_Values.Look(ref powerOutageTicks, "gfPowerOutageTicks", 0);
             Scribe_Values.Look(ref processing, "gfProcessing", false);
         }
 
-        public override void CompTickRare()
+        public override void CompTick()
         {
-            base.CompTickRare();
+            base.CompTick();
 
             if (!parent.Spawned || Power == null)
                 return;
 
-            // An existing batch continues when electricity is available.
+            // Handle an existing batch.
             if (processing)
             {
-                UpdatePowerConsumption();
-
+                // Processing cannot continue without electricity.
                 if (!Power.PowerOn)
-                    return;
+                {
+                    powerOutageTicks++;
 
-                progressTicks += 250;
+                    if (powerOutageTicks >= MaxPowerOutageTicks)
+                    {
+                        FailBatchDueToPowerLoss();
+                    }
+
+                    return;
+                }
+
+                // Electricity has been restored.
+                // Previous interruptions do not accumulate.
+                powerOutageTicks = 0;
+
+                // Continue refining.
+                progressTicks++;
 
                 if (progressTicks >= Props.processingTicks)
+                {
                     CompleteBatch();
+                }
 
                 return;
             }
 
             // No batch is running.
-            UpdatePowerConsumption();
-
             if (!Power.PowerOn)
                 return;
 
-            // Start automatically when sufficient input is available.
+            // Temporary automatic initiation.
+            // Stage 2 will replace this with colonist-operated bills.
             if (TryConsumeInputs())
             {
                 processing = true;
+
                 progressTicks = 0;
+                powerOutageTicks = 0;
 
                 UpdatePowerConsumption();
             }
         }
+
+        private void FailBatchDueToPowerLoss()
+        {
+            // Discard the current batch.
+            processing = false;
+
+            progressTicks = 0;
+            powerOutageTicks = 0;
+
+            // Return to idle electricity consumption.
+            UpdatePowerConsumption();
+
+            // Notify the player.
+            Messages.Message(
+                "GeneFoundry: Biomass refinery batch lost after two hours without power.",
+                parent,
+                MessageTypeDefOf.NegativeEvent,
+                true
+            );
+        }
+
         private bool TryConsumeInputs()
         {
             var stacks = new List<Thing>();
@@ -159,7 +201,9 @@ namespace GeneFoundry.Components
                 return;
 
             processing = false;
+
             progressTicks = 0;
+            powerOutageTicks = 0;
 
             UpdatePowerConsumption();
         }
@@ -188,7 +232,12 @@ namespace GeneFoundry.Components
             );
 
             if (Power == null || !Power.PowerOn)
-                return $"Status: Paused (no power)\nProgress: {percentage}%";
+            {
+                return
+                    $"Status: Paused (no power)\n" +
+                    $"Progress: {percentage}%\n" +
+                    $"Power outage: {powerOutageTicks}/{MaxPowerOutageTicks} ticks";
+            }
 
             return $"Status: Refining biomass\nProgress: {percentage}%";
         }

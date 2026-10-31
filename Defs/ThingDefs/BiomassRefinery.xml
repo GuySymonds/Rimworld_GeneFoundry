@@ -11,7 +11,7 @@
 Refinement requires substantial electrical power but operates without direct colonist supervision.</description>
 
     <thingClass>Building</thingClass>
-    <tickerType>Rare</tickerType>
+    <tickerType>Normal</tickerType>
     <category>Building</category>
 
     <!-- Temporary artwork -->
