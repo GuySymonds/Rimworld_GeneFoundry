@@ -7,7 +7,7 @@ namespace GeneFoundry
     {
         static Bootstrap()
         {
-            Log.Message("[GeneFoundry] Assembly loaded successfully.");
+            Log.Message("[GeneFoundry] Development build v0.2 loaded successfully.");
         }
     }
 }
