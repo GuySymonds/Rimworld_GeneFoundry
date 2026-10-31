@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- BASIC EXTRACTION -->
+  <RecipeDef>
+
+    <defName>GF_ExtractBiomassBasic</defName>
+    <label>extract raw biomass</label>
+
+    <description>Process raw meat to extract usable biological material, producing raw genetic biomass.</description>
+
+    <jobString>Extracting raw biomass.</jobString>
+
+    <workAmount>1000</workAmount>
+    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSkill>Cooking</workSkill>
+    <requiredGiverWorkType>Cooking</requiredGiverWorkType>
+
+    <effectWorking>Cook</effectWorking>
+    <soundWorking>Recipe_CookMeal</soundWorking>
+
+    <allowMixingIngredients>true</allowMixingIngredients>
+
+    <ingredients>
+      <li>
+        <filter>
+          <categories>
+            <li>MeatRaw</li>
+          </categories>
+        </filter>
+        <count>50</count>
+      </li>
+    </ingredients>
+
+    <fixedIngredientFilter>
+      <categories>
+        <li>MeatRaw</li>
+      </categories>
+    </fixedIngredientFilter>
+
+    <products>
+      <GF_RawBiomass>25</GF_RawBiomass>
+    </products>
+
+  </RecipeDef>
+
+
+  <!-- ENZYMATIC EXTRACTION -->
+  <RecipeDef>
+
+    <defName>GF_ExtractBiomassEnzymatic</defName>
+    <label>extract biomass (enzymatic)</label>
+
+    <description>Process raw meat using herbal medicine as a biological extraction catalyst.
+
+This process recovers additional genetic biomass.</description>
+
+    <jobString>Extracting biomass using enzymes.</jobString>
+
+    <workAmount>1000</workAmount>
+    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSkill>Cooking</workSkill>
+    <requiredGiverWorkType>Cooking</requiredGiverWorkType>
+
+    <effectWorking>Cook</effectWorking>
+    <soundWorking>Recipe_CookMeal</soundWorking>
+
+    <allowMixingIngredients>true</allowMixingIngredients>
+
+    <ingredients>
+
+      <!-- Organic material -->
+      <li>
+        <filter>
+          <categories>
+            <li>MeatRaw</li>
+          </categories>
+        </filter>
+        <count>50</count>
+      </li>
+
+      <!-- Extraction catalyst -->
+      <li>
+        <filter>
+          <thingDefs>
+            <li>MedicineHerbal</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+
+    </ingredients>
+
+    <fixedIngredientFilter>
+      <categories>
+        <li>MeatRaw</li>
+      </categories>
+      <thingDefs>
+        <li>MedicineHerbal</li>
+      </thingDefs>
+    </fixedIngredientFilter>
+
+    <products>
+      <GF_RawBiomass>38</GF_RawBiomass>
+    </products>
+
+  </RecipeDef>
+
+</Defs>
