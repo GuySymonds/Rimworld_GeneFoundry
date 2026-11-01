@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <WorkGiverDef>
+    <defName>GF_RefineBiomass</defName>
+    <label>prepare biomass refinement</label>
+
+    <giverClass>
+      GeneFoundry.WorkGivers.WorkGiver_RefineBiomass
+    </giverClass>
+
+    <workType>Crafting</workType>
+
+    <verb>refine</verb>
+    <gerund>refining</gerund>
+
+    <priorityInType>90</priorityInType>
+
+    <fixedBillGiverDefs>
+      <li>GF_BiomassRefinery</li>
+    </fixedBillGiverDefs>
+
+    <requiredCapacities>
+      <li>Manipulation</li>
+    </requiredCapacities>
+  </WorkGiverDef>
+
+</Defs>

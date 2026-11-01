@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <RecipeDef>
+
+    <defName>GF_StartBiomassRefinement</defName>
+    <label>refine biomass</label>
+
+    <description>Prepare a batch of raw biomass for chemical refinement. Requires 10 Raw Biomass in adjacent hoppers and 1 Neutroamine delivered by a colonist
+
+Once initiated, the refinery operates automatically.</description>
+
+    <jobString>Preparing biomass refinement.</jobString>
+
+    <!-- Temporary preparation configuration -->
+    <workAmount>300</workAmount>
+    <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
+    <workSkill>Intellectual</workSkill>
+    <requiredGiverWorkType>Crafting</requiredGiverWorkType>
+
+    <!-- Minimum operator qualifications -->
+    <skillRequirements>
+      <Intellectual>5</Intellectual>
+      <Crafting>3</Crafting>
+      <Medicine>2</Medicine>
+    </skillRequirements>
+
+    <!-- Neutroamine is the only carried ingredient -->
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>Neutroamine</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>Neutroamine</li>
+      </thingDefs>
+    </fixedIngredientFilter>
+
+    <!-- Declared output for vanilla bill configuration -->
+    <products>
+      <GF_RefinedBiomass>2</GF_RefinedBiomass>
+    </products>
+
+  </RecipeDef>
+
+</Defs>

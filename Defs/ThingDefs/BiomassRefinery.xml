@@ -10,7 +10,7 @@
 
 Refinement requires substantial electrical power but operates without direct colonist supervision.</description>
 
-    <thingClass>Building</thingClass>
+    <thingClass>Building_WorkTable</thingClass>
     <tickerType>Normal</tickerType>
     <category>Building</category>
 
@@ -43,6 +43,21 @@ Refinement requires substantial electrical power but operates without direct col
     <fillPercent>0.5</fillPercent>
 
     <designationCategory>Production</designationCategory>
+
+    <!-- Colonist interaction -->
+    <hasInteractionCell>true</hasInteractionCell>
+    <interactionCellOffset>(0,0,-1)</interactionCellOffset>
+    <surfaceType>Item</surfaceType>
+
+    <!-- Production bills -->
+    <inspectorTabs>
+      <li>ITab_Bills</li>
+    </inspectorTabs>
+
+    <!-- Available production recipes -->
+    <recipes>
+      <li>GF_StartBiomassRefinement</li>
+    </recipes>
 
     <!-- Electrical components -->
     <comps>

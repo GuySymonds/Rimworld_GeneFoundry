@@ -73,22 +73,6 @@ namespace GeneFoundry.Components
 
                 return;
             }
-
-            // No batch is running.
-            if (!Power.PowerOn)
-                return;
-
-            // Temporary automatic initiation.
-            // Stage 2 will replace this with colonist-operated bills.
-            if (TryConsumeInputs())
-            {
-                processing = true;
-
-                progressTicks = 0;
-                powerOutageTicks = 0;
-
-                UpdatePowerConsumption();
-            }
         }
 
         private void FailBatchDueToPowerLoss()
@@ -111,7 +95,40 @@ namespace GeneFoundry.Components
             );
         }
 
-        private bool TryConsumeInputs()
+        public bool CanStartBatch()
+        {
+            // Another batch must not be running.
+            if (!parent.Spawned || processing)
+                return false;
+
+            // Refinement requires electricity.
+            if (Power == null || !Power.PowerOn)
+                return false;
+
+            // Check biomass availability without consuming it.
+            return TryConsumeInputs(false);
+        }
+
+        public bool TryStartBatch()
+        {
+            if (!CanStartBatch())
+                return false;
+
+            // Consume the required biomass from adjacent hoppers.
+            if (!TryConsumeInputs())
+                return false;
+
+            // Begin automated processing.
+            processing = true;
+            progressTicks = 0;
+            powerOutageTicks = 0;
+
+            UpdatePowerConsumption();
+
+            return true;
+        }
+
+        private bool TryConsumeInputs(bool consume = true)
         {
             var stacks = new List<Thing>();
             int available = 0;
@@ -165,6 +182,10 @@ namespace GeneFoundry.Components
             // Never consume ingredients for an incomplete batch.
             if (available < Props.inputCount)
                 return false;
+
+            // Allow callers to check availability without consuming anything.
+            if (!consume)
+                return true;
 
             int remaining = Props.inputCount;
 
@@ -221,10 +242,46 @@ namespace GeneFoundry.Components
             Power.PowerOutput = -watts;
         }
 
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            foreach (Gizmo gizmo in base.CompGetGizmosExtra())
+                yield return gizmo;
+
+            if (!Prefs.DevMode)
+                yield break;
+
+            yield return new Command_Action
+            {
+                defaultLabel = "DEV: Start refinement",
+                defaultDesc = "Manually initiates a biomass refinement batch for testing.",
+
+                action = () =>
+                {
+                    if (!TryStartBatch())
+                    {
+                        Messages.Message(
+                            "GeneFoundry: Cannot start refinement. Check power, biomass and refinery status.",
+                            parent,
+                            MessageTypeDefOf.NegativeEvent,
+                            false
+                        );
+                    }
+                }
+            };
+        }
+
         public override string CompInspectStringExtra()
         {
             if (!processing)
-                return "Status: Waiting for raw biomass";
+            {
+                if (Power == null || !Power.PowerOn)
+                    return "Status: Idle (no power)";
+
+                if (!CanStartBatch())
+                    return "Status: Idle (insufficient raw biomass)";
+
+                return "Status: Ready for preparation";
+            }
 
             int percentage = Math.Min(
                 100,

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <JobDef>
+    <defName>GF_PrepareBiomassRefinement</defName>
+
+    <driverClass>
+      GeneFoundry.Jobs.JobDriver_PrepareBiomassRefinement
+    </driverClass>
+
+    <reportString>preparing biomass refinement.</reportString>
+  </JobDef>
+
+</Defs>
