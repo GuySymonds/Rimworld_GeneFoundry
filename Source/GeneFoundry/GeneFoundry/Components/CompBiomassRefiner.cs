@@ -13,6 +13,7 @@ namespace GeneFoundry.Components
         private int powerOutageTicks;
 
         private float batchFailureChance;
+        private bool completionRollMade;
 
         private bool processing;
 
@@ -38,6 +39,7 @@ namespace GeneFoundry.Components
             Scribe_Values.Look(ref processing, "gfProcessing", false);
 
             Scribe_Values.Look(ref batchFailureChance, "gfBatchFailureChance", 0f);
+            Scribe_Values.Look(ref completionRollMade, "gfCompletionRollMade", false);
         }
 
         public override void CompTick()
@@ -127,6 +129,7 @@ namespace GeneFoundry.Components
             batchFailureChance = operatorPawn == null
                 ? 0f
                 : CalculateFailureChance(operatorPawn);
+            completionRollMade = false;
 
             // Begin automated processing.
             processing = true;
@@ -218,6 +221,28 @@ namespace GeneFoundry.Components
 
         private void CompleteBatch()
         {
+            // Roll only once, even if successful output placement must be retried.
+            if (!completionRollMade)
+            {
+                completionRollMade = true;
+
+                if (Rand.Chance(batchFailureChance))
+                {
+                    processing = false;
+                    progressTicks = 0;
+                    powerOutageTicks = 0;
+                    UpdatePowerConsumption();
+
+                    Messages.Message(
+                        "GeneFoundry: Biomass refinement failed. The batch was lost.",
+                        parent,
+                        MessageTypeDefOf.NegativeEvent,
+                        true);
+
+                    return;
+                }
+            }
+
             Thing output = ThingMaker.MakeThing(Props.outputDef);
             output.stackCount = Props.outputCount;
 
