@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GeneFoundry.Components;
+using RimWorld;
 using Verse;
 using Verse.AI;
 
@@ -9,6 +10,9 @@ namespace GeneFoundry.Jobs
     {
         private const TargetIndex RefineryIndex = TargetIndex.A;
         private const TargetIndex NeutroamineIndex = TargetIndex.B;
+
+        // Match vanilla research's total base learning rate, split across operator skills.
+        private const float PreparationXpPerTick = 0.1f;
 
         private int preparationTicks;
 
@@ -68,6 +72,14 @@ namespace GeneFoundry.Jobs
 
             // Perform manual preparation.
             Toil preparation = Toils_General.Wait(preparationTicks);
+
+            preparation.AddPreTickIntervalAction(delta =>
+            {
+                float experience = PreparationXpPerTick * delta;
+                pawn.skills.Learn(SkillDefOf.Intellectual, experience * 0.60f);
+                pawn.skills.Learn(SkillDefOf.Crafting, experience * 0.25f);
+                pawn.skills.Learn(SkillDefOf.Medicine, experience * 0.15f);
+            });
 
             preparation.WithProgressBarToilDelay(RefineryIndex);
 
