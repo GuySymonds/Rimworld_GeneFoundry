@@ -76,7 +76,7 @@ namespace GeneFoundry.Fabrication
         }
         public void CancelItem(UnfinishedGenePack item)
         {
-            if (item == null || item.cancellationHandled || !item.Valid ||
+            if (item == null || item.Destroyed || item.cancellationHandled || !item.Valid ||
                 (item.fabricator != null ? item.fabricator != this : Unfinished != item)) return;
             item.cancellationHandled = true; // Persist the receipt before creating any recovery.
             bool current = Unfinished == item;

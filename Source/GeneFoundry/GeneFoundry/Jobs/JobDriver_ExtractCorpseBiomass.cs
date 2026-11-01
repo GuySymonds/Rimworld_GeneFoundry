@@ -16,6 +16,8 @@ namespace GeneFoundry.Jobs
         private bool corpsePositioned;
         private bool Enzymatic => job.bill?.recipe?.defName == "GF_ExtractBiomassCorpseEnzymatic";
         private Corpse Corpse => sourceCorpse ?? job.GetTarget(TargetIndex.B).Thing as Corpse;
+        public Corpse LiquidatingCorpse => HaveCurToil && CurToil.debugName == "GeneFoundryLiquidation" ? Corpse : null;
+        public float LiquidationProgress => BiomassCalculations.LiquidationVisualProgress(processingTicks, ticksLeftThisToil);
 
         public override string GetReport()
         {
@@ -127,6 +129,7 @@ namespace GeneFoundry.Jobs
             yield return beginExtraction;
 
             Toil processing = Toils_General.Wait(1);
+            processing.debugName = "GeneFoundryLiquidation";
             processing.initAction = () => ticksLeftThisToil = processingTicks;
             processing.WithProgressBar(TargetIndex.A,
                 () => 1f - ticksLeftThisToil / (float)System.Math.Max(1, processingTicks));

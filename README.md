@@ -246,3 +246,11 @@ Runtime acceptance still requires RimWorld. Use a disposable colony to check:
 7. Load an older colony with a built Fabricator; check idle and already-running Fabricators migrate correctly, get an empty Bills tab when no bills were saved, and existing vats, refineries and research still work. Developer-spawn an unfinished item and inspect/haul it without errors or free production.
 
 No in-game runtime verification is claimed by the automated suite. Build with `/p:PostBuildEvent=` to skip the repository's deployment script when verification should not modify the installed mod.
+
+### Corpse liquidation visuals
+
+During the Gene Vat extraction phase, the corpse visually advances through fresh, rotting and dessicated artwork at one-third and two-thirds progress. An already decayed corpse never looks fresher. Its rendered width and height shrink linearly from 100% to 50% over that extraction phase. Artificial-part recovery and ingredient hauling do not trigger the effect.
+
+These are presentation changes only. Actual rot progress, race/body size, meat recovery, timing, biomass yield, catalyst requirements and salvage are unchanged. Natural environmental decay still follows the existing rules. Rendering uses loaded vanilla/modded life-stage corpse graphics and native pawn render-node transforms; it does not alter CompRottable or regenerate textures. Normal corpse drawing is restored when extraction is interrupted or the vat is removed. After resuming or loading, visuals follow the current saved extraction progress.
+
+Manual checks: process fresh, rotten and dessicated animals and a humanlike corpse; check the two visual transitions and progressive shrink, including a large animal. Draft the operator, cut power, remove the vat and save/reload during extraction; confirm ordinary drawing returns when work stops, with no doubled or invisible corpse. Compare biomass yield and salvage to the same inputs without a visual effect. Automated tests cover visual stage/scale boundaries and existing extraction calculations; they do not verify Unity rendering.

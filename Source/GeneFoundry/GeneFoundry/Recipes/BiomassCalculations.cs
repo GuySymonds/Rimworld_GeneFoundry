@@ -5,6 +5,11 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public static float LiquidationVisualProgress(int total, int remaining) => total <= 0 ? 0f :
+            Math.Max(0f, Math.Min(1f, 1f - remaining / (float)total));
+        public static float LiquidationVisualScale(float progress) => 1f - .5f * Math.Max(0f, Math.Min(1f, progress));
+        public static int LiquidationVisualStage(int actualStage, float progress) =>
+            Math.Max(actualStage, progress >= 2f / 3f ? 2 : progress >= 1f / 3f ? 1 : 0);
         public static int EnzymaticCatalystCount(float material)
         {
             return Math.Max(1, (int)Math.Ceiling(Math.Max(0f, material) / 50d));

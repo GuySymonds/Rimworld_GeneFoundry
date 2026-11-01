@@ -6,7 +6,7 @@
   <RecipeDef>
     <defName>GF_FabricateSelectedGenes</defName>
     <label>fabricate selected genepack</label>
-    <description>Fabricate one genepack containing the genes selected in this bill. The entry is removed after one completed attempt, successful or failed. Configure genes through Details. Cancelling committed work loses ingredients.</description>
+    <description>Fabricate one genepack containing the genes selected in this bill. The entry is removed after one completed attempt, successful or failed. Configure genes through Details. Cancelling unfinished work recovers 75% of its paid ingredients, rounded down. Failure recovers nothing.</description>
     <jobString>Fabricating a genepack.</jobString>
     <workAmount>2500</workAmount>
     <workSkill>Intellectual</workSkill>
