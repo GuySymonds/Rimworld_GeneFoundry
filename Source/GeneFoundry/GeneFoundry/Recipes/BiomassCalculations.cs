@@ -5,6 +5,26 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public static float RefinementCleanlinessAdjustment(double cleanliness, bool exposed,
+            bool enabled = true, int dirtyPenaltyPoints = 15, int sterileReductionPoints = 5,
+            int exposurePenaltyPoints = 15)
+        {
+            if (!enabled)
+                return 0f;
+            if (exposed)
+                return Math.Max(0, Math.Min(50, exposurePenaltyPoints)) / 100f;
+            if (cleanliness < 0d)
+                return (float)(Math.Min(1d, -cleanliness / 2d) *
+                    Math.Max(0, Math.Min(50, dirtyPenaltyPoints)) / 100d);
+            return (float)(-Math.Min(1d, cleanliness / 0.6d) *
+                Math.Max(0, Math.Min(30, sterileReductionPoints)) / 100d);
+        }
+
+        public static float CombinedRefinementFailure(float operatorRisk, float environmentAdjustment)
+        {
+            return Math.Max(0f, Math.Min(1f, operatorRisk + environmentAdjustment));
+        }
+
         private static double Progress(int level, int minimum, int maximum)
         {
             return Math.Max(0d, Math.Min(1d, (level - minimum) / (double)(maximum - minimum)));

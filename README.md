@@ -81,8 +81,8 @@ Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finish
 
 - Build hoppers along any side of a completed refinery with their outlets facing it. Diagonal hoppers do not connect. Keep the interaction cell clear. Multiple hoppers combine their stored biomass without speeding production.
 - Assign an operator to Research work and add a refinement bill. The operator collects neutroamine, prepares the batch and then leaves automated processing to the machine.
-- Minimum skills are Intellectual 5, Crafting 3 and Medicine 2. Failure risk reaches zero at 10, 8 and 6 respectively. Their weights are 60%, 25% and 15%.
-- At default settings, preparation scales from 60 minutes at minimum skills to 30 minutes at the zero-failure thresholds, then to about 22.5 minutes at 20/20/20. Above each threshold, that skill contributes independently toward the expert reward, capped at 20. The same relative 150%-to-200% speed progression as raw extraction gives up to 33.3% extra preparation speed, or 25% shorter preparation compared with 10/8/6. Failure probability remains zero above the thresholds.
+- Minimum skills are Intellectual 5, Crafting 3 and Medicine 2. Operator skill-based failure risk reaches zero at 10, 8 and 6 respectively; dirt or exposure can still add risk. Their weights are 60%, 25% and 15%.
+- At default settings, preparation scales from 60 minutes at minimum skills to 30 minutes at the zero-failure thresholds, then to about 22.5 minutes at 20/20/20. Above each threshold, that skill contributes independently toward the expert reward, capped at 20. The same relative 150%-to-200% speed progression as raw extraction gives up to 33.3% extra preparation speed, or 25% shorter preparation compared with 10/8/6. Operator skill-based failure probability remains zero above the thresholds; room conditions can still add risk.
 - Expert yield reaches +20% at 20/20/20 by default: a successful batch produces 2 items plus a 40% chance of one extra, for an average of 2.4. Fractional yield uses chance-based whole-item rounding instead of guaranteeing 3 items and inflating the intended bonus. Expected output and failure risk are captured when processing starts. Both the success/failure roll and whole-item yield result are retained if output placement needs retrying. Expert skills do not shorten automated processing.
 - Preparation awards 0.1 total base XP per tick, split across the three skills using the same weights. Vanilla passion and learning modifiers apply. Interrupted preparation retains earned XP; hauling and automated processing award none.
 - Default processing takes 12 in-game hours. Each available gene processor removes 5% of the base duration; ten reach the six-hour minimum. Reductions add together rather than compound.
@@ -97,6 +97,25 @@ Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finish
 Open **Options → Mod Settings → GeneFoundry** to change preparation durations (1–120 minutes), processing durations (5 minutes–24 hours) and processor reduction (0–25%). Minimum durations cannot exceed base durations. Processing changes affect running batches; preparation changes apply to new preparation jobs. Settings are shared across saves. Restore defaults after accelerated testing if desired.
 
 The Refined Biomass section also has independent expert controls: extra preparation speed at level 20 (+0–100%, default +33.3%) and extra output at level 20 (+0–50%, default +20%). Set either to zero to disable that reward. The preparation-time slider for 10/8/6 specifies the pre-expert duration, rather than an absolute minimum. The view previews the resulting level-20 preparation time. Yield settings affect newly started batches; running batches retain their captured expected output. Refined defaults can be restored without changing raw extraction settings.
+
+### Refinement cleanliness
+
+Room cleanliness affects refinement failure risk by default. The refinery reads the game's Cleanliness room stat, rather than checking floor types, so modded floors and cleaning systems can contribute normally. The effects are additive percentage points:
+
+| Condition | Default adjustment |
+|---|---:|
+| Enclosed, fully roofed room at cleanliness -2 or worse | +15 points |
+| Cleanliness -1 | +7.5 points |
+| Cleanliness 0 | No adjustment |
+| Cleanliness +0.3 | -2.5 points |
+| Cleanliness +0.6 or better | -5 points |
+| Outdoor, map-edge or partly unroofed room | +15 points instead of the cleanliness adjustment |
+
+Intermediate cleanliness values interpolate linearly. Final failure probability is `clamp(operator risk + room adjustment, 0, 1)`. For example, an operator with 12% risk has 27% risk in a very dirty room, 12% at cleanliness zero and 7% at +0.6. Even an expert with zero operator risk has 15% risk in the very dirty room. No environmental penalty changes preparation, automated processing time or output quantity.
+
+Refined Biomass options include an enable checkbox and independent sliders for the maximum dirty-room penalty (0–50 points), sterile-room reduction (0–30 points), and exposure penalty (0–50 points). The fixed cleanliness breakpoints are -2, 0 and +0.6. All environment values and the final risk are captured when processing starts and saved with the batch; later cleaning, dirt, roof changes or settings changes do not alter an existing batch. The inspect panel shows the operator risk, captured environment adjustment and final batch risk. A ready refinery previews its current room adjustment. Developer-started zero-risk batches bypass cleanliness as well as operator preparation.
+
+Manual checks: use normal bills to compare dirty, clean and sterile rooms with the same operator; remove a roof tile and check the exposure penalty replaces the room effect; clean or change settings after a batch starts and verify its captured risk remains unchanged; disable cleanliness influence and confirm a newly started batch uses operator risk alone. Artificial-part salvage still ignores cleanliness and is unaffected by these settings.
 
 The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and starts a zero-risk batch.
 

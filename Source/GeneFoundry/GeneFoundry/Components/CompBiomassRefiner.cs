@@ -14,6 +14,11 @@ namespace GeneFoundry.Components
         private int powerOutageTicks;
 
         private float batchFailureChance;
+        private float batchOperatorRisk;
+        private float batchRoomCleanliness;
+        private float batchCleanlinessAdjustment;
+        private bool batchExposed;
+        private bool batchCleanlinessEnabled;
         private bool completionRollMade;
         private double batchExpectedOutput;
         private int batchOutputCount;
@@ -65,6 +70,11 @@ namespace GeneFoundry.Components
             Scribe_Values.Look(ref processing, "gfProcessing", false);
 
             Scribe_Values.Look(ref batchFailureChance, "gfBatchFailureChance", 0f);
+            Scribe_Values.Look(ref batchOperatorRisk, "gfBatchOperatorRisk", 0f);
+            Scribe_Values.Look(ref batchRoomCleanliness, "gfBatchRoomCleanliness", 0f);
+            Scribe_Values.Look(ref batchCleanlinessAdjustment, "gfBatchCleanlinessAdjustment", 0f);
+            Scribe_Values.Look(ref batchExposed, "gfBatchExposed", false);
+            Scribe_Values.Look(ref batchCleanlinessEnabled, "gfBatchCleanlinessEnabled", true);
             Scribe_Values.Look(ref completionRollMade, "gfCompletionRollMade", false);
             Scribe_Values.Look(ref batchExpectedOutput, "gfBatchExpectedOutput", 2d);
             Scribe_Values.Look(ref batchOutputCount, "gfBatchOutputCount", 0);
@@ -154,9 +164,13 @@ namespace GeneFoundry.Components
 
             // Capture the operator's skills once for this batch.
             // The developer command starts a zero-risk test batch.
-            batchFailureChance = operatorPawn == null
+            batchOperatorRisk = operatorPawn == null
                 ? 0f
                 : CalculateFailureChance(operatorPawn);
+            batchCleanlinessEnabled = operatorPawn != null && GeneFoundryMod.Settings.refinementCleanlinessEnabled;
+            batchCleanlinessAdjustment = EnvironmentAdjustment(batchCleanlinessEnabled,
+                out batchRoomCleanliness, out batchExposed);
+            batchFailureChance = BiomassCalculations.CombinedRefinementFailure(batchOperatorRisk, batchCleanlinessAdjustment);
             completionRollMade = false;
             batchExpectedOutput = operatorPawn == null ? Props.outputCount :
                 BiomassCalculations.RefinementExpectedOutput(Props.outputCount,
@@ -374,7 +388,11 @@ namespace GeneFoundry.Components
 
         public override string CompInspectStringExtra()
         {
-            string failureInfo = $"Batch failure chance: {batchFailureChance * 100f:0.#}%\n" +
+            string environmentInfo = !batchCleanlinessEnabled ? "Cleanliness influence: disabled for this batch" :
+                batchExposed ? $"Outdoor/unroofed exposure: +{batchCleanlinessAdjustment * 100f:0.#} percentage points" :
+                $"Captured room cleanliness: {batchRoomCleanliness:0.##} ({batchCleanlinessAdjustment * 100f:+0.#;-0.#;0} percentage points)";
+            string failureInfo = $"Operator risk: {batchOperatorRisk * 100f:0.#}%\n" + environmentInfo + "\n" +
+                $"Batch failure chance: {batchFailureChance * 100f:0.#}%\n" +
                 $"Expected output on success: {batchExpectedOutput:0.##} refined biomass";
 
             if (!processing)
@@ -385,7 +403,11 @@ namespace GeneFoundry.Components
                 if (!CanStartBatch())
                     return "Status: Idle (insufficient raw biomass)";
 
-                return "Status: Ready for preparation";
+                float adjustment = EnvironmentAdjustment(GeneFoundryMod.Settings.refinementCleanlinessEnabled,
+                    out float cleanliness, out bool exposed);
+                string roomInfo = !GeneFoundryMod.Settings.refinementCleanlinessEnabled ? "Cleanliness influence disabled" :
+                    exposed ? "Outdoor/unroofed exposure" : $"Room cleanliness: {cleanliness:0.##}";
+                return $"Status: Ready for preparation\n{roomInfo}: {adjustment * 100f:+0.#;-0.#;0} risk percentage points";
             }
 
             int percentage = Math.Min(100, (int)(batchProgress * 100f));
@@ -417,6 +439,16 @@ namespace GeneFoundry.Components
                 pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
                 pawn.skills.GetSkill(SkillDefOf.Crafting).Level,
                 pawn.skills.GetSkill(SkillDefOf.Medicine).Level);
+        }
+
+        private float EnvironmentAdjustment(bool enabled, out float cleanliness, out bool exposed)
+        {
+            Room room = parent.GetRoom();
+            exposed = room == null || room.OutdoorsForWork || room.TouchesMapEdge || room.OpenRoofCount > 0;
+            cleanliness = exposed ? 0f : room.GetStat(RoomStatDefOf.Cleanliness);
+            GeneFoundrySettings settings = GeneFoundryMod.Settings;
+            return BiomassCalculations.RefinementCleanlinessAdjustment(cleanliness, exposed, enabled,
+                settings.refinementDirtyPenalty, settings.refinementSterileReduction, settings.refinementExposurePenalty);
         }
 
         public static int CalculatePreparationTicks(Pawn pawn)

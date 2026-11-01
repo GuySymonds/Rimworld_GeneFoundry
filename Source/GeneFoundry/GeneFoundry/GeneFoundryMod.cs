@@ -18,6 +18,10 @@ namespace GeneFoundry
         public int expertYieldPercent = 20;
         public int refinedExpertSpeedPercent = 200;
         public int refinedExpertYieldPercent = 20;
+        public bool refinementCleanlinessEnabled = true;
+        public int refinementDirtyPenalty = 15;
+        public int refinementSterileReduction = 5;
+        public int refinementExposurePenalty = 15;
 
         public void Validate()
         {
@@ -33,6 +37,9 @@ namespace GeneFoundry
             expertYieldPercent = Math.Max(0, Math.Min(50, expertYieldPercent));
             refinedExpertSpeedPercent = Math.Max(150, Math.Min(300, refinedExpertSpeedPercent));
             refinedExpertYieldPercent = Math.Max(0, Math.Min(50, refinedExpertYieldPercent));
+            refinementDirtyPenalty = Math.Max(0, Math.Min(50, refinementDirtyPenalty));
+            refinementSterileReduction = Math.Max(0, Math.Min(30, refinementSterileReduction));
+            refinementExposurePenalty = Math.Max(0, Math.Min(50, refinementExposurePenalty));
         }
 
         public override void ExposeData()
@@ -50,6 +57,10 @@ namespace GeneFoundry
             Scribe_Values.Look(ref expertYieldPercent, "expertYieldPercent", 20);
             Scribe_Values.Look(ref refinedExpertSpeedPercent, "refinedExpertSpeedPercent", 200);
             Scribe_Values.Look(ref refinedExpertYieldPercent, "refinedExpertYieldPercent", 20);
+            Scribe_Values.Look(ref refinementCleanlinessEnabled, "refinementCleanlinessEnabled", true);
+            Scribe_Values.Look(ref refinementDirtyPenalty, "refinementDirtyPenalty", 15);
+            Scribe_Values.Look(ref refinementSterileReduction, "refinementSterileReduction", 5);
+            Scribe_Values.Look(ref refinementExposurePenalty, "refinementExposurePenalty", 15);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 Validate();
         }
@@ -142,6 +153,26 @@ namespace GeneFoundry
                 "Each available processor removes this percentage of the unassisted duration. Reductions add together until the shortest allowed time is reached. 0% disables assistance. Range: 0–25% in 1% steps."));
             listing.Label("Processing settings affect running batches. Preparation settings apply to new preparation jobs.");
             listing.Label("Active gene assemblers have priority. Each powered processor assists at most one refinery.");
+            listing.GapLine();
+            listing.Label("Refinement cleanliness and exposure");
+            listing.CheckboxLabeled("Room cleanliness affects batch failure risk", ref Settings.refinementCleanlinessEnabled,
+                "Add room cleanliness or exposure risk to the operator's failure chance. Applies only to refinement; artificial-part recovery still ignores cleanliness. Changes affect new batches only.");
+            if (Settings.refinementCleanlinessEnabled)
+            {
+                Settings.refinementDirtyPenalty = (int)Math.Round(listing.SliderLabeled(
+                    $"Very dirty room (cleanliness -2): +{Settings.refinementDirtyPenalty} risk points",
+                    Settings.refinementDirtyPenalty, 0, 50, 0.75f,
+                    "Maximum added failure probability, in percentage points, at cleanliness -2 or worse. Scales linearly to zero at cleanliness 0. Default: +15 points; -1 gives +7.5. Range: 0–50 points."));
+                Settings.refinementSterileReduction = (int)Math.Round(listing.SliderLabeled(
+                    $"Sterile room (cleanliness +0.6): -{Settings.refinementSterileReduction} risk points",
+                    Settings.refinementSterileReduction, 0, 30, 0.75f,
+                    "Maximum reduction in failure probability at cleanliness +0.6 or better. Scales linearly from zero at cleanliness 0. Default: -5 percentage points. Final failure chance cannot fall below zero. Range: 0–30 points."));
+                Settings.refinementExposurePenalty = (int)Math.Round(listing.SliderLabeled(
+                    $"Outdoor or unroofed exposure: +{Settings.refinementExposurePenalty} risk points",
+                    Settings.refinementExposurePenalty, 0, 50, 0.75f,
+                    "Fixed added failure probability when the refinery is outside an enclosed, fully roofed room. Replaces the room cleanliness adjustment; the two penalties do not stack. Default: +15 percentage points. Range: 0–50 points."));
+            }
+            listing.Label("Risk = operator risk + room adjustment, clamped to 0–100%. Captured when processing starts; later dirt, cleaning or settings changes do not alter that batch. Speed and yield are unaffected.");
             if (listing.ButtonText("Restore refined biomass defaults"))
             {
                 Settings.preparationMinutes = 60;
@@ -151,6 +182,10 @@ namespace GeneFoundry
                 Settings.processorReductionPercent = 5;
                 Settings.refinedExpertSpeedPercent = 200;
                 Settings.refinedExpertYieldPercent = 20;
+                Settings.refinementCleanlinessEnabled = true;
+                Settings.refinementDirtyPenalty = 15;
+                Settings.refinementSterileReduction = 5;
+                Settings.refinementExposurePenalty = 15;
             }
             contentHeight = Math.Max(inRect.height, listing.CurHeight + 20f);
             listing.End();
