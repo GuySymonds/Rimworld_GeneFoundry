@@ -19,13 +19,20 @@ namespace GeneFoundry.Fabrication
         public bool outcomeRolled, failed;
         public Pawn creator;
         private bool creatorAssigned;
+        public Building_GeneFabricator fabricator;
+        public Bill_GeneFabrication bill;
+        public int paidBiomass = -1, paidCapsules = -1;
+        public bool cancellationHandled;
+        public string OwnerLabel => creator?.Name?.ToStringShort ?? (creatorAssigned ? "Owner unavailable" : "Unassigned");
+        public string IntendedGenes => string.Join(", ", (genes ?? new List<GeneDef>()).Select(g => g?.label ?? g?.defName ?? "missing gene"));
+        public override string LabelNoCount => Valid ? "unfinished genepack: " + IntendedGenes : base.LabelNoCount;
         public bool CanBeWorkedBy(Pawn pawn) => pawn != null && (!creatorAssigned || creator == pawn);
         public bool TryClaim(Pawn pawn)
         {
             if (!Valid || !CanBeWorkedBy(pawn)) return false;
             creator = pawn; creatorAssigned = true; return true;
         }
-        public bool Valid => committed && genes != null && genes.Count > 0 &&
+        public bool Valid => committed && !cancellationHandled && genes != null && genes.Count > 0 &&
             genes.All(g => g != null) && genes.Distinct().Count() == genes.Count &&
             totalWork > 0 && !float.IsInfinity(totalWork) && workDone >= 0 && workDone <= totalWork &&
             riskWork >= 0 && !float.IsInfinity(riskWork) && riskWork <= workDone * .30001f;
@@ -54,10 +61,22 @@ namespace GeneFoundry.Fabrication
             Scribe_Values.Look(ref failed, "gfFailed");
             Scribe_References.Look(ref creator, "gfCreator");
             Scribe_Values.Look(ref creatorAssigned, "gfCreatorAssigned");
+            Scribe_References.Look(ref fabricator, "gfFabricator");
+            Scribe_References.Look(ref bill, "gfBill");
+            Scribe_Values.Look(ref paidBiomass, "gfPaidBiomass", -1);
+            Scribe_Values.Look(ref paidCapsules, "gfPaidCapsules", -1);
+            Scribe_Values.Look(ref cancellationHandled, "gfCancellationHandled");
         }
         public override string GetInspectString() => Valid
-            ? $"Genes: {genes.Count}\nProgress: {workDone / totalWork:P0}\nFailure estimate: {Failure:P1}"
+            ? $"Intended genepack: {IntendedGenes}\nAssigned to: {OwnerLabel}\nProgress: {workDone / totalWork:P0}\nFailure estimate: {Failure:P1}"
             : "No valid paid fabrication job. Cannot be fabricated.";
+        public override IEnumerable<Gizmo> GetGizmos()
+        {
+            foreach (var gizmo in base.GetGizmos()) yield return gizmo;
+            if (Valid && fabricator != null && !fabricator.Destroyed)
+                yield return new Command_Action { defaultLabel = "Cancel fabrication", defaultDesc = "Recover 75% of committed ingredients, rounded down.",
+                    icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = () => fabricator.CancelItem(this) };
+        }
     }
 
     public static class FabricationSkills
@@ -80,23 +99,24 @@ namespace GeneFoundry.Fabrication
         }
     }
 
-    public class Building_GeneFabricator : Building_WorkTable, IThingHolder
+    public partial class Building_GeneFabricator : Building_WorkTable, IThingHolder
     {
         private ThingOwner<Thing> contents;
         private List<GeneDef> selected = new List<GeneDef>();
         private int generation;
         private Bill_GeneFabrication activeBill;
+        private UnfinishedGenePack currentItem;
         public Bill_GeneFabrication ActiveBill => activeBill;
         public bool CanBeWorkedBy(Pawn pawn) => Unfinished == null || Unfinished.CanBeWorkedBy(pawn);
         public int Generation => generation;
         public Building_GeneFabricator() { contents = new ThingOwner<Thing>(this); }
         public List<GeneDef> Selected => new List<GeneDef>(selected ?? new List<GeneDef>());
-        public UnfinishedGenePack Unfinished => contents.OfType<UnfinishedGenePack>().FirstOrDefault();
+        public UnfinishedGenePack Unfinished => currentItem != null && !currentItem.Destroyed ? currentItem : contents.OfType<UnfinishedGenePack>().FirstOrDefault();
         public bool Pending => selected != null && selected.Count > 0;
         public bool Powered => this.TryGetComp<CompPowerTrader>()?.PowerOn == true &&
             this.TryGetComp<CompBreakdownable>()?.BrokenDown != true;
         public bool CanWork => Spawned && Pending && Powered && (activeBill == null || (!activeBill.DeletedOrDereferenced && activeBill.ShouldDoNow())) && selected.All(GeneFabricationResearch.IsUnlocked) &&
-            (Unfinished == null || (Unfinished.Valid && selected.SequenceEqual(Unfinished.genes)));
+            (Unfinished == null || (Unfinished.Valid && selected.SequenceEqual(Unfinished.genes) && (AtWorkSurface(Unfinished) || contents.Contains(Unfinished))));
         public static int Complexity(IEnumerable<GeneDef> genes) => genes.Sum(g => Math.Max(0, g.biostatCpx));
         public static int Archites(IEnumerable<GeneDef> genes) => genes.Sum(g => Math.Max(0, g.biostatArc));
         public static ThingDef BiomassDef => DefDatabase<ThingDef>.GetNamed("GF_RefinedBiomass");
@@ -135,18 +155,25 @@ namespace GeneFoundry.Fabrication
         public bool TryCommit(Pawn pawn)
         {
             if (pawn == null || !CanWork || !FabricationSkills.Qualified(pawn) || !CanBeWorkedBy(pawn)) return false;
-            return CommitDeliveredMaterials() && Unfinished.TryClaim(pawn);
+            return CommitDeliveredMaterials() && Unfinished.TryClaim(pawn) && PlaceCurrentItem();
         }
         internal bool CommitDeliveredMaterials()
         {
             if (!Pending || selected.Any(g => g == null)) return false;
             if (Unfinished != null) return Unfinished.Valid;
+            if (activeBill?.HasStarted == true) return false;
             if (Missing(BiomassDef) > 0 || Missing(CapsuleDef) > 0) return false;
             var item = MakeUnfinished();
             item.genes = Selected;
             item.totalWork = FabricationCalculations.Work(selected.Count, Complexity(selected));
             item.committed = true;
+            item.fabricator = this;
+            item.bill = activeBill;
+            item.paidBiomass = Required(BiomassDef);
+            item.paidCapsules = Required(CapsuleDef);
             if (!contents.TryAdd(item, false)) { item.Destroy(); return false; }
+            currentItem = item;
+            activeBill?.BindUnfinished(item);
             ConsumeDelivered(BiomassDef, Required(BiomassDef));
             ConsumeDelivered(CapsuleDef, Required(CapsuleDef));
             return true;
@@ -181,7 +208,9 @@ namespace GeneFoundry.Fabrication
             }
             if (item.failed)
             {
+                item.cancellationHandled = true;
                 contents.Remove(item);
+                currentItem = null;
                 item.Destroy();
                 FinishBillIteration(item.creator);
                 selected.Clear();
@@ -198,6 +227,8 @@ namespace GeneFoundry.Fabrication
                 return false; // Keep the paid job and its already-rolled success for retry.
             }
             contents.Remove(item);
+            currentItem = null;
+            item.cancellationHandled = true;
             item.Destroy();
             FinishBillIteration(item.creator);
             selected.Clear();
@@ -218,8 +249,14 @@ namespace GeneFoundry.Fabrication
             generation++;
             var bill = activeBill;
             activeBill = null;
+            var item = Unfinished;
+            if (item != null && item.Valid)
+            {
+                if (item.bill == null) item.bill = bill;
+                CancelItem(item);
+            }
+            else if (item != null) { contents.Remove(item); currentItem = null; item.Destroy(); }
             if (bill != null && !bill.deleted && billStack.Bills.Contains(bill)) billStack.Delete(bill);
-            if (Unfinished != null) { var item = Unfinished; contents.Remove(item); item.Destroy(); }
             selected.Clear();
             if (Spawned) contents.TryDropAll(InteractionCell, Map, ThingPlaceMode.Near);
         }
@@ -234,20 +271,10 @@ namespace GeneFoundry.Fabrication
         public bool TryConfigureBill(Bill_GeneFabrication bill, IEnumerable<GeneDef> genes)
         {
             var list = genes?.Distinct().ToList();
-            if (!billStack.Bills.Contains(bill) || (Pending && activeBill == bill) ||
+            if (!billStack.Bills.Contains(bill) || bill.HasStarted || (Pending && activeBill == bill) ||
                 list == null || list.Count == 0 || !list.All(GeneFabricationResearch.IsUnlocked)) return false;
             bill.genes = list;
             return true;
-        }
-        public void TryStartNextBill()
-        {
-            if (!Spawned || !Powered || Pending || contents.Count != 0) return;
-            foreach (var bill in billStack.Bills.OfType<Bill_GeneFabrication>())
-                if (bill.ShouldDoNow() && TryStart(bill.genes))
-                {
-                    activeBill = bill;
-                    return;
-                }
         }
         private void FinishBillIteration(Pawn pawn)
         {
@@ -260,14 +287,15 @@ namespace GeneFoundry.Fabrication
         {
             base.Notify_BillDeleted(bill);
             if (activeBill == bill) Cancel();
+            else if (bill is Bill_GeneFabrication fabrication && fabrication.unfinished != null) CancelItem(fabrication.unfinished);
         }
         public override void TickRare()
         {
             base.TickRare();
+            if (Unfinished != null && contents.Contains(Unfinished)) PlaceCurrentItem();
             if (!Pending && Spawned)
             {
                 contents.TryDropAll(InteractionCell, Map, ThingPlaceMode.Near);
-                TryStartNextBill();
             }
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
@@ -284,6 +312,7 @@ namespace GeneFoundry.Fabrication
             Scribe_Collections.Look(ref selected, "gfSelectedGenes", LookMode.Def);
             Scribe_Values.Look(ref generation, "gfGeneration");
             Scribe_References.Look(ref activeBill, "gfActiveBill");
+            Scribe_References.Look(ref currentItem, "gfCurrentItem");
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 if (contents == null) contents = new ThingOwner<Thing>(this);
@@ -296,7 +325,7 @@ namespace GeneFoundry.Fabrication
         protected override void DrawAt(Vector3 drawLoc, bool flip = false)
         {
             base.DrawAt(drawLoc, flip);
-            if (Unfinished != null)
+            if (Unfinished != null && !Unfinished.Spawned)
             {
                 drawLoc.y = Altitudes.AltitudeFor(AltitudeLayer.BuildingOnTop);
                 Unfinished.Graphic.Draw(drawLoc, Rot4.North, Unfinished);
@@ -317,9 +346,9 @@ namespace GeneFoundry.Fabrication
         {
             foreach (var gizmo in base.GetGizmos()) yield return gizmo;
             if (Faction != Faction.OfPlayer) yield break;
-            yield return new Command_Action { defaultLabel = Pending ? "Inspect selected genes" : "Fabricate genepack", defaultDesc = "Select researched genes for one manual fabrication job.", icon = ContentFinder<Texture2D>.Get("UI/Gizmos/RecombineGenes"), action = () => Find.WindowStack.Add(new Dialog_GeneFabrication(this)) };
+            if (Pending) yield return new Command_Action { defaultLabel = "Inspect selected genes", defaultDesc = "Inspect the current fabrication order.", icon = ContentFinder<Texture2D>.Get("UI/Gizmos/RecombineGenes"), action = () => Find.WindowStack.Add(new Dialog_GeneFabrication(this)) };
             yield return new Command_Action { defaultLabel = "Add fabrication bill", defaultDesc = "Queue one genepack with the selected genes. No quantity or repeat controls.", icon = ContentFinder<Texture2D>.Get("UI/Gizmos/RecombineGenes"), action = () => Find.WindowStack.Add(new Dialog_GeneFabrication(this, addBill: true)) };
-            if (Pending) yield return new Command_Action { defaultLabel = "Cancel fabrication", defaultDesc = "Return delivered ingredients before work starts. Committed ingredients are lost.", icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = Cancel };
+            if (Pending) yield return new Command_Action { defaultLabel = "Cancel fabrication", defaultDesc = "Return delivered ingredients before work starts; recover 75% of committed ingredients, rounded down.", icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = Cancel };
         }
     }
 }

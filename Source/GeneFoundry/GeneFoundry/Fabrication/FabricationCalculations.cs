@@ -10,6 +10,7 @@ namespace GeneFoundry.Fabrication
         public const int WorkPerGene = 2500, WorkPerComplexity = 1000;
         public const float IntellectualWeight = 0.60f, MedicineWeight = 0.25f, CraftingWeight = 0.15f;
         public const float XpPerTick = 0.1f;
+        public static int CancellationRecovery(int paid) => (int)(Math.Max(0L, paid) * 75 / 100);
         public const int DiscountPerAdditionalGene = 10, MaximumDiscount = 50;
         public static int BiomassDiscountPercent(int genes) =>
             (int)Math.Min(MaximumDiscount, Math.Max(0L, (long)genes - 1) * DiscountPerAdditionalGene);

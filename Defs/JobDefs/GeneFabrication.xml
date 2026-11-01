@@ -10,4 +10,19 @@
     <driverClass>GeneFoundry.Jobs.JobDriver_FabricateGenePack</driverClass>
     <reportString>Fabricating a genepack.</reportString>
   </JobDef>
+  <JobDef>
+    <defName>GF_StartFabricationBill</defName>
+    <driverClass>GeneFoundry.Jobs.JobDriver_HandleFabrication</driverClass>
+    <reportString>Starting the next gene fabrication bill.</reportString>
+  </JobDef>
+  <JobDef>
+    <defName>GF_SetAsideFabrication</defName>
+    <driverClass>GeneFoundry.Jobs.JobDriver_HandleFabrication</driverClass>
+    <reportString>Setting aside an unfinished genepack.</reportString>
+  </JobDef>
+  <JobDef>
+    <defName>GF_ResumeFabrication</defName>
+    <driverClass>GeneFoundry.Jobs.JobDriver_HandleFabrication</driverClass>
+    <reportString>Retrieving an unfinished genepack.</reportString>
+  </JobDef>
 </Defs>

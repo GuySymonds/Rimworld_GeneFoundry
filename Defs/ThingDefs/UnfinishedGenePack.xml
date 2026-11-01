@@ -21,6 +21,8 @@
 
     <!-- Each unfinished genepack is an individual item -->
     <stackLimit>1</stackLimit>
+    <selectable>true</selectable>
+    <drawerType>RealtimeOnly</drawerType>
 
     <!-- Not manufactured from variable stuff materials -->
     <stuffCategories Inherit="False" />

@@ -24,7 +24,7 @@ namespace GeneFoundry.Fabrication
         private readonly Building_GeneFabricator bench;
         private readonly Bill_GeneFabrication editingBill;
         private readonly bool addBill;
-        private bool ReadOnly => editingBill != null ? bench.Pending && bench.ActiveBill == editingBill : !addBill && bench.Pending;
+        private bool ReadOnly => editingBill != null ? editingBill.HasStarted : !addBill && bench.Pending;
         private readonly List<GeneDef> selected;
         private readonly List<GeneDef> available;
         private readonly HashSet<GeneCategoryDef> collapsed = new HashSet<GeneCategoryDef>();
@@ -65,7 +65,7 @@ namespace GeneFoundry.Fabrication
                 $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills ({work:0} work)\n" +
                 "Minimum: Intellectual 10, Medicine 6, Crafting 4. Weights: 60% / 25% / 15%.\n" +
                 "Failure: 30% at minimum; 0% at 16 / 12 / 10. Work is locked to its first operator.\n" +
-                "Cancellation after work starts loses committed ingredients.");
+                "Cancellation recovers 75% of committed ingredients, rounded down.");
             Rect buttons = new Rect(0, rect.height - ButSize.y, rect.width, ButSize.y);
             if (!ReadOnly) DoBottomButtons(buttons);
             else if (Widgets.ButtonText(new Rect(0, buttons.y, ButSize.x, ButSize.y), "Close".Translate())) Close();

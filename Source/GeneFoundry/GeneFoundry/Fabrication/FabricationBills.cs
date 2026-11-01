@@ -10,6 +10,13 @@ namespace GeneFoundry.Fabrication
     {
         public List<GeneDef> genes = new List<GeneDef>();
         private bool completed;
+        private bool started;
+        public UnfinishedGenePack unfinished;
+        public bool HasStarted => started || unfinished != null;
+        public void BindUnfinished(UnfinishedGenePack item) { unfinished = item; started = true; item.bill = this; }
+        public bool CanBeScheduledFor(Pawn pawn) => ShouldDoNow() && (!HasStarted || unfinished.CanBeWorkedBy(pawn));
+        public string AssignmentLabel => unfinished?.OwnerLabel ?? (started ? "Unfinished pack unavailable" : "Unassigned");
+        protected override string StatusString => "Assigned to: " + AssignmentLabel;
         public Bill_GeneFabrication() { }
         public Bill_GeneFabrication(IEnumerable<GeneDef> genes)
             : base(DefDatabase<RecipeDef>.GetNamed("GF_FabricateSelectedGenes"))
@@ -20,7 +27,7 @@ namespace GeneFoundry.Fabrication
             string.Join(", ", genes.Take(2).Select(g => g?.label ?? "missing gene")) + (genes.Count > 2 ? "…" : "");
         public override string LabelCap => Label;
         public override bool ShouldDoNow() => !completed && !suspended && genes != null &&
-            genes.Count > 0 && genes.All(g => g != null);
+            genes.Count > 0 && genes.All(g => g != null) && (!HasStarted || (unfinished != null && !unfinished.Destroyed && unfinished.Valid && !unfinished.cancellationHandled));
         // Vanilla DoBill must never run this recipe: it cannot handle selected genes,
         // custom ownership, material commitment or failure. Only our workgiver executes it.
         public override bool PawnAllowedToStartAnew(Pawn pawn) => false;
@@ -46,6 +53,8 @@ namespace GeneFoundry.Fabrication
         {
             Scribe_Collections.Look(ref genes, "gfBillGenes", LookMode.Def);
             Scribe_Values.Look(ref completed, "gfBillCompleted");
+            Scribe_Values.Look(ref started, "gfBillStarted");
+            Scribe_References.Look(ref unfinished, "gfBillUnfinished");
         }
         public override Bill Clone()
         {

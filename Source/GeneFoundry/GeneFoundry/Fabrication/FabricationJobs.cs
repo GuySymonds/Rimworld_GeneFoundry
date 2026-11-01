@@ -27,7 +27,9 @@ namespace GeneFoundry.Jobs
     public class JobDriver_FabricateGenePack : JobDriver
     {
         private Building_GeneFabricator Bench => job.targetA.Thing as Building_GeneFabricator;
-        public override bool TryMakePreToilReservations(bool errorOnFailed) => pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
+        public override bool TryMakePreToilReservations(bool errorOnFailed) =>
+            pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed) &&
+            (Bench?.Unfinished == null || !Bench.Unfinished.Spawned || pawn.Reserve(Bench.Unfinished, job, 1, 1, null, errorOnFailed));
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOnDestroyedOrNull(TargetIndex.A);
@@ -36,7 +38,10 @@ namespace GeneFoundry.Jobs
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
             var work = ToilMaker.MakeToil("FabricateGenePack");
             work.defaultCompleteMode = ToilCompleteMode.Never;
-            work.initAction = () => { if (!Bench.TryCommit(pawn)) EndJobWith(JobCondition.Incompletable); };
+            work.initAction = () =>
+            {
+                if (!Bench.TryCommit(pawn) || !pawn.Reserve(Bench.Unfinished, job, 1, 1)) EndJobWith(JobCondition.Incompletable);
+            };
             work.tickIntervalAction = delta =>
             {
                 pawn.rotationTracker.FaceTarget(Bench);

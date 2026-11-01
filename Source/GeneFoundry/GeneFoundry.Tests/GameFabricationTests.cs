@@ -37,6 +37,12 @@ namespace GeneFoundry.Tests
             public Bill_GeneFabrication bill = new Bill_GeneFabrication();
             public void ExposeData() => bill.ExposeGeneData();
         }
+        public class LinkedWorkData : IExposable
+        {
+            public Bill_GeneFabrication bill;
+            public UnfinishedGenePack item;
+            public void ExposeData() { bill.ExposeGeneData(); item.ExposeJobData(); }
+        }
         private class HeadlessBench : Building_GeneFabricator
         {
             public HeadlessBench()
@@ -58,6 +64,7 @@ namespace GeneFoundry.Tests
                 return result;
             }
             protected override void NotifyFailure() { failures++; }
+            protected override Thing MakeRecoveredMaterial(ThingDef def, int count) => new Material { def = def, stackCount = count };
         }
         private static ThingDef ItemDef(string name)
         {
@@ -66,7 +73,7 @@ namespace GeneFoundry.Tests
         }
         private static HeadlessItem Paid(float total = 100)
         {
-            return new HeadlessItem { committed = true, totalWork = total, genes = new List<GeneDef>
+            return new HeadlessItem { committed = true, totalWork = total, paidBiomass = 0, paidCapsules = 0, genes = new List<GeneDef>
                 { new GeneDef { defName = "VanillaGene" }, new GeneDef { defName = "ModdedGene" } },
                 def = ItemDef("GF_UnfinishedGenePack") };
         }
@@ -94,6 +101,95 @@ namespace GeneFoundry.Tests
             Assert.True(bench.CanBeWorkedBy(first)); Assert.False(bench.CanBeWorkedBy(second));
             item.creator = null; // A missing owner reference must not transfer ownership.
             Assert.False(item.CanBeWorkedBy(second)); Assert.False(item.TryClaim(second));
+        }
+        [Fact] public void SettingAsidePreservesThePackOwnerAndBillWhileFreeingTheBench()
+        {
+            var bench = new HeadlessBench(); var item = Paid();
+            var alice = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn)); alice.Name = new NameSingle("Alice");
+            var bob = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn)); bob.Name = new NameSingle("Bob");
+            item.TryClaim(alice); item.AddWork(40, .3f); item.fabricator = bench;
+            var first = new Bill_GeneFabrication { genes = item.genes }; first.BindUnfinished(item);
+            var next = new Bill_GeneFabrication { genes = item.genes };
+            bench.billStack.AddBill(first); bench.billStack.AddBill(next);
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            typeof(Building_GeneFabricator).GetField("activeBill", flags).SetValue(bench, first);
+            typeof(Building_GeneFabricator).GetField("currentItem", flags).SetValue(bench, item);
+            typeof(Building_GeneFabricator).GetField("selected", flags).SetValue(bench, new List<GeneDef>(item.genes));
+            bench.GetDirectlyHeldThings().TryAdd(item, false);
+            Assert.False(bench.DetachUnfinished(item)); // Must be physically removed first.
+            bench.GetDirectlyHeldThings().Remove(item); // Vanilla carrying performs this transfer.
+            int generation = bench.Generation;
+            Assert.True(bench.DetachUnfinished(item));
+            Assert.Null(bench.Unfinished); Assert.Null(bench.ActiveBill); Assert.False(bench.Pending);
+            Assert.NotEqual(generation, bench.Generation);
+            Assert.Same(item, first.unfinished); Assert.Same(first, item.bill); Assert.Equal(40, item.workDone);
+            Assert.True(first.CanBeScheduledFor(alice)); Assert.False(first.CanBeScheduledFor(bob));
+            Assert.True(next.CanBeScheduledFor(bob));
+            Assert.Contains("VanillaGene", item.GetInspectString()); Assert.Contains("ModdedGene", item.GetInspectString());
+            Assert.Contains("Alice", item.GetInspectString());
+            Assert.Equal("Alice", first.AssignmentLabel); Assert.Equal("Unassigned", next.AssignmentLabel);
+        }
+        [Fact] public void MissingPaidPackCannotRestartItsBillOrChargeMaterialsAgain()
+        {
+            var bench = new HeadlessBench(); var bill = new Bill_GeneFabrication { genes = Paid().genes };
+            bill.BindUnfinished(Paid()); bill.unfinished = null;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            typeof(Building_GeneFabricator).GetField("activeBill", flags).SetValue(bench, bill);
+            typeof(Building_GeneFabricator).GetField("selected", flags).SetValue(bench, bill.genes);
+            Assert.True(bill.HasStarted); Assert.False(bill.ShouldDoNow());
+            Assert.False(bench.CommitDeliveredMaterials()); Assert.Equal(0, bench.unfinishedCreated);
+        }
+        [Fact] public void ParkedPackAndBillReferencesRoundTripTogether()
+        {
+            var previous = DefDatabase<GeneDef>.AllDefsListForReading.ToList();
+            string path = Path.GetTempFileName(); bool profiling = DeepProfiler.enabled; DeepProfiler.enabled = false;
+            try
+            {
+                var recipe = (RecipeDef)RuntimeHelpers.GetUninitializedObject(typeof(RecipeDef)); recipe.defName = "GF_FabricateSelectedGenes";
+                var source = new LinkedWorkData { item = Paid(), bill = new Bill_GeneFabrication { recipe = recipe } };
+                source.bill.genes = source.item.genes; source.bill.BindUnfinished(source.item); source.item.AddWork(40, .3f);
+                DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(source.item.genes);
+                Scribe.saver.InitSaving(path, "work");
+                Scribe.saver.loadIDsErrorsChecker.RegisterDeepSaved(source.bill, "bill");
+                Scribe.saver.loadIDsErrorsChecker.RegisterDeepSaved(source.item, "item");
+                source.ExposeData(); Scribe.saver.FinalizeSaving();
+                var loaded = new LinkedWorkData { item = Paid(), bill = new Bill_GeneFabrication { recipe = recipe } };
+                Scribe.loader.InitLoading(path); Scribe.loader.curParent = loaded; Scribe.loader.curPathRelToParent = null;
+                loaded.ExposeData(); Scribe.loader.crossRefs.RegisterForCrossRefResolve(loaded); Scribe.loader.initer.RegisterForPostLoadInit(loaded);
+                var directory = (LoadedObjectDirectory)typeof(CrossRefHandler).GetField("loadedObjectDirectory", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(Scribe.loader.crossRefs);
+                directory.RegisterLoaded(loaded.bill); directory.RegisterLoaded(loaded.item); Scribe.loader.FinalizeLoading();
+                Assert.Same(loaded.item, loaded.bill.unfinished); Assert.Same(loaded.bill, loaded.item.bill);
+                Assert.True(loaded.bill.HasStarted); Assert.True(loaded.bill.ShouldDoNow()); Assert.Equal(40, loaded.item.workDone);
+            }
+            finally
+            {
+                Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling;
+                DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(previous);
+            }
+        }
+        [Fact] public void CancellingParkedWorkRecoversMaterialsOnceWithoutCancellingCurrentWork()
+        {
+            var previous = DefDatabase<ThingDef>.AllDefsListForReading.ToList();
+            try
+            {
+                var biomass = ItemDef("GF_RefinedBiomass"); biomass.stackLimit = 75;
+                var capsule = ItemDef("ArchiteCapsule"); capsule.stackLimit = 10;
+                DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(new[] { biomass, capsule });
+                var bench = new HeadlessBench(); var parked = Paid(); parked.fabricator = bench;
+                parked.paidBiomass = 20; parked.paidCapsules = 4;
+                var oldBill = new Bill_GeneFabrication { genes = parked.genes }; oldBill.BindUnfinished(parked);
+                var current = Paid(); var currentBill = new Bill_GeneFabrication { genes = current.genes }; currentBill.BindUnfinished(current);
+                bench.billStack.AddBill(oldBill); bench.billStack.AddBill(currentBill);
+                bench.GetDirectlyHeldThings().TryAdd(current, false);
+                typeof(Building_GeneFabricator).GetField("activeBill", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(bench, currentBill);
+                bench.CancelItem(parked); bench.CancelItem(parked);
+                Assert.Same(current, bench.Unfinished); Assert.Same(currentBill, bench.ActiveBill);
+                Assert.Same(currentBill, Assert.Single(bench.billStack.Bills));
+                Assert.True(parked.destroyed); Assert.False(parked.Valid);
+                Assert.Equal(15, bench.GetDirectlyHeldThings().Where(t => t.def == biomass).Sum(t => t.stackCount));
+                Assert.Equal(3, bench.GetDirectlyHeldThings().Where(t => t.def == capsule).Sum(t => t.stackCount));
+            }
+            finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
         }
         [Fact] public void BillIsOnePackAndCannotRunAgainAfterCompletion()
         {
@@ -326,7 +422,9 @@ namespace GeneFoundry.Tests
                 Assert.Equal(100, bench.Unfinished.workDone);
                 int generation = bench.Generation; bench.Cancel();
                 Assert.True(bench.Generation != generation);
-                Assert.False(bench.Pending); Assert.Empty(bench.GetDirectlyHeldThings());
+                Assert.False(bench.Pending);
+                Assert.Equal(15, bench.GetDirectlyHeldThings().Where(t => t.def == biomass).Sum(t => t.stackCount));
+                Assert.Equal(2, bench.GetDirectlyHeldThings().Where(t => t.def == capsule).Sum(t => t.stackCount));
             }
             finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
         }
