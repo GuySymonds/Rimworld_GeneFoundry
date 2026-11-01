@@ -9,7 +9,7 @@ namespace GeneFoundry.Components
     {
         private const int MaxPowerOutageTicks = 5000;
 
-        private int progressTicks;
+        private double batchProgress;
         private int powerOutageTicks;
 
         private float batchFailureChance;
@@ -23,6 +23,22 @@ namespace GeneFoundry.Components
         private CompPowerTrader Power =>
             parent.TryGetComp<CompPowerTrader>();
 
+        public bool AcceptsProcessorAssistance =>
+            processing && parent.Spawned && Power != null && Power.PowerOn;
+
+        private int AssistingProcessors => parent.Spawned
+            ? parent.Map.GetComponent<GeneProcessorAssistance>().ProcessorCount(parent)
+            : 0;
+
+        private float ProcessingDurationTicks(int processors)
+        {
+            GeneFoundrySettings settings = GeneFoundryMod.Settings;
+            float baseMinutes = Math.Max(1, settings.processingMinutes);
+            float minimumMinutes = Math.Max(1, Math.Min(baseMinutes, settings.minimumProcessingMinutes));
+            float reduction = Math.Max(0, Math.Min(100, settings.processorReductionPercent)) / 100f;
+            return Math.Max(minimumMinutes, baseMinutes * (1f - processors * reduction)) * 2500f / 60f;
+        }
+
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
@@ -34,7 +50,14 @@ namespace GeneFoundry.Components
         {
             base.PostExposeData();
 
-            Scribe_Values.Look(ref progressTicks, "gfProgressTicks", 0);
+            Scribe_Values.Look(ref batchProgress, "gfBatchProgress", -1d);
+            if (Scribe.mode == LoadSaveMode.LoadingVars && batchProgress < 0d)
+            {
+                // Older saves stored elapsed ticks against the old XML duration.
+                int oldProgress = 0;
+                Scribe_Values.Look(ref oldProgress, "gfProgressTicks", 0);
+                batchProgress = Math.Min(1d, oldProgress / (double)Math.Max(1, Props.processingTicks));
+            }
             Scribe_Values.Look(ref powerOutageTicks, "gfPowerOutageTicks", 0);
             Scribe_Values.Look(ref processing, "gfProcessing", false);
 
@@ -70,9 +93,9 @@ namespace GeneFoundry.Components
                 powerOutageTicks = 0;
 
                 // Continue refining.
-                progressTicks++;
+                batchProgress = Math.Min(1d, batchProgress + 1d / ProcessingDurationTicks(AssistingProcessors));
 
-                if (progressTicks >= Props.processingTicks)
+                if (batchProgress >= 1f)
                 {
                     CompleteBatch();
                 }
@@ -86,7 +109,7 @@ namespace GeneFoundry.Components
             // Discard the current batch.
             processing = false;
 
-            progressTicks = 0;
+            batchProgress = 0f;
             powerOutageTicks = 0;
 
             // Return to idle electricity consumption.
@@ -133,7 +156,7 @@ namespace GeneFoundry.Components
 
             // Begin automated processing.
             processing = true;
-            progressTicks = 0;
+            batchProgress = 0f;
             powerOutageTicks = 0;
 
             UpdatePowerConsumption();
@@ -229,7 +252,7 @@ namespace GeneFoundry.Components
                 if (Rand.Chance(batchFailureChance))
                 {
                     processing = false;
-                    progressTicks = 0;
+                    batchProgress = 0f;
                     powerOutageTicks = 0;
                     UpdatePowerConsumption();
 
@@ -259,7 +282,7 @@ namespace GeneFoundry.Components
 
             processing = false;
 
-            progressTicks = 0;
+            batchProgress = 0f;
             powerOutageTicks = 0;
 
             UpdatePowerConsumption();
@@ -345,10 +368,13 @@ namespace GeneFoundry.Components
                 return "Status: Ready for preparation";
             }
 
-            int percentage = Math.Min(
-                100,
-                progressTicks * 100 / Math.Max(1, Props.processingTicks)
-            );
+            int percentage = Math.Min(100, (int)(batchProgress * 100f));
+            int processors = AssistingProcessors;
+            float duration = ProcessingDurationTicks(processors);
+            string timingInfo =
+                $"Assisting gene processors: {processors}\n" +
+                $"Processing duration at current speed: {duration / 2500f:0.##} hours\n" +
+                $"Time remaining at current speed: {(1f - batchProgress) * duration / 2500f:0.##} hours";
 
             if (Power == null || !Power.PowerOn)
             {
@@ -356,13 +382,13 @@ namespace GeneFoundry.Components
                     $"Status: Paused (no power)\n" +
                     $"Progress: {percentage}%\n" +
                     $"Power outage: {powerOutageTicks}/{MaxPowerOutageTicks} ticks\n" +
-                    failureInfo;
+                    failureInfo + "\n" + timingInfo;
             }
 
             return
                 $"Status: Refining biomass\n" +
                 $"Progress: {percentage}%\n" +
-                failureInfo;
+                failureInfo + "\n" + timingInfo;
         }
 
         private static float SkillProgress(
@@ -394,8 +420,11 @@ namespace GeneFoundry.Components
 
         public static int CalculatePreparationTicks(Pawn pawn)
         {
-            // One in-game hour is 2,500 ticks; skill can halve preparation time.
-            return (int)Math.Round(2500f - 1250f * WeightedSkillProgress(pawn));
+            GeneFoundrySettings settings = GeneFoundryMod.Settings;
+            int maximum = Math.Max(1, settings.preparationMinutes);
+            int minimum = Math.Max(1, Math.Min(maximum, settings.minimumPreparationMinutes));
+            float minutes = maximum - (maximum - minimum) * WeightedSkillProgress(pawn);
+            return Math.Max(1, (int)Math.Round(minutes * 2500f / 60f));
         }
     }
 }

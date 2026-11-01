@@ -74,6 +74,12 @@ Refinement requires substantial electrical power but operates without direct col
 
       <li Class="CompProperties_Breakdownable" />
 
+      <li Class="CompProperties_AffectedByFacilities">
+        <linkableFacilities>
+          <li>GeneProcessor</li>
+        </linkableFacilities>
+      </li>
+
       <!-- Automated biomass refinement -->
       <li Class="GeneFoundry.Components.CompProperties_BiomassRefiner">
 
@@ -83,6 +89,7 @@ Refinement requires substantial electrical power but operates without direct col
         <inputCount>10</inputCount>
         <outputCount>2</outputCount>
 
+        <!-- Legacy duration for migrating pre-settings saves only. Runtime timings use Mod Settings. -->
         <processingTicks>2500</processingTicks>
 
         <idlePower>100</idlePower>
