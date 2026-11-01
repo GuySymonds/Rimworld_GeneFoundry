@@ -6,14 +6,18 @@
     <defName>GF_StartBiomassRefinement</defName>
     <label>refine biomass</label>
 
-    <description>Prepare a batch of raw biomass for chemical refinement. Requires 10 Raw Biomass in adjacent hoppers and 1 Neutroamine delivered by a colonist
+    <description>Prepare 10 raw biomass from correctly oriented adjacent hoppers and 1 neutroamine delivered by the operator. A successful batch produces 2 refined biomass.
 
-Once initiated, the refinery operates automatically.</description>
+Requires Intellectual 5, Crafting 3 and Medicine 2. Preparation speed and reliability improve with these skills, weighted 60%, 25% and 15% respectively. Failure risk falls from 30% at the minimum requirements to 0% at Intellectual 10, Crafting 8 and Medicine 6. Higher skills give no additional benefit.
+
+The operator earns skill experience during preparation and is free to leave once automated processing starts. Available gene processors shorten automated processing. Durations and processor assistance are configurable in GeneFoundry's mod settings.
+
+Do X times counts batches started, including batches that later fail. Do until X continues requesting batches until the stored output target is reached. Ingredients are consumed when processing starts and are lost if the batch fails.</description>
 
     <jobString>Preparing biomass refinement.</jobString>
 
-    <!-- Temporary preparation configuration -->
-    <workAmount>300</workAmount>
+    <!-- Default base work metadata. The custom preparation job uses skill-based Mod Settings timings. -->
+    <workAmount>2500</workAmount>
     <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
     <workSkill>Intellectual</workSkill>
     <requiredGiverWorkType>Research</requiredGiverWorkType>

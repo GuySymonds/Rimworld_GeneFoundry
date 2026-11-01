@@ -6,9 +6,9 @@
     <defName>GF_BiomassHopper</defName>
     <label>raw biomass hopper</label>
 
-    <description>A specialised storage hopper that supplies raw biomass to an adjacent biomass refinery.
+    <description>Stores raw biomass for an adjacent biomass refinery. Build beside any side of a completed refinery and rotate the hopper so its mechanical outlet faces the refinery. Diagonal connections are not supported, and the operator's interaction cell must remain clear.
 
-Colonists automatically deliver raw biomass to the hopper. The connected refinery consumes the material during automated processing.</description>
+Colonists haul raw biomass here according to its storage settings. The refinery combines biomass from all correctly connected hoppers and consumes 10 when a batch starts. Extra hoppers increase storage capacity but do not increase processing speed.</description>
 
     <thingClass>Building_Storage</thingClass>
 

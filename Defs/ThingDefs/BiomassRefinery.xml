@@ -6,9 +6,13 @@
     <defName>GF_BiomassRefinery</defName>
     <label>biomass refinery</label>
 
-    <description>An automated biotechnology facility that purifies raw biomass into concentrated genetic material.
+    <description>Purifies 10 raw biomass and 1 neutroamine into 2 refined biomass. Raw biomass must be stored in adjacent hoppers with their outlets facing the refinery. A colonist delivers neutroamine and prepares the batch, then automated processing begins.
 
-Refinement requires substantial electrical power but operates without direct colonist supervision.</description>
+Operators require Intellectual 5, Crafting 3 and Medicine 2. Better skills shorten preparation and reduce failure risk, with no further benefit above Intellectual 10, Crafting 8 and Medicine 6. Preparation awards experience in all three skills. A failed batch consumes its ingredients and produces nothing.
+
+Default preparation takes 30–60 in-game minutes. Automated processing takes 12 hours, reduced by 5% per available gene processor to a minimum of 6 hours. Processors must be powered and within normal connection range with a clear line of sight. Active gene assembler jobs take priority, including while their operators are away. Each processor assists only one refinery at a time. Timing and processor bonuses can be changed in GeneFoundry's mod settings.
+
+Consumes 100 W while idle and 1,500 W while processing. Power loss pauses processing; two consecutive in-game hours without power destroy the batch. Restoring power resets the outage timer.</description>
 
     <thingClass>Building_WorkTable</thingClass>
     <tickerType>Normal</tickerType>

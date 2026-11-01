@@ -5,9 +5,9 @@
     <defName>GF_RefinedBiomass</defName>
     <label>refined biomass</label>
 
-    <description>Highly purified genetic material produced through the energy-intensive refinement of raw biomass.
+    <description>Highly purified biological material produced in a biomass refinery. Each successful batch converts 10 raw biomass and 1 neutroamine into 2 refined biomass.
 
-Contains concentrated biological compounds suitable for manufacturing synthetic genes.</description>
+A concentrated feedstock intended for future genepack fabrication. Gene fabrication is not yet available.</description>
 
     <graphicData>
       <texPath>GeneFoundry/RefinedBiomass</texPath>
