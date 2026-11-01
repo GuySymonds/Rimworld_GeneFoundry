@@ -18,7 +18,7 @@
       <texPath>GeneFoundry/Buildings/GeneFabrication_north</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <shaderType>CutoutComplex</shaderType>
-      <drawSize>(5,2)</drawSize>
+      <drawSize>(5.4,2.4)</drawSize>
       <drawRotated>false</drawRotated>
     </graphicData>
 
