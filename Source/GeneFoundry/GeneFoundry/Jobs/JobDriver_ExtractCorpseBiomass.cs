@@ -9,12 +9,21 @@ namespace GeneFoundry.Jobs
     public class JobDriver_ExtractCorpseBiomass : JobDriver
     {
         private int processingTicks;
+        private int recoveryTicks;
+        private Hediff recoveryPart;
         private Corpse Corpse => job.GetTarget(TargetIndex.B).Thing as Corpse;
+
+        public override string GetReport()
+        {
+            return recoveryPart == null ? base.GetReport() : $"recovering {recoveryPart.Label}.";
+        }
 
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_Values.Look(ref processingTicks, "gfCorpseProcessingTicks", 0);
+            Scribe_Values.Look(ref recoveryTicks, "gfRecoveryTicks", 0);
+            Scribe_References.Look(ref recoveryPart, "gfRecoveryPart");
         }
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
@@ -30,6 +39,7 @@ namespace GeneFoundry.Jobs
             this.FailOnBurningImmobile(TargetIndex.A);
             this.FailOn(() => job.bill == null || job.bill.DeletedOrDereferenced ||
                 !job.bill.ShouldDoNow() || !CorpseBiomassUtility.CanProcess(Corpse) ||
+                !ArtificialPartRecovery.CanRecoverAll(pawn, Corpse.InnerPawn) ||
                 !(job.targetA.Thing is Building_WorkTable table) || !table.UsableForBillsAfterFueling());
 
             yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
@@ -46,11 +56,42 @@ namespace GeneFoundry.Jobs
                 }
                 // Vanilla stripping preserves the actual items, their condition and taint.
                 Corpse.Strip(false);
+            });
+
+            Toil beginRecovery = Toils_General.Do(() =>
+            {
+                if (recoveryPart == null || !Corpse.InnerPawn.health.hediffSet.hediffs.Contains(recoveryPart))
+                {
+                    recoveryPart = ArtificialPartRecovery.NextPart(Corpse.InnerPawn);
+                    recoveryTicks = recoveryPart == null ? 0 : ArtificialPartRecovery.WorkTicks(pawn, recoveryPart);
+                }
+            });
+            Toil beginExtraction = Toils_General.Do(() =>
+            {
                 if (processingTicks <= 0)
                     processingTicks = CorpseBiomassUtility.WorkTicks(
                         CorpseBiomassUtility.RecoverableMeat(Corpse),
                         pawn.GetStatValue(DefDatabase<StatDef>.GetNamed("CookSpeed")), Corpse.GetRotStage());
             });
+
+            // A fixed loop of toils keeps save/load indices stable as parts are removed.
+            yield return beginRecovery;
+            yield return Toils_Jump.JumpIf(beginExtraction, () => recoveryPart == null);
+            Toil recovery = Toils_General.Wait(1);
+            recovery.initAction = () => ticksLeftThisToil = recoveryTicks;
+            recovery.WithProgressBar(TargetIndex.A,
+                () => 1f - ticksLeftThisToil / (float)System.Math.Max(1, recoveryTicks));
+            recovery.AddPreTickIntervalAction(delta => pawn.skills.Learn(SkillDefOf.Medicine, 0.1f * delta));
+            yield return recovery;
+            yield return Toils_General.Do(() =>
+            {
+                if (recoveryPart != null)
+                    ArtificialPartRecovery.Complete(pawn, Corpse, job.targetA.Thing, recoveryPart);
+                recoveryPart = null;
+                recoveryTicks = 0;
+            });
+            yield return Toils_Jump.Jump(beginRecovery);
+            yield return beginExtraction;
 
             Toil processing = Toils_General.Wait(1);
             processing.initAction = () => ticksLeftThisToil = processingTicks;

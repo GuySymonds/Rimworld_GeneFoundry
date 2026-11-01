@@ -14,6 +14,28 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
+        [InlineData(2000f, 1f, 2000)]
+        [InlineData(2000f, 2f, 1000)]
+        [InlineData(2000f, 0.5f, 4000)]
+        [InlineData(0f, 1f, 1)]
+        [InlineData(-10f, 1f, 1)]
+        public void RecoveryTimeUsesRemovalWorkAndMedicalSpeed(float work, float speed, int expected)
+        {
+            Assert.Equal(expected, BiomassCalculations.MedicalRecoveryTicks(work, speed));
+        }
+
+        [Theory]
+        [InlineData(0.6f, 0.6f, 1f)]
+        [InlineData(1.1f, 1.1f, 1f)]
+        [InlineData(0.45f, 0.6f, 0.75f)]
+        [InlineData(0.825f, 1.1f, 0.75f)]
+        public void RemovingCleanlinessPreservesOtherEnvironmentalFactors(
+            float environment, float cleanliness, float expected)
+        {
+            Assert.Equal(expected, BiomassCalculations.WithoutCleanliness(environment, cleanliness), 5);
+        }
+
+        [Theory]
         [InlineData(28f, 1f, 17)]
         [InlineData(28f, 0.5f, 8)]
         [InlineData(28f, 0.1f, 1)]

@@ -58,6 +58,7 @@
     <Compile Include="Jobs\JobDriver_ExtractCorpseBiomass.cs" />
     <Compile Include="Recipes\CorpseBiomassUtility.cs" />
     <Compile Include="Recipes\BiomassCalculations.cs" />
+    <Compile Include="Recipes\ArtificialPartRecovery.cs" />
     <Compile Include="WorkGivers\WorkGiver_GeneVat.cs" />
     <Compile Include="PlaceWorkers\PlaceWorker_BiomassHopper.cs" />
     <Compile Include="WorkGivers\WorkGiver_RefineBiomass.cs" />

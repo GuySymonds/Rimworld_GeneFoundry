@@ -11,12 +11,6 @@ namespace GeneFoundry.Recipes
             if (corpse == null || corpse.InnerPawn == null || !corpse.InnerPawn.RaceProps.IsFlesh)
                 return false;
 
-            // Until medical recovery is implemented, do not destroy installed artificial parts.
-            foreach (Hediff hediff in corpse.InnerPawn.health.hediffSet.hediffs)
-            {
-                if (hediff.def.countsAsAddedPartOrImplant && !hediff.def.organicAddedBodypart)
-                    return false;
-            }
             return true;
         }
 

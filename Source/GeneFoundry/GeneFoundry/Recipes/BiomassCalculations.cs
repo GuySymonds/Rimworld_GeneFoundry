@@ -5,6 +5,16 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public static int MedicalRecoveryTicks(float workAmount, float workSpeed)
+        {
+            return Math.Max(1, (int)Math.Ceiling(Math.Max(0f, workAmount) / Math.Max(0.01f, workSpeed)));
+        }
+
+        public static float WithoutCleanliness(float environmentFactor, float cleanlinessFactor)
+        {
+            return environmentFactor / Math.Max(0.01f, cleanlinessFactor);
+        }
+
         public static int CorpseYield(float material, float decayMultiplier)
         {
             return Math.Max(1, (int)Math.Floor(Math.Max(0f, material) * 0.625d * decayMultiplier));

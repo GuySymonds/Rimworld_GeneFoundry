@@ -17,7 +17,8 @@ namespace GeneFoundry.WorkGivers
             if (vanillaJob.targetQueueB == null || vanillaJob.targetQueueB.Count != 1)
                 return null;
             Corpse corpse = vanillaJob.targetQueueB[0].Thing as Corpse;
-            if (!CorpseBiomassUtility.CanProcess(corpse))
+            if (!CorpseBiomassUtility.CanProcess(corpse) ||
+                !ArtificialPartRecovery.CanRecoverAll(pawn, corpse.InnerPawn))
                 return null;
 
             Job result = JobMaker.MakeJob(

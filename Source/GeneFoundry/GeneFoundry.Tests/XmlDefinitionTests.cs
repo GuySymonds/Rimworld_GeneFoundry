@@ -124,6 +124,9 @@ namespace GeneFoundry.Tests
             XElement recipe = Def("GF_ExtractBiomassCorpse");
             Assert.Equal("false", (string)recipe.Element("interruptIfIngredientIsRotting"));
             Assert.Equal("1", (string)recipe.Element("ingredients").Element("li").Element("count"));
+            Assert.Single(recipe.Element("ingredients").Elements());
+            Assert.DoesNotContain(recipe.Element("ingredients").Descendants(),
+                element => element.Value == "Medicine" || element.Value.StartsWith("Medicine", StringComparison.Ordinal));
             Assert.Equal("CorpsesAnimal", (string)recipe.Element("defaultIngredientFilter").Element("categories").Element("li"));
             Assert.Contains("GF_AllowUnsafeBiomassCorpses",
                 recipe.Element("fixedIngredientFilter").Element("specialFiltersToDisallow").Elements().Select(element => element.Value));
