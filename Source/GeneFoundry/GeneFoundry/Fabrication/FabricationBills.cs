@@ -12,10 +12,21 @@ namespace GeneFoundry.Fabrication
         private bool completed;
         private bool started;
         public UnfinishedGenePack unfinished;
+        public Pawn assignedPawn;
         public bool HasStarted => started || unfinished != null;
         public void BindUnfinished(UnfinishedGenePack item) { unfinished = item; started = true; item.bill = this; }
-        public bool CanBeScheduledFor(Pawn pawn) => ShouldDoNow() && (!HasStarted || unfinished.CanBeWorkedBy(pawn));
-        public string AssignmentLabel => unfinished?.OwnerLabel ?? (started ? "Unfinished pack unavailable" : "Unassigned");
+        public bool CanBeScheduledFor(Pawn pawn) => ShouldDoNow() && (assignedPawn == null || assignedPawn == pawn) && (!HasStarted || unfinished.CanBeWorkedBy(pawn));
+        public string AssignmentLabel => unfinished?.OwnerLabel ?? assignedPawn?.Name?.ToStringShort ?? (started ? "Unfinished pack unavailable" : "Unassigned");
+        public bool TryAssign(Pawn pawn)
+        {
+            if (pawn == null || HasStarted || assignedPawn != null || !ShouldDoNow()) return false;
+            assignedPawn = pawn; return true;
+        }
+        public void ReleaseUnfinished(UnfinishedGenePack item)
+        {
+            if (unfinished != item) return;
+            unfinished = null; started = false; assignedPawn = null;
+        }
         protected override string StatusString => "Assigned to: " + AssignmentLabel;
         public Bill_GeneFabrication() { }
         public Bill_GeneFabrication(IEnumerable<GeneDef> genes)
@@ -35,6 +46,7 @@ namespace GeneFoundry.Fabrication
         protected override void DoConfigInterface(Rect rect, Color color)
         {
             Widgets.Label(new Rect(28, 29, rect.width - 140, 24), "One genepack");
+            if (!HasStarted && assignedPawn != null && Widgets.ButtonText(new Rect(rect.xMax - 195, 27, 90, 24), "Unassign")) assignedPawn = null;
             if (Widgets.ButtonText(new Rect(rect.xMax - 100, 27, 100, 24), "Details".Translate() + "…"))
                 Find.WindowStack.Add(new Dialog_GeneFabrication((Building_GeneFabricator)billStack.billGiver, this));
         }
@@ -55,6 +67,7 @@ namespace GeneFoundry.Fabrication
             Scribe_Values.Look(ref completed, "gfBillCompleted");
             Scribe_Values.Look(ref started, "gfBillStarted");
             Scribe_References.Look(ref unfinished, "gfBillUnfinished");
+            Scribe_References.Look(ref assignedPawn, "gfBillAssignedPawn");
         }
         public override Bill Clone()
         {

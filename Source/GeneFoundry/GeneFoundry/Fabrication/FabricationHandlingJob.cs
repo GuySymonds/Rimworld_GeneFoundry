@@ -23,7 +23,7 @@ namespace GeneFoundry.Jobs
                 yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
                 yield return Toils_General.Do(() =>
                 {
-                    if (!Bench.TryStartBill(job.bill as Bill_GeneFabrication)) EndJobWith(JobCondition.Incompletable);
+                    if (!Bench.TryStartBill(job.bill as Bill_GeneFabrication, pawn)) EndJobWith(JobCondition.Incompletable);
                 });
                 yield break;
             }
@@ -33,7 +33,7 @@ namespace GeneFoundry.Jobs
                 yield return Toils_General.Do(() =>
                 {
                     if (!Bench.ReleaseUncommitted()) { EndJobWith(JobCondition.Incompletable); return; }
-                    if (job.bill is Bill_GeneFabrication next && !next.HasStarted) Bench.TryStartBill(next);
+                    if (job.bill is Bill_GeneFabrication next && !next.HasStarted) Bench.TryStartBill(next, pawn);
                 });
                 yield break;
             }
@@ -53,7 +53,7 @@ namespace GeneFoundry.Jobs
                             nearPlaceValidator: cell => !Bench.OccupiedRect().Contains(cell)) ||
                         !Bench.DetachUnfinished(item)) { EndJobWith(JobCondition.Incompletable); return; }
                     var next = job.bill as Bill_GeneFabrication;
-                    if (next != null && !next.HasStarted) Bench.TryStartBill(next);
+                    if (next != null && !next.HasStarted) Bench.TryStartBill(next, pawn);
                 }
                 else if (!Bench.RestoreUnfinished(item, pawn)) EndJobWith(JobCondition.Incompletable);
             });

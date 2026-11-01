@@ -147,19 +147,25 @@ namespace GeneFoundry.Tests
             {
                 var recipe = (RecipeDef)RuntimeHelpers.GetUninitializedObject(typeof(RecipeDef)); recipe.defName = "GF_FabricateSelectedGenes";
                 var source = new LinkedWorkData { item = Paid(), bill = new Bill_GeneFabrication { recipe = recipe } };
-                source.bill.genes = source.item.genes; source.bill.BindUnfinished(source.item); source.item.AddWork(40, .3f);
+                var owner = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
+                owner.def = ItemDef("Human"); owner.def.category = ThingCategory.Pawn; owner.thingIDNumber = 9876; owner.Name = new NameSingle("Alice");
+                source.bill.genes = source.item.genes; Assert.True(source.bill.TryAssign(owner));
+                source.bill.BindUnfinished(source.item); source.item.AddWork(40, .3f);
                 DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(source.item.genes);
                 Scribe.saver.InitSaving(path, "work");
                 Scribe.saver.loadIDsErrorsChecker.RegisterDeepSaved(source.bill, "bill");
                 Scribe.saver.loadIDsErrorsChecker.RegisterDeepSaved(source.item, "item");
+                Scribe.saver.loadIDsErrorsChecker.RegisterDeepSaved(owner, "mapPawn");
                 source.ExposeData(); Scribe.saver.FinalizeSaving();
                 var loaded = new LinkedWorkData { item = Paid(), bill = new Bill_GeneFabrication { recipe = recipe } };
                 Scribe.loader.InitLoading(path); Scribe.loader.curParent = loaded; Scribe.loader.curPathRelToParent = null;
                 loaded.ExposeData(); Scribe.loader.crossRefs.RegisterForCrossRefResolve(loaded); Scribe.loader.initer.RegisterForPostLoadInit(loaded);
                 var directory = (LoadedObjectDirectory)typeof(CrossRefHandler).GetField("loadedObjectDirectory", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(Scribe.loader.crossRefs);
-                directory.RegisterLoaded(loaded.bill); directory.RegisterLoaded(loaded.item); Scribe.loader.FinalizeLoading();
+                directory.RegisterLoaded(loaded.bill); directory.RegisterLoaded(loaded.item); directory.RegisterLoaded(owner); Scribe.loader.FinalizeLoading();
                 Assert.Same(loaded.item, loaded.bill.unfinished); Assert.Same(loaded.bill, loaded.item.bill);
                 Assert.True(loaded.bill.HasStarted); Assert.True(loaded.bill.ShouldDoNow()); Assert.Equal(40, loaded.item.workDone);
+                Assert.Same(owner, loaded.bill.assignedPawn); Assert.True(loaded.bill.CanBeScheduledFor(owner));
+                Assert.False(loaded.bill.CanBeScheduledFor((Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn))));
             }
             finally
             {
@@ -184,12 +190,38 @@ namespace GeneFoundry.Tests
                 typeof(Building_GeneFabricator).GetField("activeBill", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(bench, currentBill);
                 bench.CancelItem(parked); bench.CancelItem(parked);
                 Assert.Same(current, bench.Unfinished); Assert.Same(currentBill, bench.ActiveBill);
-                Assert.Same(currentBill, Assert.Single(bench.billStack.Bills));
+                Assert.Equal(2, bench.billStack.Count); Assert.Contains(currentBill, bench.billStack.Bills); Assert.Contains(oldBill, bench.billStack.Bills);
+                Assert.False(oldBill.HasStarted); Assert.Null(oldBill.unfinished); Assert.True(oldBill.ShouldDoNow());
                 Assert.True(parked.destroyed); Assert.False(parked.Valid);
                 Assert.Equal(15, bench.GetDirectlyHeldThings().Where(t => t.def == biomass).Sum(t => t.stackCount));
                 Assert.Equal(3, bench.GetDirectlyHeldThings().Where(t => t.def == capsule).Sum(t => t.stackCount));
             }
             finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
+        }
+        [Fact] public void QueuedAssignmentCannotBeTakenByAnotherPawnAndCanBeClearedBeforeStarting()
+        {
+            var bill = new Bill_GeneFabrication { genes = Paid().genes };
+            var alice = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn)); alice.Name = new NameSingle("Alice");
+            var bob = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn)); bob.Name = new NameSingle("Bob");
+            Assert.True(bill.TryAssign(alice)); Assert.Equal("Alice", bill.AssignmentLabel);
+            Assert.False(bill.TryAssign(bob)); Assert.True(bill.CanBeScheduledFor(alice)); Assert.False(bill.CanBeScheduledFor(bob));
+            bill.assignedPawn = null; Assert.True(bill.TryAssign(bob));
+            var item = Paid(); bill.BindUnfinished(item);
+            Assert.True(item.TryClaim(bob)); Assert.False(item.TryClaim(alice)); Assert.False(bill.TryAssign(alice));
+        }
+        [Fact] public void DestroyedUnfinishedWorkResetsItsBillWithoutRefundOrCompletion()
+        {
+            var bench = new HeadlessBench(); var item = Paid(); item.fabricator = bench;
+            var bill = new Bill_GeneFabrication { genes = item.genes }; bill.BindUnfinished(item); bench.billStack.AddBill(bill);
+            bench.GetDirectlyHeldThings().TryAdd(item, false);
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            typeof(Building_GeneFabricator).GetField("activeBill", flags).SetValue(bench, bill);
+            typeof(Building_GeneFabricator).GetField("selected", flags).SetValue(bench, new List<GeneDef>(item.genes));
+            int generation = bench.Generation;
+            bench.NotifyUnfinishedDestroyed(item); // Called by the item's real Destroy hook before native destruction.
+            Assert.Same(bill, Assert.Single(bench.billStack.Bills)); Assert.False(bill.HasStarted); Assert.True(bill.ShouldDoNow());
+            Assert.Equal(item.genes, bill.genes); Assert.Null(bench.ActiveBill); Assert.False(bench.Pending);
+            Assert.Empty(bench.GetDirectlyHeldThings()); Assert.NotEqual(generation, bench.Generation); Assert.Equal(0, bench.outputs);
         }
         [Fact] public void BillIsOnePackAndCannotRunAgainAfterCompletion()
         {

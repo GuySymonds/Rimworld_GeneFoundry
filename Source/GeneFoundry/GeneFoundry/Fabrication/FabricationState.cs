@@ -26,7 +26,21 @@ namespace GeneFoundry.Fabrication
         public string OwnerLabel => creator?.Name?.ToStringShort ?? (creatorAssigned ? "Owner unavailable" : "Unassigned");
         public string IntendedGenes => string.Join(", ", (genes ?? new List<GeneDef>()).Select(g => g?.label ?? g?.defName ?? "missing gene"));
         public override string LabelNoCount => Valid ? "unfinished genepack: " + IntendedGenes : base.LabelNoCount;
-        public bool CanBeWorkedBy(Pawn pawn) => pawn != null && (!creatorAssigned || creator == pawn);
+        public bool CanBeWorkedBy(Pawn pawn) => pawn != null && (!creatorAssigned || creator == pawn) && (bill?.assignedPawn == null || bill.assignedPawn == pawn);
+        public override Vector3 DrawPos
+        {
+            get
+            {
+                Vector3 position = base.DrawPos;
+                if (Spawned && fabricator != null && fabricator.AtWorkSurface(this)) position.z += .12f;
+                return position;
+            }
+        }
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            if (!cancellationHandled) fabricator?.NotifyUnfinishedDestroyed(this);
+            base.Destroy(mode);
+        }
         public bool TryClaim(Pawn pawn)
         {
             if (!Valid || !CanBeWorkedBy(pawn)) return false;
@@ -74,7 +88,7 @@ namespace GeneFoundry.Fabrication
         {
             foreach (var gizmo in base.GetGizmos()) yield return gizmo;
             if (Valid && fabricator != null && !fabricator.Destroyed)
-                yield return new Command_Action { defaultLabel = "Cancel fabrication", defaultDesc = "Recover 75% of committed ingredients, rounded down.",
+                yield return new Command_Action { defaultLabel = "Discard unfinished genepack", defaultDesc = "Keep its bill and recover 75% of committed ingredients, rounded down.",
                     icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = () => fabricator.CancelItem(this) };
         }
     }
@@ -107,7 +121,7 @@ namespace GeneFoundry.Fabrication
         private Bill_GeneFabrication activeBill;
         private UnfinishedGenePack currentItem;
         public Bill_GeneFabrication ActiveBill => activeBill;
-        public bool CanBeWorkedBy(Pawn pawn) => Unfinished == null || Unfinished.CanBeWorkedBy(pawn);
+        public bool CanBeWorkedBy(Pawn pawn) => (activeBill == null || activeBill.CanBeScheduledFor(pawn)) && (Unfinished == null || Unfinished.CanBeWorkedBy(pawn));
         public int Generation => generation;
         public Building_GeneFabricator() { contents = new ThingOwner<Thing>(this); }
         public List<GeneDef> Selected => new List<GeneDef>(selected ?? new List<GeneDef>());
@@ -256,7 +270,7 @@ namespace GeneFoundry.Fabrication
                 CancelItem(item);
             }
             else if (item != null) { contents.Remove(item); currentItem = null; item.Destroy(); }
-            if (bill != null && !bill.deleted && billStack.Bills.Contains(bill)) billStack.Delete(bill);
+            else bill?.ReleaseUnfinished(null); // Explicit reset can repair a missing old-save work reference.
             selected.Clear();
             if (Spawned) contents.TryDropAll(InteractionCell, Map, ThingPlaceMode.Near);
         }
@@ -348,7 +362,7 @@ namespace GeneFoundry.Fabrication
             if (Faction != Faction.OfPlayer) yield break;
             if (Pending) yield return new Command_Action { defaultLabel = "Inspect selected genes", defaultDesc = "Inspect the current fabrication order.", icon = ContentFinder<Texture2D>.Get("UI/Gizmos/RecombineGenes"), action = () => Find.WindowStack.Add(new Dialog_GeneFabrication(this)) };
             yield return new Command_Action { defaultLabel = "Add fabrication bill", defaultDesc = "Queue one genepack with the selected genes. No quantity or repeat controls.", icon = ContentFinder<Texture2D>.Get("UI/Gizmos/RecombineGenes"), action = () => Find.WindowStack.Add(new Dialog_GeneFabrication(this, addBill: true)) };
-            if (Pending) yield return new Command_Action { defaultLabel = "Cancel fabrication", defaultDesc = "Return delivered ingredients before work starts; recover 75% of committed ingredients, rounded down.", icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = Cancel };
+            if (Pending) yield return new Command_Action { defaultLabel = "Reset current fabrication", defaultDesc = "Keep the bill. Return delivered ingredients before work starts; recover 75% of committed ingredients, rounded down.", icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = Cancel };
         }
     }
 }
