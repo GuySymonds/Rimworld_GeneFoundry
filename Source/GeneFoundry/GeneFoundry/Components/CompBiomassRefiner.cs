@@ -158,7 +158,8 @@ namespace GeneFoundry.Components
                 foreach (Thing thing in contents)
                 {
                     if (thing is Building_Storage &&
-                        thing.def.defName == "GF_BiomassHopper")
+                        thing.def.defName == "GF_BiomassHopper" &&
+                        footprint.Contains(thing.Position + thing.Rotation.FacingCell))
                     {
                         hasHopper = true;
                         break;
