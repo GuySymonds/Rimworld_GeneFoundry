@@ -36,7 +36,12 @@ namespace GeneFoundry.Research
                 int cost = GeneResearchCalculations.CategoryCost(members.Count, complexity, archite,
                     baseCost, perGene, perComplexity, perArchite, costPercent, maximumCost, minimumCost);
                 string category = group.Key?.label ?? group.Key?.defName ?? "uncategorized";
+                
                 bool automatic = GeneResearchCalculations.IsCosmeticCategory(group.Key?.defName);
+
+                if (automatic)
+                    continue;
+
                 var prerequisites = new List<ResearchProjectDef> { fabrication };
                 if (!automatic && members.All(gene => gene.biostatArc > 0))
                     prerequisites.Add(archogenetics);
@@ -44,7 +49,20 @@ namespace GeneFoundry.Research
                     ? "Automatically researched at no additional research cost once Gene fabrication is complete.\n\n"
                     : $"Research cost: ({baseCost} + {members.Count} × {perGene} + {complexity} × {perComplexity} + {archite} × {perArchite}) × {costPercent}%, rounded up, minimum {minimumCost}, capped at {maximumCost} points = {cost}. " +
                         "Costs are configured in GeneFoundry's Gene research settings and apply after restarting RimWorld.\n\n";
+                
                 int index = result.Count;
+
+                const int MaxDescriptionGenes = 6;
+
+                string geneList = string.Join("\n",
+                    members.Take(MaxDescriptionGenes)
+                        .Select(gene => gene.label ?? gene.defName));
+
+                if (members.Count > MaxDescriptionGenes)
+                {
+                    geneList += $"\n... and {members.Count - MaxDescriptionGenes} more genes";
+                }
+
                 result.Add(new GeneCategoryResearchProjectDef
                 {
                     defName = ProjectName(group.Key),
@@ -55,15 +73,15 @@ namespace GeneFoundry.Research
                         "Genes with an archite cost also require vanilla Archogenetics, even after this category is complete. " +
                         (automatic ? "" : "Categories containing only archite genes require Archogenetics before research can begin. ") +
                         "\n\nGenes:\n" +
-                        string.Join("\n", members.Select(gene => gene.label ?? gene.defName)),
+                        geneList,
                     baseCost = cost,
                     techLevel = TechLevel.Industrial,
                     tab = tab,
                     // Vanilla enforces and lists these in project details without drawing edges.
                     prerequisites = new List<ResearchProjectDef>(),
                     hiddenPrerequisites = prerequisites,
-                    researchViewX = 1.5f * (index % 4),
-                    researchViewY = 4f + index / 4,
+                    researchViewX = 6f + 1.5f * (index % 4),
+                    researchViewY = index / 4f,
                     modContentPack = fabrication.modContentPack,
                     genes = members,
                     automaticallyResearched = automatic
