@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="Fabrication\FabricationCalculations.cs" />
     <Compile Include="GeneFoundryMod.cs" />
     <Compile Include="Research\GeneResearchCalculations.cs" />
     <Compile Include="Research\GeneFabricationResearch.cs" />

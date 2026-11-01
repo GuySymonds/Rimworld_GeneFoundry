@@ -90,8 +90,8 @@ namespace GeneFoundry.Tests
             Assert.Equal(15, first.Select(project => (project.researchViewX, project.researchViewY)).Distinct().Count());
             Assert.All(first, project =>
             {
-                Assert.InRange(project.researchViewX, 0f, 4.5f);
-                Assert.True(project.researchViewY >= 4f);
+                Assert.InRange(project.researchViewX, 6f, 10.5f);
+                Assert.True(project.researchViewY >= 0f);
                 Assert.Empty(project.prerequisites);
                 Assert.Contains(foundation, project.hiddenPrerequisites);
             });
@@ -177,3 +177,4 @@ namespace GeneFoundry.Tests
     }
 }
 #endif
+
