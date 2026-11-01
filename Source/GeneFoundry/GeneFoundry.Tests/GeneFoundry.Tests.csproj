@@ -30,6 +30,7 @@
     <Compile Include="../GeneFoundry/Fabrication/FabricationJobs.cs" Link="Production/FabricationJobs.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationBills.cs" Link="Production/FabricationBills.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationWorkspace.cs" Link="Production/FabricationWorkspace.cs" />
+    <Compile Include="../GeneFoundry/Recipes/MapComponent_CorpseLiquidationVisuals.cs" Link="Production/MapComponent_CorpseLiquidationVisuals.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationHandlingJob.cs" Link="Production/FabricationHandlingJob.cs" />
     <Compile Include="../GeneFoundry/WorkGivers/WorkGiver_FabricateGenePack.cs" Link="Production/WorkGiver_FabricateGenePack.cs" />
     <Compile Include="../GeneFoundry/Jobs/GeneVatIngredientPlacement.cs" Link="Production/GeneVatIngredientPlacement.cs" />

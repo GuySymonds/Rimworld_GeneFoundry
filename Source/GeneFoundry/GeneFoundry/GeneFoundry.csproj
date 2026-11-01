@@ -74,6 +74,7 @@
     <Compile Include="Recipes\CorpseBiomassUtility.cs" />
     <Compile Include="Recipes\BiomassCalculations.cs" />
     <Compile Include="Recipes\Building_GeneVat.cs" />
+    <Compile Include="Recipes\MapComponent_CorpseLiquidationVisuals.cs" />
     <Compile Include="Recipes\ArtificialPartRecovery.cs" />
     <Compile Include="Recipes\GeneVatSkills.cs" />
     <Compile Include="Recipes\RecipeWorkerCounter_CorpseBiomass.cs" />

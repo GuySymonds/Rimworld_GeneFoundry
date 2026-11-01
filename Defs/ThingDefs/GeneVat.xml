@@ -15,7 +15,7 @@ Colonists manually process raw meat, raw plant food or whole organic corpses. Be
 
 Basic meat and plant extraction require Cooking 3. Enzymatic and corpse extraction require Cooking 3, Medicine 3 and Intellectual 2. Extraction speed and experience use Cooking 40%, Medicine 40% and Intellectual 20%. The skill multiplier scales from 50% at level 0 to 100% at level 5 and 150% at level 10, then more gradually to 200% at level 20 by default. Skills above 10 also improve biomass recovery, reaching 20% extra at level 20 by default. Each skill contributes independently, capped at 20. Expert speed and yield are configurable under Raw Biomass in the mod settings. General work speed, sight and manipulation also affect processing time. Artificial parts are recovered before corpse extraction, using separate medical surgery rules without medicine or cleanliness modifiers; these can require higher medical skills.</description>
 
-    <thingClass>GeneFoundry.Recipes.Building_GeneVat</thingClass>
+    <thingClass>Building_WorkTable</thingClass>
     <tickerType>Normal</tickerType>
     <drawerType>MapMeshAndRealTime</drawerType>
 

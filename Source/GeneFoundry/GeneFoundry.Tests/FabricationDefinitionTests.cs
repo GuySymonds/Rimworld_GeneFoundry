@@ -33,5 +33,9 @@ namespace GeneFoundry.Tests
             Assert.Equal("false",(string)item.Element("isUnfinishedThing"));
             Assert.Equal("GeneFoundry/UnfinishedGenePack",(string)item.Element("graphicData").Element("texPath"));
         }
+        [Fact] public void GeneVatPreservesTheVanillaBuildingClassUsedByExistingSaves()
+        {
+            Assert.Equal("Building_WorkTable", (string)Def("GF_GeneVat").Element("thingClass"));
+        }
     }
 }

@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace GeneFoundry.Jobs
 {
-    public class JobDriver_ExtractCorpseBiomass : JobDriver_DoBill
+    public class JobDriver_ExtractCorpseBiomass : JobDriver_DoBill, ICorpseLiquidationPresentation
     {
         private int processingTicks;
         private int recoveryTicks;
