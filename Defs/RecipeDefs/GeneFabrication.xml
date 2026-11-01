@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <!-- Identity and native bill settings only. Selected genes and real variable costs
+       belong to Bill_GeneFabrication; vanilla DoBill is explicitly blocked. No fixed
+       products: do-until counting arbitrary genepacks would count the wrong gene set. -->
+  <RecipeDef>
+    <defName>GF_FabricateSelectedGenes</defName>
+    <label>fabricate selected genepack</label>
+    <description>Fabricate one genepack containing the genes selected in this bill. The entry is removed after one completed attempt, successful or failed. Configure genes through Details. Cancelling committed work loses ingredients.</description>
+    <jobString>Fabricating a genepack.</jobString>
+    <workAmount>2500</workAmount>
+    <workSkill>Intellectual</workSkill>
+    <workSkillLearnFactor>0</workSkillLearnFactor>
+    <requiredGiverWorkType>Research</requiredGiverWorkType>
+    <researchPrerequisite>GF_GeneFabrication</researchPrerequisite>
+    <ingredients />
+    <defaultIngredientFilter />
+  </RecipeDef>
+</Defs>

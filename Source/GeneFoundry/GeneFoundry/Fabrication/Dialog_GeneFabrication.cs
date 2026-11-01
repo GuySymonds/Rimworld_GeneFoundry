@@ -22,19 +22,24 @@ namespace GeneFoundry.Fabrication
     public class Dialog_GeneFabrication : GeneCreationDialogBase
     {
         private readonly Building_GeneFabricator bench;
+        private readonly Bill_GeneFabrication editingBill;
+        private readonly bool addBill;
+        private bool ReadOnly => editingBill != null ? bench.Pending && bench.ActiveBill == editingBill : !addBill && bench.Pending;
         private readonly List<GeneDef> selected;
         private readonly List<GeneDef> available;
         private readonly HashSet<GeneCategoryDef> collapsed = new HashSet<GeneCategoryDef>();
         private Vector2 selectedScroll;
         protected override List<GeneDef> SelectedGenes => selected;
-        protected override string Header => bench.Pending ? "Selected fabrication genes" : "Fabricate genepack";
-        protected override string AcceptButtonLabel => "Fabricate genepack";
+        protected override string Header => ReadOnly ? "Selected fabrication genes" : editingBill != null ? "Edit fabrication bill" : addBill ? "Add fabrication bill" : "Fabricate genepack";
+        protected override string AcceptButtonLabel => editingBill != null ? "Save bill" : addBill ? "Add bill" : "Fabricate genepack";
         public override Vector2 InitialSize => new Vector2(Mathf.Min(UI.screenWidth, 1016f), UI.screenHeight - 4f);
 
-        public Dialog_GeneFabrication(Building_GeneFabricator bench)
+        public Dialog_GeneFabrication(Building_GeneFabricator bench, Bill_GeneFabrication editingBill = null, bool addBill = false)
         {
             this.bench = bench;
-            selected = bench.Selected;
+            this.editingBill = editingBill;
+            this.addBill = addBill;
+            selected = (editingBill?.genes ?? (addBill ? new List<GeneDef>() : bench.Selected)).Where(g => g != null).ToList();
             available = FabricationGeneCatalog.Available(DefDatabase<GeneDef>.AllDefsListForReading);
             forcePause = true;
             absorbInputAroundWindow = true;
@@ -56,13 +61,13 @@ namespace GeneFoundry.Fabrication
             float work = FabricationCalculations.Work(selected.Count, complexity);
             Widgets.Label(new Rect(0, y, rect.width, 150),
                 $"Selected: {selected.Count} genes; complexity: {complexity}\n" +
-                $"Materials: {FabricationCalculations.Biomass(selected.Count, complexity)} refined biomass + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
+                $"Materials: {FabricationCalculations.Biomass(selected.Count, complexity)} refined biomass ({FabricationCalculations.BiomassDiscountPercent(selected.Count)}% discount) + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
                 $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills ({work:0} work)\n" +
                 "Minimum: Intellectual 10, Medicine 6, Crafting 4. Weights: 60% / 25% / 15%.\n" +
-                "Failure: 30% at minimum; 0% at 16 / 12 / 10; weighted by each operator's work.\n" +
+                "Failure: 30% at minimum; 0% at 16 / 12 / 10. Work is locked to its first operator.\n" +
                 "Cancellation after work starts loses committed ingredients.");
             Rect buttons = new Rect(0, rect.height - ButSize.y, rect.width, ButSize.y);
-            if (!bench.Pending) DoBottomButtons(buttons);
+            if (!ReadOnly) DoBottomButtons(buttons);
             else if (Widgets.ButtonText(new Rect(0, buttons.y, ButSize.x, ButSize.y), "Close".Translate())) Close();
         }
 
@@ -71,7 +76,7 @@ namespace GeneFoundry.Fabrication
             float selectedHeight = Mathf.Min(190f, rect.height * .38f);
             Widgets.Label(new Rect(rect.x, rect.y, rect.width, 25), "SelectedGenes".Translate() + " — " + "ClickToAddOrRemove".Translate());
             DrawSection(new Rect(rect.x, rect.y + 26, rect.width, selectedHeight), selected.ToList(), ref selectedScroll, false);
-            if (bench.Pending) return;
+            if (ReadOnly) return;
             float libraryY = rect.y + selectedHeight + 36;
             Widgets.Label(new Rect(rect.x, libraryY, rect.width, 25), "Genes".Translate());
             DrawSection(new Rect(rect.x, libraryY + 26, rect.width, rect.yMax - libraryY - 26),
@@ -115,7 +120,7 @@ namespace GeneFoundry.Fabrication
                     GeneUIUtility.DrawGeneDef(gene, card, GeneType.Xenogene, clickable: false);
                     Widgets.InfoCardButton(card.xMax - 20, card.y, gene);
                     Rect info = new Rect(card.xMax - 20, card.y, 24, 24);
-                    if (!bench.Pending && !Mouse.IsOver(info) && Widgets.ButtonInvisible(card))
+                    if (!ReadOnly && !Mouse.IsOver(info) && Widgets.ButtonInvisible(card))
                     {
                         if (grouped) selected.Add(gene); else selected.Remove(gene);
                         OnGenesChanged();
@@ -142,11 +147,12 @@ namespace GeneFoundry.Fabrication
                     matchingGenes.Add(gene);
             quickSearchWidget.noResultsMatched = quickSearchWidget.filter.Active && matchingGenes.Count == 0;
         }
-        protected override bool CanAccept() => !bench.Pending && selected.Count > 0;
+        protected override bool CanAccept() => !ReadOnly && selected.Count > 0 && selected.All(GeneFabricationResearch.IsUnlocked);
         protected override void Accept()
         {
-            if (bench.TryStart(selected)) Close();
-            else Messages.Message("Cannot start: select researched genes, provide all reachable materials, and ensure the Fabricator is empty.", MessageTypeDefOf.RejectInput, false);
+            bool accepted = editingBill != null ? bench.TryConfigureBill(editingBill, selected) : addBill ? bench.TryAddBill(selected) : bench.TryStart(selected);
+            if (accepted) Close();
+            else Messages.Message("Cannot confirm: select researched genes. Bills need a free bill slot and cannot be edited during their active job. Immediate fabrication also needs reachable materials and an empty Fabricator.", MessageTypeDefOf.RejectInput, false);
         }
     }
 }

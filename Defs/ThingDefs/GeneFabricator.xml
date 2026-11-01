@@ -10,7 +10,8 @@
 
     <thingClass>GeneFoundry.Fabrication.Building_GeneFabricator</thingClass>
     <tickerType>Rare</tickerType>
-    <inspectorTabs Inherit="False" />
+    <drawerType>MapMeshAndRealTime</drawerType>
+    <inspectorTabs Inherit="False"><li>GeneFoundry.Fabrication.ITab_GeneFabricationBills</li></inspectorTabs>
 
     <!-- Gene Fabricator artwork -->
     <graphicData>

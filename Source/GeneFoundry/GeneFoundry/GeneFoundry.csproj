@@ -55,6 +55,7 @@
     <Compile Include="Fabrication\FabricationCalculations.cs" />
     <Compile Include="Fabrication\FabricationState.cs" />
     <Compile Include="Fabrication\FabricationJobs.cs" />
+    <Compile Include="Fabrication\FabricationBills.cs" />
     <Compile Include="WorkGivers\WorkGiver_FabricateGenePack.cs" />
     <Compile Include="Fabrication\Dialog_GeneFabrication.cs" />
     <Compile Include="GeneFoundryMod.cs" />

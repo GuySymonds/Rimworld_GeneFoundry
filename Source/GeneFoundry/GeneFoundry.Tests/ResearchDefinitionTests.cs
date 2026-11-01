@@ -77,12 +77,13 @@ namespace GeneFoundry.Tests
         public void EveryProductionRecipeHasTheCorrectResearchGateIncludingEnzymaticCorpses()
         {
             var recipes = Definitions().Where(def => def.Name == "RecipeDef").ToList();
-            Assert.Equal(7, recipes.Count);
+            Assert.Equal(8, recipes.Count);
             foreach (XElement recipe in recipes)
             {
                 string name = recipe.Element("defName").Value;
                 string expected = name.Contains("Enzymatic") ? "GF_EnzymaticExtraction" :
-                    name == "GF_StartBiomassRefinement" ? "GF_BiomassRefinement" : "GF_BiomassExtraction";
+                    name == "GF_StartBiomassRefinement" ? "GF_BiomassRefinement" :
+                    name == "GF_FabricateSelectedGenes" ? "GF_GeneFabrication" : "GF_BiomassExtraction";
                 Assert.Equal(expected, (string)recipe.Element("researchPrerequisite"));
                 Assert.Equal("ResearchProjectDef", Definitions().Single(def =>
                     (string)def.Element("defName") == expected).Name.LocalName);

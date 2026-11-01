@@ -32,6 +32,11 @@ namespace GeneFoundry.Tests
             public UnfinishedGenePack item = new UnfinishedGenePack();
             public void ExposeData() => item.ExposeJobData();
         }
+        public class BillData : IExposable
+        {
+            public Bill_GeneFabrication bill = new Bill_GeneFabrication();
+            public void ExposeData() => bill.ExposeGeneData();
+        }
         private class HeadlessBench : Building_GeneFabricator
         {
             public HeadlessBench()
@@ -73,6 +78,66 @@ namespace GeneFoundry.Tests
             var bench = new HeadlessBench();
             Assert.False(bench.Complete(1));
             Assert.Equal(0, bench.outputs);
+        }
+        [Fact] public void FirstWorkerOwnsPaidWorkAndOtherPawnsCannotTakeOver()
+        {
+            var item = Paid();
+            var first = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
+            var second = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
+            Assert.True(item.CanBeWorkedBy(first)); Assert.True(item.CanBeWorkedBy(second));
+            Assert.False(item.TryClaim(null));
+            item.AddWork(40, .3f); // Also covers migration of existing, unowned work.
+            Assert.True(item.TryClaim(first));
+            Assert.True(item.TryClaim(first)); Assert.False(item.TryClaim(second));
+            Assert.Same(first, item.creator); Assert.Equal(40, item.workDone);
+            var bench = new HeadlessBench(); bench.GetDirectlyHeldThings().TryAdd(item, false);
+            Assert.True(bench.CanBeWorkedBy(first)); Assert.False(bench.CanBeWorkedBy(second));
+            item.creator = null; // A missing owner reference must not transfer ownership.
+            Assert.False(item.CanBeWorkedBy(second)); Assert.False(item.TryClaim(second));
+        }
+        [Fact] public void BillIsOnePackAndCannotRunAgainAfterCompletion()
+        {
+            var bench = new HeadlessBench();
+            var bill = new Bill_GeneFabrication { genes = Paid().genes };
+            bench.billStack.AddBill(bill);
+            Assert.True(bill.ShouldDoNow()); Assert.False(bill.PawnAllowedToStartAnew(null));
+            bill.suspended = true; Assert.False(bill.ShouldDoNow());
+            bill.suspended = false; Assert.True(bill.ShouldDoNow());
+            bill.Notify_IterationCompleted(null, new List<Thing>());
+            Assert.Empty(bench.billStack.Bills); Assert.False(bill.ShouldDoNow());
+            bill.Notify_IterationCompleted(null, new List<Thing>());
+            Assert.Empty(bench.billStack.Bills);
+        }
+        [Theory]
+        [InlineData(false)] [InlineData(true)]
+        public void CompletedBillLeavesQueueOnceOnSuccessOrFailure(bool failure)
+        {
+            var bench = new HeadlessBench(); var item = Paid();
+            var bill = new Bill_GeneFabrication { genes = new List<GeneDef>(item.genes) };
+            var next = new Bill_GeneFabrication { genes = new List<GeneDef>(item.genes) };
+            bench.billStack.AddBill(bill); bench.billStack.AddBill(next);
+            typeof(Building_GeneFabricator).GetField("activeBill", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(bench, bill);
+            bench.GetDirectlyHeldThings().TryAdd(item, false);
+            item.AddWork(100, failure ? .3f : 0);
+            Assert.True(bench.Complete(0));
+            Assert.Null(bench.ActiveBill); Assert.False(bill.ShouldDoNow());
+            Assert.Same(next, Assert.Single(bench.billStack.Bills));
+            Assert.False(bench.Complete(0)); Assert.True(next.ShouldDoNow());
+            Assert.Equal(failure ? 0 : 1, bench.outputs);
+        }
+        [Fact] public void DeletingActiveBillCancelsPaidItemWithoutTouchingOtherEntries()
+        {
+            var bench = new HeadlessBench(); var item = Paid();
+            var active = new Bill_GeneFabrication { genes = item.genes };
+            var next = new Bill_GeneFabrication { genes = item.genes };
+            bench.billStack.AddBill(active); bench.billStack.AddBill(next);
+            typeof(Building_GeneFabricator).GetField("activeBill", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(bench, active);
+            bench.GetDirectlyHeldThings().TryAdd(item, false);
+            int generation = bench.Generation;
+            bench.billStack.Delete(active);
+            Assert.Null(bench.ActiveBill); Assert.True(item.destroyed); Assert.Null(bench.Unfinished);
+            Assert.Same(next, Assert.Single(bench.billStack.Bills));
+            Assert.NotEqual(generation, bench.Generation); Assert.Equal(0, bench.outputs);
         }
         [Fact] public void ChangingWorkersWeightsActualWorkAndClampsFinalTick()
         {
@@ -148,7 +213,7 @@ namespace GeneFoundry.Tests
             var bench = new HeadlessBench(); var item = Paid();
             bench.GetDirectlyHeldThings().TryAdd(item, false);
             Assert.False(bench.CanWork);
-            Assert.False(bench.TryCommit());
+            Assert.False(bench.TryCommit(null));
             bench.Work(null, 100); // Must reject before reading a pawn or consuming anything.
             Assert.Equal(0, item.workDone);
             Assert.Same(item, bench.Unfinished);
@@ -156,7 +221,78 @@ namespace GeneFoundry.Tests
         private class Material : Thing
         {
             public bool destroyed;
+            public int splitCount;
             public override void Destroy(DestroyMode mode = DestroyMode.Vanish) { destroyed = true; }
+            public override Thing SplitOff(int count)
+            {
+                splitCount += count;
+                if (count >= stackCount) return base.SplitOff(count);
+                // Only replace Unity's ThingMaker for partial-stack fixture creation.
+                stackCount -= count;
+                return new Material { def = def, stackCount = count };
+            }
+        }
+        [Fact] public void DiscountedCommitKeepsExcessBiomassAndChargesAllArchiteCapsules()
+        {
+            var previous = DefDatabase<ThingDef>.AllDefsListForReading.ToList();
+            try
+            {
+                var biomass = ItemDef("GF_RefinedBiomass"); biomass.stackLimit = 75;
+                var capsule = ItemDef("ArchiteCapsule"); capsule.stackLimit = 10;
+                DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(new[] { biomass, capsule });
+                var bench = new HeadlessBench();
+                var genes = new List<GeneDef> { new GeneDef { biostatCpx = 1, biostatArc = 1 }, new GeneDef { biostatCpx = 0, biostatArc = 2 } };
+                typeof(Building_GeneFabricator).GetField("selected", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(bench, genes);
+                var delivered = new Material { def = biomass, stackCount = 30 };
+                var capsules = new Material { def = capsule, stackCount = 3 };
+                bench.GetDirectlyHeldThings().TryAdd(delivered, false); bench.GetDirectlyHeldThings().TryAdd(capsules, false);
+                Assert.Equal(23, bench.Required(biomass)); Assert.Equal(3, bench.Required(capsule));
+                Assert.True(bench.CommitDeliveredMaterials());
+                Assert.Equal(23, delivered.splitCount); Assert.Equal(7, delivered.stackCount); Assert.False(delivered.destroyed);
+                Assert.Equal(3, capsules.splitCount); Assert.True(capsules.destroyed);
+                Assert.Equal(6000, bench.Unfinished.totalWork); // Work receives no discount.
+                Assert.True(bench.CommitDeliveredMaterials()); Assert.Equal(23, delivered.splitCount);
+            }
+            finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
+        }
+        [Fact] public void BillQueueRetainsNativeOrderingAndSuspension()
+        {
+            var bench = new HeadlessBench();
+            var first = new Bill_GeneFabrication { genes = Paid().genes };
+            var second = new Bill_GeneFabrication { genes = Paid().genes };
+            bench.billStack.AddBill(first); bench.billStack.AddBill(second);
+            Assert.Same(first, bench.billStack.FirstShouldDoNow);
+            first.suspended = true; Assert.Same(second, bench.billStack.FirstShouldDoNow);
+            first.suspended = false; bench.billStack.Reorder(second, -1);
+            Assert.Same(second, bench.billStack.FirstShouldDoNow);
+            second.Notify_IterationCompleted(null, new List<Thing>());
+            Assert.Same(first, bench.billStack.FirstShouldDoNow);
+        }
+        [Theory]
+        [InlineData(false)] [InlineData(true)]
+        public void BillGeneSelectionsAndCompletedStateRoundTrip(bool completed)
+        {
+            var previous = DefDatabase<GeneDef>.AllDefsListForReading.ToList();
+            string path = Path.GetTempFileName();
+            bool profiling = DeepProfiler.enabled; DeepProfiler.enabled = false;
+            try
+            {
+                var data = new BillData { bill = new Bill_GeneFabrication { genes = Paid().genes } };
+                var expected = data.bill.genes.ToList();
+                if (completed) data.bill.Notify_IterationCompleted(null, new List<Thing>());
+                DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(expected);
+                Scribe.saver.InitSaving(path, "fabrication"); Scribe_Deep.Look(ref data, "bill"); Scribe.saver.FinalizeSaving();
+                data = new BillData(); Scribe.loader.InitLoading(path); Scribe.EnterNode("bill");
+                Scribe.loader.curParent = data; Scribe.loader.curPathRelToParent = null; data.ExposeData();
+                Scribe.loader.crossRefs.RegisterForCrossRefResolve(data); Scribe.loader.initer.RegisterForPostLoadInit(data);
+                Scribe.ExitNode(); Scribe.loader.FinalizeLoading();
+                Assert.Equal(expected, data.bill.genes); Assert.Equal(!completed, data.bill.ShouldDoNow());
+            }
+            finally
+            {
+                Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling;
+                DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(previous);
+            }
         }
         [Fact] public void MaterialsCommitOnlyWhenCompleteAndNeverChargeTwice()
         {
@@ -194,7 +330,9 @@ namespace GeneFoundry.Tests
             }
             finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
         }
-        [Fact] public void ScribeRoundTripPreservesSelectedGenesProgressAndWeightedRisk()
+        [Theory]
+        [InlineData(false)] [InlineData(true)]
+        public void ScribeRoundTripPreservesSelectedGenesProgressRiskAndOwner(bool owned)
         {
             var previous = DefDatabase<GeneDef>.AllDefsListForReading.ToList();
             string path = Path.GetTempFileName();
@@ -202,19 +340,34 @@ namespace GeneFoundry.Tests
             try
             {
                 var item = Paid(); item.AddWork(90, .3f);
+                var owner = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
+                owner.def = ItemDef("Human"); owner.def.category = ThingCategory.Pawn; owner.thingIDNumber = 1234;
+                if (owned) Assert.True(item.TryClaim(owner));
                 DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(item.genes);
                 var data = new JobData { item = item };
-                Scribe.saver.InitSaving(path,"fabrication"); Scribe_Deep.Look(ref data,"job"); Scribe.saver.FinalizeSaving();
+                Scribe.saver.InitSaving(path,"fabrication");
+                // The pawn is supplied by the map in a real load; this fixture round-trips
+                // the item's reference without running the entire Pawn/Unity serializer.
+                Scribe.saver.loadIDsErrorsChecker.RegisterDeepSaved(owner, "mapPawn");
+                Scribe_Deep.Look(ref data,"job"); Scribe.saver.FinalizeSaving();
                 data = new JobData();
                 Scribe.loader.InitLoading(path); Scribe.EnterNode("job");
-                Scribe.loader.curParent = data; data.ExposeData();
+                Scribe.loader.curParent = data; Scribe.loader.curPathRelToParent = null; data.ExposeData();
                 Scribe.loader.crossRefs.RegisterForCrossRefResolve(data);
                 Scribe.loader.initer.RegisterForPostLoadInit(data);
+                var directory = (LoadedObjectDirectory)typeof(CrossRefHandler).GetField("loadedObjectDirectory", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(Scribe.loader.crossRefs);
+                directory.RegisterLoaded(owner);
                 Scribe.ExitNode(); Scribe.loader.FinalizeLoading(); var loaded = data.item;
                 Assert.True(loaded.Valid, $"committed={loaded.committed}, total={loaded.totalWork}, done={loaded.workDone}, risk={loaded.riskWork}, genes={string.Join(",", loaded.genes?.Select(g => g?.defName ?? "null") ?? new string[0])}; XML={File.ReadAllText(path)}");
                 Assert.Equal(item.genes, loaded.genes);
                 Assert.Equal(90,loaded.workDone);
                 Assert.Equal(27,loaded.riskWork,4);
+                if (owned)
+                {
+                    Assert.Same(owner, loaded.creator);
+                    Assert.True(loaded.CanBeWorkedBy(owner));
+                    Assert.False(loaded.CanBeWorkedBy((Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn))));
+                }
                 loaded.AddWork(10,0);
                 Assert.Equal(.27f,loaded.Failure,5);
             }

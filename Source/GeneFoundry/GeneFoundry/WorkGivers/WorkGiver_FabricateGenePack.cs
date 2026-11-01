@@ -14,7 +14,7 @@ namespace GeneFoundry.WorkGivers
         public override Job JobOnThing(Pawn pawn, Thing thing, bool forced = false)
         {
             var bench = thing as Building_GeneFabricator;
-            if (bench == null || bench.Faction != pawn.Faction || !bench.CanWork || thing.IsForbidden(pawn) || !FabricationSkills.Qualified(pawn) ||
+            if (bench == null || bench.Faction != pawn.Faction || !bench.CanWork || !bench.CanBeWorkedBy(pawn) || thing.IsForbidden(pawn) || !FabricationSkills.Qualified(pawn) ||
                 !pawn.CanReserveAndReach(thing, PathEndMode.InteractionCell, Danger.Some)) return null;
             if (bench.Unfinished == null)
             {

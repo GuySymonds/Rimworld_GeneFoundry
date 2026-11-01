@@ -32,11 +32,11 @@ namespace GeneFoundry.Jobs
         {
             this.FailOnDestroyedOrNull(TargetIndex.A);
             this.FailOnBurningImmobile(TargetIndex.A);
-            this.FailOn(() => Bench == null || !Bench.CanWork || job.countQueue == null || job.countQueue.Count != 1 || job.countQueue[0] != Bench.Generation || !FabricationSkills.Qualified(pawn));
+            this.FailOn(() => Bench == null || !Bench.CanWork || job.countQueue == null || job.countQueue.Count != 1 || job.countQueue[0] != Bench.Generation || !FabricationSkills.Qualified(pawn) || !Bench.CanBeWorkedBy(pawn));
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
             var work = ToilMaker.MakeToil("FabricateGenePack");
             work.defaultCompleteMode = ToilCompleteMode.Never;
-            work.initAction = () => { if (!Bench.TryCommit()) EndJobWith(JobCondition.Incompletable); };
+            work.initAction = () => { if (!Bench.TryCommit(pawn)) EndJobWith(JobCondition.Incompletable); };
             work.tickIntervalAction = delta =>
             {
                 pawn.rotationTracker.FaceTarget(Bench);
