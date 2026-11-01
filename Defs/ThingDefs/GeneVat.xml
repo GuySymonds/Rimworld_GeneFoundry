@@ -44,7 +44,7 @@ Colonists manually process biological matter, optionally using herbal medicine t
     <pathCost>50</pathCost>
     <fillPercent>0.5</fillPercent>
 
-    <designationCategory>Production</designationCategory>
+    <designationCategory>Biotech</designationCategory>
 
     <hasInteractionCell>true</hasInteractionCell>
     <interactionCellOffset>(0,0,-2)</interactionCellOffset>

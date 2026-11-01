@@ -50,13 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
-  
     <Compile Include="Components\CompBiomassRefiner.cs" />
     <Compile Include="Components\CompProperties_BiomassRefiner.cs" />
-  
     <Compile Include="Jobs\JobDriver_PrepareBiomassRefinement.cs" />
+    <Compile Include="PlaceWorkers\PlaceWorker_BiomassHopper.cs" />
     <Compile Include="WorkGivers\WorkGiver_RefineBiomass.cs" />
-  
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

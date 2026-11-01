@@ -44,7 +44,7 @@ Refinement requires substantial electrical power but operates without direct col
     <pathCost>50</pathCost>
     <fillPercent>0.5</fillPercent>
 
-    <designationCategory>Production</designationCategory>
+    <designationCategory>Biotech</designationCategory>
 
     <!-- Colonist interaction -->
     <hasInteractionCell>true</hasInteractionCell>

@@ -24,6 +24,10 @@ Colonists automatically deliver raw biomass to the hopper. The connected refiner
     <size>(1,1)</size>
     <rotatable>true</rotatable>
 
+    <placeWorkers>
+      <li>GeneFoundry.PlaceWorkers.PlaceWorker_BiomassHopper</li>
+    </placeWorkers>
+
     <!-- Construction -->
     <costList>
       <Steel>30</Steel>
@@ -44,7 +48,7 @@ Colonists automatically deliver raw biomass to the hopper. The connected refiner
     <pathCost>42</pathCost>
     <fillPercent>0.5</fillPercent>
 
-    <designationCategory>Production</designationCategory>
+    <designationCategory>Biotech</designationCategory>
     <surfaceType>Item</surfaceType>
 
     <!-- Storage configuration -->
