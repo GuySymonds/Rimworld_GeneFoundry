@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <JobDef>
+    <defName>GF_ExtractCorpseBiomass</defName>
+    <driverClass>GeneFoundry.Jobs.JobDriver_ExtractCorpseBiomass</driverClass>
+    <reportString>extracting biomass from a corpse.</reportString>
+  </JobDef>
+</Defs>

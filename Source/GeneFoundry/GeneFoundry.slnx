@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="GeneFoundry/GeneFoundry.csproj" Id="25dedfb8-fb77-4d2d-9179-dd5121848959" />
+  <Project Path="GeneFoundry.Tests/GeneFoundry.Tests.csproj" />
 </Solution>

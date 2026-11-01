@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <SpecialThingFilterDef>
+    <defName>GF_AllowUnsafeBiomassCorpses</defName>
+    <label>corpses unsuitable for biomass extraction</label>
+    <description>Non-organic corpses and corpses with artificial parts awaiting medical recovery.</description>
+    <parentCategory>Corpses</parentCategory>
+    <allowedByDefault>true</allowedByDefault>
+    <saveKey>gfAllowUnsafeBiomassCorpses</saveKey>
+    <workerClass>GeneFoundry.Recipes.SpecialThingFilterWorker_UnsafeBiomassCorpse</workerClass>
+  </SpecialThingFilterDef>
+  <RecipeDef>
+    <defName>GF_ExtractBiomassCorpse</defName>
+    <label>extract biomass from corpse</label>
+    <description>Convert a whole organic corpse into raw biomass. Recovery is based on remaining biological material, with 25% additional biomass from organs, bones and hide. This bonus also applies to damaged bodies. Rotting corpses yield 50% and desiccated corpses 10% of fresh recovery, with a minimum of 1 raw biomass per eligible corpse. Processing work scales with remaining material; larger bodies benefit from batch efficiency. By default, 30% of work handles the body regardless of decay, while 70% scales with recovery. Rotting bodies therefore take 65% and desiccated bodies 37% of fresh processing time. Corpse timings can be changed under Raw Biomass in GeneFoundry's mod settings. Clothing and equipment are stripped before extraction; special butcher products such as horns and tusks are recovered using their body-part definitions. Corpses with installed artificial parts are temporarily excluded until medical recovery is implemented. Animal corpses are selected by default; other organic corpses require enabling them in the ingredient filter.</description>
+    <jobString>Extracting biomass from a corpse.</jobString>
+    <workAmount>1000</workAmount>
+    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSkill>Cooking</workSkill>
+    <requiredGiverWorkType>Cooking</requiredGiverWorkType>
+    <interruptIfIngredientIsRotting>false</interruptIfIngredientIsRotting>
+    <ingredients>
+      <li>
+        <filter>
+          <categories>
+            <li>Corpses</li>
+          </categories>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <categories>
+        <li>Corpses</li>
+      </categories>
+      <specialFiltersToDisallow>
+        <li>GF_AllowUnsafeBiomassCorpses</li>
+      </specialFiltersToDisallow>
+    </fixedIngredientFilter>
+    <defaultIngredientFilter>
+      <categories>
+        <li>CorpsesAnimal</li>
+      </categories>
+      <specialFiltersToAllow>
+        <li>AllowFresh</li>
+        <li>AllowRotten</li>
+      </specialFiltersToAllow>
+    </defaultIngredientFilter>
+    <forceHiddenSpecialFilters>
+      <li>GF_AllowUnsafeBiomassCorpses</li>
+    </forceHiddenSpecialFilters>
+    <!-- Used for vanilla Do until X output counting; the custom job calculates actual yield. -->
+    <products>
+      <GF_RawBiomass>1</GF_RawBiomass>
+    </products>
+  </RecipeDef>
+</Defs>

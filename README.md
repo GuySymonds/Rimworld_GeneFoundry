@@ -5,7 +5,7 @@ For RimWorld 1.6 with Biotech. The Gene Vat and Biomass Refinery are implemented
 
 ## Raw biomass extraction
 
-The Gene Vat currently supports three vanilla production bills:
+The Gene Vat supports these material extraction bills:
 
 | Input | Raw biomass output |
 |---|---:|
@@ -15,7 +15,41 @@ The Gene Vat currently supports three vanilla production bills:
 
 Each recipe currently requires 1,000 work units, uses Cooking work and CookSpeed, and allows mixing eligible ingredient types. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
 
-Whole-corpse extraction, artificial-part recovery and the weighted Cooking/Medicine/Intellectual skill system are planned and are not implemented yet.
+An additional corpse extraction bill uses a custom job selected through vanilla bill and ingredient selection. It defaults to animal corpses; other organic corpses require explicit ingredient-filter changes. Non-organic corpses and corpses with installed artificial parts are excluded. Artificial-part recovery and weighted Cooking/Medicine/Intellectual processing remain future iterations.
+
+Corpse biomass is `max(1, floor(material amount × 0.5 × 1.25 × decay))`. Material amount uses vanilla MeatAmount with post-processing disabled: body size, missing natural parts, slaughter condition, nutrition and difficulty still apply, but vanilla's small-animal meat bonus does not. The whole-body multiplier includes the remaining organs, bones and hide even when limbs are missing. Decay multipliers are 1 for fresh, 0.5 for rotting and 0.1 for desiccated bodies. Every eligible corpse yields at least one biomass.
+
+Fresh processing time starts at `setup minutes + material / 50 × extraction minutes`, divided by the operator's CookSpeed for this iteration. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material preserve the original `100 + 20 × material` work baseline. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
+
+Decay then multiplies processing time by `handling share + (1 - handling share) × decay multiplier`. With the default 30% handling share, fresh bodies take 100%, rotting bodies 65% and desiccated bodies 37% of fresh time. This makes a large desiccated body slower to process than a small fresh body yielding the same biomass. Time is captured after delivery/stripping, using the settings, operator speed and corpse condition at that point, and saved per job. Yield uses the condition at completion; a body that decays during work can therefore give less output without shortening a job already underway.
+
+Clothing, equipment and inventory are stripped before extraction. Vanilla pawn butcher-product generation recovers special products, while meat and leather are consumed rather than produced separately. Existing meat and plant bills still use vanilla DoBill jobs through the Gene Vat workgiver; the old vanilla Cooking workgiver patch is replaced to prevent it bypassing the custom corpse job.
+
+### Raw biomass timing options
+
+Open **Options → Mod Settings → GeneFoundry → Raw biomass**. Sliders have hover explanations, and this section has its own reset button:
+
+| Setting | Default | Range | Effect |
+|---|---:|---:|---|
+| Fresh extraction per 50 material | 24 minutes | 1–120 minutes | Scales extraction work with body size; lower values speed processing. |
+| Setup time per corpse | 2.4 minutes | 0–15 minutes, 0.1-minute steps | Adds per-body work before other modifiers; discourages processing many tiny bodies for better throughput. |
+| Work unaffected by decay | 30% | 0–100%, 1% steps | At 0%, time scales entirely with recovery. At 100%, decay does not shorten work. |
+
+The view shows current fresh/rotting/desiccated timing percentages. These settings apply to newly started corpse extraction, not running jobs or meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
+
+### Calculation unit tests
+
+The .NET 10 xUnit project compiles the production `BiomassCalculations.cs` source directly, without loading RimWorld or running the deployment script. This tests the exact math used by the mod while keeping the test runner independent of a game installation. It covers yield and rounding, damaged bodies, minimum recovery, decay/handling timing, equal-yield comparisons, batch efficiency, operator speed and configurable minutes.
+
+```powershell
+dotnet test Source/GeneFoundry/GeneFoundry.Tests/GeneFoundry.Tests.csproj
+```
+
+The same test project also checks all mod definition XML for parsing and surrounding text whitespace, duplicate definition names, unresolved GeneFoundry references, recipe/product reference types and custom classes included in the production project. Regression checks cover Gene Vat recipe/workgiver registration and corpse ingredient safety/decay settings. Fixtures are copied from the real definitions and sources at build time; no game installation is needed for these checks.
+
+The game mod remains .NET Framework 4.7.2. These static checks do not replace RimWorld's definition loading, inheritance and cross-references to vanilla or other mods. UI rendering, job behavior and game-object integration still require in-game testing.
+
+Before v1, development prioritises current behavior over compatibility with older development saves. Normal save/load of current jobs and settings remains supported; migration of old development saves is not a release requirement.
 
 ## Biomass refinery
 

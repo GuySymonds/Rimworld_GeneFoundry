@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
+    <Compile Include="../GeneFoundry/Recipes/BiomassCalculations.cs" Link="Production/BiomassCalculations.cs" />
+    <Content Include="../../../Defs/**/*.xml" Link="Fixtures/Defs/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../GeneFoundry/**/*.cs" Exclude="../GeneFoundry/bin/**;../GeneFoundry/obj/**" Link="Fixtures/Source/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../GeneFoundry/GeneFoundry.csproj" Link="Fixtures/GeneFoundry.csproj" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

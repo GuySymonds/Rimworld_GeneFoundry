@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <WorkGiverDef>
+    <defName>GF_OperateGeneVat</defName>
+    <label>extract raw biomass</label>
+    <giverClass>GeneFoundry.WorkGivers.WorkGiver_GeneVat</giverClass>
+    <workType>Cooking</workType>
+    <verb>extract biomass</verb>
+    <gerund>extracting biomass</gerund>
+    <priorityInType>90</priorityInType>
+    <fixedBillGiverDefs>
+      <li>GF_GeneVat</li>
+    </fixedBillGiverDefs>
+    <requiredCapacities>
+      <li>Manipulation</li>
+    </requiredCapacities>
+  </WorkGiverDef>
+</Defs>

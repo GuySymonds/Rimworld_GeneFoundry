@@ -55,6 +55,7 @@ Colonists manually process raw meat or raw plant food. A batch of 50 raw meat pr
       <li>GF_ExtractBiomassBasic</li>
       <li>GF_ExtractBiomassEnzymatic</li>
       <li>GF_ExtractBiomassPlant</li>
+      <li>GF_ExtractBiomassCorpse</li>
     </recipes>
 
     <!-- Bills interface -->
