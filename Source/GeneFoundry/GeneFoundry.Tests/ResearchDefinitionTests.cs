@@ -17,7 +17,7 @@ namespace GeneFoundry.Tests
             .SelectMany(path => XDocument.Load(path).Root.Elements()).ToList();
 
         [Fact]
-        public void ExactlyThreeProjectsUseTheirOwnVisibleResearchTabAndDistinctPositions()
+        public void FourFoundationProjectsUseTheirOwnVisibleResearchTabAndDistinctPositions()
         {
             var defs = Definitions();
             XElement tab = Assert.Single(defs, def => def.Name == "ResearchTabDef");
@@ -25,7 +25,7 @@ namespace GeneFoundry.Tests
             Assert.Equal("GeneFoundry", (string)tab.Element("label"));
             Assert.Equal("true", (string)tab.Element("visibleByDefault"));
             var projects = defs.Where(def => def.Name == "ResearchProjectDef").ToList();
-            Assert.Equal(3, projects.Count);
+            Assert.Equal(4, projects.Count);
             Assert.All(projects, project =>
             {
                 Assert.Equal("GF_GeneFoundry", (string)project.Element("tab"));
@@ -34,7 +34,7 @@ namespace GeneFoundry.Tests
                 Assert.True(float.Parse(project.Element("researchViewX").Value, CultureInfo.InvariantCulture) >= 0);
                 Assert.True(float.Parse(project.Element("researchViewY").Value, CultureInfo.InvariantCulture) >= 0);
             });
-            Assert.Equal(3, projects.Select(project => (
+            Assert.Equal(4, projects.Select(project => (
                 (string)project.Element("researchViewX"), (string)project.Element("researchViewY"))).Distinct().Count());
         }
 
@@ -42,6 +42,7 @@ namespace GeneFoundry.Tests
         [InlineData("GF_BiomassExtraction", "Xenogermination", 500)]
         [InlineData("GF_EnzymaticExtraction", "GF_BiomassExtraction", 750)]
         [InlineData("GF_BiomassRefinement", "GF_BiomassExtraction", 1000)]
+        [InlineData("GF_GeneFabrication", "GF_BiomassRefinement", 1500)]
         public void ResearchBranchesFromExtractionAndAlwaysRequiresVanillaXenogenetics(
             string name, string prerequisite, int cost)
         {
@@ -101,6 +102,16 @@ namespace GeneFoundry.Tests
                 Assert.False(string.IsNullOrWhiteSpace(element.Value));
                 Assert.Equal(element.Value.Trim(), element.Value);
             });
+        }
+
+        [Fact]
+        public void CategoryGeneratorReferencesTheCorrectFoundationTabAndVanillaArchogenetics()
+        {
+            XElement generator = Assert.Single(Definitions(),
+                def => def.Name == "GeneFoundry.Research.GeneResearchGeneratorDef");
+            Assert.Equal("GF_GeneFabrication", (string)generator.Element("fabricationResearch"));
+            Assert.Equal("GF_GeneFoundry", (string)generator.Element("researchTab"));
+            Assert.Equal("Archogenetics", (string)generator.Element("architeResearch"));
         }
     }
 }

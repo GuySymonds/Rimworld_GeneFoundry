@@ -24,10 +24,12 @@
       <HintPath>$(RimWorldManagedDir)/UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Compile Include="../GeneFoundry/Jobs/GeneVatIngredientPlacement.cs" Link="Production/GeneVatIngredientPlacement.cs" />
+    <Compile Include="../GeneFoundry/Research/GeneFabricationResearch.cs" Link="Production/GeneFabricationResearch.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
     <Compile Include="../GeneFoundry/Recipes/BiomassCalculations.cs" Link="Production/BiomassCalculations.cs" />
+    <Compile Include="../GeneFoundry/Research/GeneResearchCalculations.cs" Link="Production/GeneResearchCalculations.cs" />
     <Content Include="../../../Defs/**/*.xml" Link="Fixtures/Defs/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Languages/**/*.xml" Link="Fixtures/Languages/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../GeneFoundry/**/*.cs" Exclude="../GeneFoundry/bin/**;../GeneFoundry/obj/**" Link="Fixtures/Source/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

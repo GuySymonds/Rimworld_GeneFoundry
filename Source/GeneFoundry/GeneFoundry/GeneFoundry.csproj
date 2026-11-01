@@ -51,6 +51,9 @@
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
     <Compile Include="GeneFoundryMod.cs" />
+    <Compile Include="Research\GeneResearchCalculations.cs" />
+    <Compile Include="Research\GeneFabricationResearch.cs" />
+    <Compile Include="Research\GeneResearchGeneratorDef.cs" />
     <Compile Include="Components\GeneProcessorAssistance.cs" />
     <Compile Include="Components\GameComponent_GeneFoundryIntroduction.cs" />
     <Compile Include="Components\CompBiomassRefiner.cs" />

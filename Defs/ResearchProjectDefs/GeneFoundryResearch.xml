@@ -4,7 +4,7 @@
     <defName>GF_GeneFoundry</defName>
     <label>GeneFoundry</label>
     <generalTitle>GeneFoundry research</generalTitle>
-    <generalDescription>After researching xenogenetics, develop biomass extraction, enzymatic recovery and refinement. Extraction is required for both advanced branches.</generalDescription>
+    <generalDescription>After researching xenogenetics, develop biomass extraction, enzymatic recovery, refinement and gene fabrication. Gene category projects follow gene fabrication; archite genes also require vanilla archogenetics.</generalDescription>
     <visibleByDefault>true</visibleByDefault>
   </ResearchTabDef>
 
@@ -49,4 +49,24 @@
       <li>GF_BiomassExtraction</li>
     </prerequisites>
   </ResearchProjectDef>
+  <ResearchProjectDef>
+    <defName>GF_GeneFabrication</defName>
+    <label>gene fabrication</label>
+    <description>Develop the foundation for fabricating genes from refined biomass. Unlocks independent research projects for each loaded gene category. Completing a category permits fabrication of all of its genes; genes with an archite cost also require vanilla archogenetics. Category costs depend on gene count, total complexity and total archite value. Configure research costs in GeneFoundry's Gene research settings, then restart RimWorld.</description>
+    <baseCost>1500</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>GF_GeneFoundry</tab>
+    <researchViewX>4</researchViewX>
+    <researchViewY>2</researchViewY>
+    <prerequisites>
+      <li>GF_BiomassRefinement</li>
+    </prerequisites>
+  </ResearchProjectDef>
+
+  <GeneFoundry.Research.GeneResearchGeneratorDef>
+    <defName>GF_GeneResearchGenerator</defName>
+    <fabricationResearch>GF_GeneFabrication</fabricationResearch>
+    <architeResearch>Archogenetics</architeResearch>
+    <researchTab>GF_GeneFoundry</researchTab>
+  </GeneFoundry.Research.GeneResearchGeneratorDef>
 </Defs>

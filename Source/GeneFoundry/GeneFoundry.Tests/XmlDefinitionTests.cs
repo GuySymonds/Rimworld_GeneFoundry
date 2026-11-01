@@ -98,7 +98,8 @@ namespace GeneFoundry.Tests
             }
             var references = Definitions().SelectMany(def => def.DescendantsAndSelf())
                 .SelectMany(element => element.Attributes().Select(attribute => attribute.Value)
-                    .Concat(element.HasElements ? Enumerable.Empty<string>() : new[] { element.Value }))
+                    .Concat(element.HasElements ? Enumerable.Empty<string>() : new[] { element.Value })
+                    .Concat(new[] { element.Name.LocalName }))
                 .Where(value => value.StartsWith("GeneFoundry.", StringComparison.Ordinal));
             Assert.NotEmpty(references);
             foreach (string reference in references)

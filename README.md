@@ -127,19 +127,39 @@ Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finish
 
 ### Research progression
 
-All GeneFoundry production is gated behind vanilla **Xenogenetics** (internal definition `Xenogermination`). The three projects appear in their own **GeneFoundry** research tab:
+All GeneFoundry production is gated behind vanilla **Xenogenetics** (internal definition `Xenogermination`). Projects appear in their own **GeneFoundry** research tab:
 
 | Project | Cost | Prerequisite | Unlocks |
 | --- | ---: | --- | --- |
 | Biomass extraction | 500 | Xenogenetics | Gene vat and basic meat, plant and corpse extraction |
 | Enzymatic extraction | 750 | Biomass extraction | Herbal medicine recipes for meat, plants and corpses |
 | Biomass refinement | 1,000 | Biomass extraction | Refinery, raw biomass hoppers and refinement bill |
+| Gene fabrication | 1,500 by default | Biomass refinement | Independent projects for each loaded gene category |
+| Gene category fabrication | Calculated per category | Gene fabrication; Archogenetics too for archite-only categories | Fabrication permission for genes in that category |
 
 Enzymatic extraction and refinement are independent branches. Buildings and recipes both have research gates, so an existing vat does not bypass recipe research. The tab remains visible before Xenogenetics so players can inspect the progression, but the projects cannot be researched yet.
 
 A paused introduction dialog explains the production chain once Xenogenetics is complete. It also appears when loading a colony that already researched Xenogenetics before installing the mod. This uses a per-game saved flag and checks during game updates, including while paused; acknowledging it and saving prevents it from repeating on subsequent loads. Translation text is included under `Languages/English/Keyed` and copied by the deployment script.
 
-XML tests validate the tab, all three prerequisite paths, building and recipe gates, research costs, distinct layout positions and introduction translation text. In-game checks: verify locked projects/buildings/bills before research; finish Xenogenetics and check the introduction; research each branch and check its unlocks; save/reload to confirm the introduction does not repeat; also load a colony with Xenogenetics already complete and GeneFoundry newly installed. UI layout, automatic component discovery and popup timing require this manual verification.
+XML tests validate the tab, all foundation prerequisite paths, category generator configuration, building and recipe gates, default research costs, distinct layout positions and introduction translation text. In-game checks: verify locked projects/buildings/bills before research; finish Xenogenetics and check the introduction; research each branch and check its unlocks; save/reload to confirm the introduction does not repeat; also load a colony with Xenogenetics already complete and GeneFoundry newly installed. UI layout, automatic component discovery and popup timing require this manual verification.
+
+### Gene fabrication research
+
+Gene category projects are generated during definition resolution from the loaded `GeneDef.displayCategory` values. This includes modded and generated genes, zero-complexity cosmetic genes and genes excluded from random gene-set generation. Empty categories do not produce projects; genes without a category share an Uncategorized project. Stable project names use category definition names, not translated labels. All category projects remain in the GeneFoundry tab. Their descriptions list their genes and explain their cost breakdown.
+
+Default category research cost:
+
+`500 + (100 × gene count) + (200 × total complexity) + (500 × total archite value)`
+
+Each gene's complexity and archite value are clamped independently to at least zero before summing, so negative modded stats cannot cancel another gene's cost. Each gene definition counts once. Final research cost is at least 1 point, with no balancing cap; arithmetic saturates at the integer limit instead of overflowing.
+
+**Archite genes require vanilla Archogenetics** (`Archogenetics`) as well as the foundation and their category project. An archite gene is identified by `biostatArc > 0`, regardless of category. Mixed categories can be researched without Archogenetics so their ordinary genes become available; their archite genes stay locked. Archite-only categories also list Archogenetics as a research prerequisite. Setting the archite surcharge to zero does not remove this requirement. Vanilla gene extraction and assembly are unaffected.
+
+The separate **Gene research** settings section provides sliders for the fabrication foundation (100–10,000; default 1,500), category base cost (0–5,000; default 500), cost per gene (0–1,000; default 100), cost per complexity point (0–2,000; default 200) and cost per archite value (0–5,000; default 500). It has an independent reset button. Restart RimWorld after changing these settings. Existing research progress remains in points, so increasing costs can make even a formerly completed project require more work. Earlier biomass research costs are unchanged.
+
+This phase implements research projects and the shared `GeneFabricationResearch.IsUnlocked(GeneDef)` permission check. The physical fabricator, resource costs, gene selection and production jobs are not implemented yet; those must use this check when added. Research completion alone does not create genepacks.
+
+Pure unit tests cover the formula, configurable terms, minimum costs, overflow, monotonic increases and all combinations of foundation/category/archite gates. Optional installed-game API tests cover category membership, modded/uncategorized genes, mixed and pure archite prerequisites, stable IDs, actual research database registration, duplicate prevention and vanilla UI coordinate generation. The registration fixture bypasses vanilla DLC discovery in `PostLoad`; definition loading with real DLC and the displayed research tree still require an in-game check. Manually verify category descriptions and costs, the archite-only prerequisite, save/reload of category research, and changed costs after a restart.
 
 ### Settings and testing
 
@@ -178,4 +198,4 @@ Use a disposable save and short processing settings:
 4. Check Do X times and Do until X after both successful and failed batches.
 5. Load an existing colony with a refinery built before processor support, and confirm nearby processors can assist it.
 
-The next development focus is finishing the Gene Vat/raw biomass stage. Gene Fabricator implementation remains deferred.
+Raw and refined biomass production and their research progression are implemented. Gene fabrication research is implemented; the physical Gene Fabricator and gene production remain the next development phase.

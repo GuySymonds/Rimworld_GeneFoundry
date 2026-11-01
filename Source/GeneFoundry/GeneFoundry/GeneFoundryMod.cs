@@ -22,6 +22,11 @@ namespace GeneFoundry
         public int refinementDirtyPenalty = 15;
         public int refinementSterileReduction = 5;
         public int refinementExposurePenalty = 15;
+        public int geneFabricationResearchCost = 1500;
+        public int geneCategoryBaseCost = 500;
+        public int geneResearchPerGene = 100;
+        public int geneResearchPerComplexity = 200;
+        public int geneResearchPerArchite = 500;
 
         public void Validate()
         {
@@ -40,6 +45,11 @@ namespace GeneFoundry
             refinementDirtyPenalty = Math.Max(0, Math.Min(50, refinementDirtyPenalty));
             refinementSterileReduction = Math.Max(0, Math.Min(30, refinementSterileReduction));
             refinementExposurePenalty = Math.Max(0, Math.Min(50, refinementExposurePenalty));
+            geneFabricationResearchCost = Math.Max(100, Math.Min(10000, geneFabricationResearchCost));
+            geneCategoryBaseCost = Math.Max(0, Math.Min(5000, geneCategoryBaseCost));
+            geneResearchPerGene = Math.Max(0, Math.Min(1000, geneResearchPerGene));
+            geneResearchPerComplexity = Math.Max(0, Math.Min(2000, geneResearchPerComplexity));
+            geneResearchPerArchite = Math.Max(0, Math.Min(5000, geneResearchPerArchite));
         }
 
         public override void ExposeData()
@@ -61,6 +71,11 @@ namespace GeneFoundry
             Scribe_Values.Look(ref refinementDirtyPenalty, "refinementDirtyPenalty", 15);
             Scribe_Values.Look(ref refinementSterileReduction, "refinementSterileReduction", 5);
             Scribe_Values.Look(ref refinementExposurePenalty, "refinementExposurePenalty", 15);
+            Scribe_Values.Look(ref geneFabricationResearchCost, "geneFabricationResearchCost", 1500);
+            Scribe_Values.Look(ref geneCategoryBaseCost, "geneCategoryBaseCost", 500);
+            Scribe_Values.Look(ref geneResearchPerGene, "geneResearchPerGene", 100);
+            Scribe_Values.Look(ref geneResearchPerComplexity, "geneResearchPerComplexity", 200);
+            Scribe_Values.Look(ref geneResearchPerArchite, "geneResearchPerArchite", 500);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 Validate();
         }
@@ -187,6 +202,33 @@ namespace GeneFoundry
                 Settings.refinementSterileReduction = 5;
                 Settings.refinementExposurePenalty = 15;
             }
+            listing.GapLine();
+            listing.Label("Gene research — Fabrication and categories");
+            listing.Label("Research cost = category base + gene count × cost per gene + total complexity × cost per complexity + total archite value × cost per archite value. All loaded genes count, including modded genes. Each gene's negative complexity or archite value contributes zero.");
+            listing.Label("Restart RimWorld after changing these costs. Research points already earned remain unchanged; raising costs can require additional research, including for previously completed projects. Earlier biomass research costs are unaffected.");
+            Settings.geneFabricationResearchCost = ResearchCostSlider(listing,
+                "Gene fabrication foundation", Settings.geneFabricationResearchCost, 100, 10000, 100,
+                "Cost of the foundation project after Biomass refinement. Default: 1,500 points. Range: 100–10,000, in 100-point steps.");
+            Settings.geneCategoryBaseCost = ResearchCostSlider(listing,
+                "Base cost per gene category", Settings.geneCategoryBaseCost, 0, 5000, 50,
+                "Fixed cost added once per category. Default: 500 points. Range: 0–5,000, in 50-point steps. Final category cost is always at least 1 point.");
+            Settings.geneResearchPerGene = ResearchCostSlider(listing,
+                "Additional cost per gene", Settings.geneResearchPerGene, 0, 1000, 25,
+                "Added for every gene in the category, including zero-complexity cosmetic genes. Default: 100 points per gene. Range: 0–1,000, in 25-point steps.");
+            Settings.geneResearchPerComplexity = ResearchCostSlider(listing,
+                "Additional cost per complexity point", Settings.geneResearchPerComplexity, 0, 2000, 25,
+                "Multiplies the sum of non-negative gene complexity in the category, not the average. Default: 200 points per complexity. Range: 0–2,000, in 25-point steps.");
+            Settings.geneResearchPerArchite = ResearchCostSlider(listing,
+                "Additional cost per archite value", Settings.geneResearchPerArchite, 0, 5000, 50,
+                "Multiplies the sum of non-negative archite values in the category. Default: 500 points per archite value. Range: 0–5,000, in 50-point steps. Setting zero removes the surcharge but never removes the vanilla Archogenetics requirement.");
+            if (listing.ButtonText("Restore gene research defaults"))
+            {
+                Settings.geneFabricationResearchCost = 1500;
+                Settings.geneCategoryBaseCost = 500;
+                Settings.geneResearchPerGene = 100;
+                Settings.geneResearchPerComplexity = 200;
+                Settings.geneResearchPerArchite = 500;
+            }
             contentHeight = Math.Max(inRect.height, listing.CurHeight + 20f);
             listing.End();
             Widgets.EndScrollView();
@@ -204,6 +246,14 @@ namespace GeneFoundry
             value = Math.Max(minimum, Math.Min(maximum, value));
             float selected = listing.SliderLabeled(
                 $"{label}: {FormatDuration(value)}", value, minimum, maximum, 0.75f, tooltip);
+            return Math.Max(minimum, Math.Min(maximum, (int)Math.Round(selected / step) * step));
+        }
+
+        private static int ResearchCostSlider(Listing_Standard listing, string label,
+            int value, int minimum, int maximum, int step, string tooltip)
+        {
+            float selected = listing.SliderLabeled($"{label}: {value:N0} points",
+                value, minimum, maximum, 0.75f, tooltip);
             return Math.Max(minimum, Math.Min(maximum, (int)Math.Round(selected / step) * step));
         }
 
