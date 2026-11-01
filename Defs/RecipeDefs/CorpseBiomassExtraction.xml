@@ -11,7 +11,9 @@
   </SpecialThingFilterDef>
   <RecipeDef>
     <defName>GF_ExtractBiomassCorpse</defName>
-    <label>extract biomass from corpse</label>
+    <label>extract biomass from corpse (variable yield)</label>
+    <workerCounterClass>GeneFoundry.Recipes.RecipeWorkerCounter_CorpseBiomass</workerCounterClass>
+    <uiIconThing>GF_RawBiomass</uiIconThing>
     <description>Convert a whole organic corpse into raw biomass. Recovery is based on remaining biological material, with 25% additional biomass from organs, bones and hide. This bonus also applies to damaged bodies. Rotting corpses yield 50% and desiccated corpses 10% of fresh recovery, with a minimum of 1 raw biomass per eligible corpse. Processing work scales with remaining material; larger bodies benefit from batch efficiency. By default, 30% of work handles the body regardless of decay, while 70% scales with recovery. Rotting bodies therefore take 65% and desiccated bodies 37% of fresh processing time. Corpse timings can be changed under Raw Biomass in GeneFoundry's mod settings. Clothing and equipment are stripped before extraction; special butcher products such as horns and tusks are recovered using their body-part definitions. Installed artificial parts are removed first using medical work. Each recoverable item has one recovery attempt: success salvages it, failure destroys it. Recovery uses vanilla surgery factors and skill requirements but consumes no medicine and ignores cleanliness. The operator must meet the applicable surgery skill requirements. Artificial parts without a defined removal item are discarded. Animal corpses are selected by default; other organic corpses require enabling them in the ingredient filter.</description>
     <jobString>Extracting biomass from a corpse.</jobString>
     <skillRequirements>
@@ -31,6 +33,10 @@
           <categories>
             <li>Corpses</li>
           </categories>
+          <disallowedCategories>
+            <li>CorpsesMechanoid</li>
+            <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
+          </disallowedCategories>
         </filter>
         <count>1</count>
       </li>
@@ -39,6 +45,10 @@
       <categories>
         <li>Corpses</li>
       </categories>
+      <disallowedCategories>
+        <li>CorpsesMechanoid</li>
+        <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
+      </disallowedCategories>
       <specialFiltersToDisallow>
         <li>GF_AllowUnsafeBiomassCorpses</li>
       </specialFiltersToDisallow>
@@ -55,9 +65,77 @@
     <forceHiddenSpecialFilters>
       <li>GF_AllowUnsafeBiomassCorpses</li>
     </forceHiddenSpecialFilters>
-    <!-- Used for vanilla Do until X output counting; the custom job calculates actual yield. -->
-    <products>
-      <GF_RawBiomass>1</GF_RawBiomass>
-    </products>
+    <!-- Variable output uses the custom counter, not a misleading fixed product quantity. -->
+  </RecipeDef>
+  <RecipeDef>
+    <defName>GF_ExtractBiomassCorpseEnzymatic</defName>
+    <label>extract corpse biomass (enzymatic, variable yield)</label>
+    <description>Process an organic corpse with herbal enzymes for 50% more biomass than basic corpse extraction, before final rounding. Requires 1 herbal medicine per 50 units of body material, rounded up with a minimum of 1. The ingredient listing shows the minimum catalyst amount; the actual cost scales with the selected corpse and does not decrease with decay. Fresh, rotting and desiccated corpses are allowed, with their normal decay yield and timing modifiers. Expert yield applies after the enzyme bonus. Clothing is stripped and installed artificial parts are handled before extraction. Enzymes do not multiply horns, tusks or recovered implants. Catalyst is gathered before work and consumed only when extraction completes. Mechanoid, drone and non-organic corpses cannot be processed. Actual yield depends on remaining body material, decay and operator skills; it is never a fixed one-item product.</description>
+    <workerCounterClass>GeneFoundry.Recipes.RecipeWorkerCounter_CorpseBiomass</workerCounterClass>
+    <uiIconThing>GF_RawBiomass</uiIconThing>
+    <jobString>Extracting corpse biomass using enzymes.</jobString>
+    <skillRequirements>
+      <Cooking>3</Cooking>
+      <Medicine>3</Medicine>
+      <Intellectual>2</Intellectual>
+    </skillRequirements>
+    <workAmount>1000</workAmount>
+    <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
+    <workSkill>Cooking</workSkill>
+    <workSkillLearnFactor>0</workSkillLearnFactor>
+    <requiredGiverWorkType>Cooking</requiredGiverWorkType>
+    <interruptIfIngredientIsRotting>false</interruptIfIngredientIsRotting>
+    <ingredients>
+      <li>
+        <filter>
+          <categories>
+            <li>Corpses</li>
+          </categories>
+          <disallowedCategories>
+            <li>CorpsesMechanoid</li>
+            <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
+          </disallowedCategories>
+        </filter>
+        <count>1</count>
+      </li>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>MedicineHerbal</li>
+          </thingDefs>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <categories>
+        <li>Corpses</li>
+      </categories>
+      <thingDefs>
+        <li>MedicineHerbal</li>
+      </thingDefs>
+      <disallowedCategories>
+        <li>CorpsesMechanoid</li>
+        <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
+      </disallowedCategories>
+      <specialFiltersToDisallow>
+        <li>GF_AllowUnsafeBiomassCorpses</li>
+      </specialFiltersToDisallow>
+    </fixedIngredientFilter>
+    <defaultIngredientFilter>
+      <categories>
+        <li>CorpsesAnimal</li>
+      </categories>
+      <thingDefs>
+        <li>MedicineHerbal</li>
+      </thingDefs>
+      <specialFiltersToAllow>
+        <li>AllowFresh</li>
+        <li>AllowRotten</li>
+      </specialFiltersToAllow>
+    </defaultIngredientFilter>
+    <forceHiddenSpecialFilters>
+      <li>GF_AllowUnsafeBiomassCorpses</li>
+    </forceHiddenSpecialFilters>
   </RecipeDef>
 </Defs>

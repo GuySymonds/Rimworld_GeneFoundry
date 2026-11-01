@@ -6,16 +6,22 @@ using Verse.AI;
 
 namespace GeneFoundry.Jobs
 {
-    public class JobDriver_ExtractCorpseBiomass : JobDriver
+    public class JobDriver_ExtractCorpseBiomass : JobDriver_DoBill
     {
         private int processingTicks;
         private int recoveryTicks;
         private Hediff recoveryPart;
-        private Corpse Corpse => job.GetTarget(TargetIndex.B).Thing as Corpse;
+        private Corpse sourceCorpse;
+        private int requiredCatalyst;
+        private bool Enzymatic => job.bill?.recipe?.defName == "GF_ExtractBiomassCorpseEnzymatic";
+        private Corpse Corpse => sourceCorpse ?? job.GetTarget(TargetIndex.B).Thing as Corpse;
 
         public override string GetReport()
         {
-            return recoveryPart == null ? base.GetReport() : $"recovering {recoveryPart.Label}.";
+            if (recoveryPart != null)
+                return $"recovering {recoveryPart.Label}.";
+            string report = base.GetReport();
+            return Enzymatic && requiredCatalyst > 0 ? $"{report} Catalyst: {requiredCatalyst} herbal medicine." : report;
         }
 
         public override void ExposeData()
@@ -24,37 +30,39 @@ namespace GeneFoundry.Jobs
             Scribe_Values.Look(ref processingTicks, "gfCorpseProcessingTicks", 0);
             Scribe_Values.Look(ref recoveryTicks, "gfRecoveryTicks", 0);
             Scribe_References.Look(ref recoveryPart, "gfRecoveryPart");
+            Scribe_References.Look(ref sourceCorpse, "gfSourceCorpse");
+            Scribe_Values.Look(ref requiredCatalyst, "gfRequiredCatalyst", 0);
         }
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed) &&
-                pawn.Reserve(job.targetB, job, 1, -1, null, errorOnFailed);
+            return base.TryMakePreToilReservations(errorOnFailed);
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOnDestroyedOrNull(TargetIndex.A);
-            this.FailOnDestroyedOrNull(TargetIndex.B);
             this.FailOnBurningImmobile(TargetIndex.A);
             this.FailOn(() => job.bill == null || job.bill.DeletedOrDereferenced ||
-                !job.bill.ShouldDoNow() || !CorpseBiomassUtility.CanProcess(Corpse) ||
+                !job.bill.ShouldDoNow() || Corpse == null || Corpse.Destroyed || !CorpseBiomassUtility.CanProcess(Corpse) ||
                 !job.bill.recipe.PawnSatisfiesSkillRequirements(pawn) ||
                 !ArtificialPartRecovery.CanRecoverAll(pawn, Corpse.InnerPawn) ||
                 !(job.targetA.Thing is Building_WorkTable table) || !table.UsableForBillsAfterFueling());
 
-            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
-            yield return Toils_Haul.StartCarryThing(TargetIndex.B);
+            yield return Toils_General.Do(() =>
+            {
+                if (sourceCorpse == null)
+                    sourceCorpse = Corpse;
+                if (Enzymatic && requiredCatalyst == 0)
+                    requiredCatalyst = BiomassCalculations.EnzymaticCatalystCount(
+                        CorpseBiomassUtility.RecoverableMeat(Corpse));
+            });
+            foreach (Toil collect in CollectIngredientsToils(TargetIndex.B, TargetIndex.A, TargetIndex.C))
+                yield return collect;
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
 
             yield return Toils_General.Do(() =>
             {
-                if (!pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out Thing dropped) ||
-                    dropped != Corpse)
-                {
-                    EndJobWith(JobCondition.Incompletable);
-                    return;
-                }
                 // Vanilla stripping preserves the actual items, their condition and taint.
                 Corpse.Strip(false);
             });
@@ -103,10 +111,16 @@ namespace GeneFoundry.Jobs
 
             yield return Toils_General.Do(() =>
             {
+                if (Enzymatic && !TryConsumeCatalyst())
+                {
+                    EndJobWith(JobCondition.Incompletable);
+                    return;
+                }
                 Corpse corpse = Corpse;
                 Pawn source = corpse.InnerPawn;
                 int amount = CorpseBiomassUtility.Yield(
-                    CorpseBiomassUtility.RecoverableMeat(corpse), corpse.GetRotStage(), GeneVatSkills.YieldMultiplier(pawn));
+                    CorpseBiomassUtility.RecoverableMeat(corpse), corpse.GetRotStage(),
+                    GeneVatSkills.YieldMultiplier(pawn), Enzymatic);
                 ThingDef biomassDef = DefDatabase<ThingDef>.GetNamed("GF_RawBiomass");
 
                 // Vanilla body-part definitions determine horns, tusks and modded products.
@@ -130,6 +144,38 @@ namespace GeneFoundry.Jobs
                 job.bill.Notify_IterationCompleted(pawn, new List<Thing> { corpse });
                 corpse.Destroy(DestroyMode.Vanish);
             });
+        }
+
+        private bool TryConsumeCatalyst()
+        {
+            // Use only this job's delivered quantities, even if they merged into
+            // existing stacks. Validate the full cost before consuming anything.
+            var delivered = new Dictionary<Thing, int>();
+            foreach (ThingCountClass entry in job.placedThings ?? new List<ThingCountClass>())
+            {
+                Thing herb = entry.thing;
+                if (herb == null || herb.Destroyed || !herb.Spawned || herb.Map != pawn.Map ||
+                    herb.def != ThingDefOf.MedicineHerbal)
+                    continue;
+                delivered.TryGetValue(herb, out int count);
+                delivered[herb] = count + entry.Count;
+            }
+            int available = 0;
+            foreach (var entry in delivered)
+                available += System.Math.Min(entry.Value, entry.Key.stackCount);
+            if (available < requiredCatalyst)
+                return false;
+            int remaining = requiredCatalyst;
+            foreach (var entry in delivered)
+            {
+                int take = System.Math.Min(remaining, System.Math.Min(entry.Value, entry.Key.stackCount));
+                if (take > 0)
+                    entry.Key.SplitOff(take).Destroy(DestroyMode.Vanish);
+                remaining -= take;
+                if (remaining == 0)
+                    break;
+            }
+            return true;
         }
     }
 }

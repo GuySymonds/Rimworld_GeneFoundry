@@ -8,10 +8,11 @@ namespace GeneFoundry.Recipes
     {
         public static bool CanProcess(Corpse corpse)
         {
-            if (corpse == null || corpse.InnerPawn == null || !corpse.InnerPawn.RaceProps.IsFlesh)
+            if (corpse == null || corpse.InnerPawn == null)
                 return false;
-
-            return true;
+            RaceProperties race = corpse.InnerPawn.RaceProps;
+            return BiomassCalculations.IsOrganicCorpse(race.IsFlesh && race.FleshType.isOrganic,
+                race.IsMechanoid, race.IsDrone);
         }
 
         public static float RecoverableMeat(Corpse corpse)
@@ -21,10 +22,10 @@ namespace GeneFoundry.Recipes
             return Math.Max(0f, corpse.InnerPawn.GetStatValue(StatDefOf.MeatAmount, false));
         }
 
-        public static int Yield(float meatAmount, RotStage stage, float expertMultiplier = 1f)
+        public static int Yield(float meatAmount, RotStage stage, float expertMultiplier = 1f, bool enzymatic = false)
         {
             // Include remaining organs, bones and hide, even when limbs are missing.
-            return BiomassCalculations.CorpseYield(meatAmount, DecayMultiplier(stage), expertMultiplier);
+            return BiomassCalculations.CorpseYield(meatAmount, DecayMultiplier(stage), expertMultiplier, enzymatic);
         }
 
         public static float DecayMultiplier(RotStage stage)

@@ -5,6 +5,15 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public static int EnzymaticCatalystCount(float material)
+        {
+            return Math.Max(1, (int)Math.Ceiling(Math.Max(0f, material) / 50d));
+        }
+
+        public static bool IsOrganicCorpse(bool flesh, bool mechanoid, bool drone)
+        {
+            return flesh && !mechanoid && !drone;
+        }
         public static float RefinementCleanlinessAdjustment(double cleanliness, bool exposed,
             bool enabled = true, int dirtyPenaltyPoints = 15, int sterileReductionPoints = 5,
             int exposurePenaltyPoints = 15)
@@ -122,9 +131,11 @@ namespace GeneFoundry.Recipes
             return environmentFactor / Math.Max(0.01f, cleanlinessFactor);
         }
 
-        public static int CorpseYield(float material, float decayMultiplier, float expertMultiplier = 1f)
+        public static int CorpseYield(float material, float decayMultiplier, float expertMultiplier = 1f,
+            bool enzymatic = false)
         {
-            return Math.Max(1, (int)Math.Floor(Math.Max(0f, material) * 0.625d * decayMultiplier * expertMultiplier));
+            return Math.Max(1, (int)Math.Floor(Math.Max(0f, material) * 0.625d * decayMultiplier *
+                (enzymatic ? 1.5d : 1d) * expertMultiplier));
         }
 
         public static int CorpseWorkTicks(float material, float workSpeed, float decayMultiplier,

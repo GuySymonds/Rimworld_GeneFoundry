@@ -2,6 +2,8 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using GeneFoundry.Recipes;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GeneFoundry.WorkGivers
 {
@@ -13,25 +15,52 @@ namespace GeneFoundry.WorkGivers
             if (vanillaJob == null || vanillaJob.def != JobDefOf.DoBill)
                 return vanillaJob;
 
-            if (vanillaJob.bill?.recipe?.defName != "GF_ExtractBiomassCorpse")
+            string recipe = vanillaJob.bill?.recipe?.defName;
+            bool enzymaticCorpse = recipe == "GF_ExtractBiomassCorpseEnzymatic";
+            if (recipe != "GF_ExtractBiomassCorpse" && !enzymaticCorpse)
             {
                 if (vanillaJob.bill?.recipe?.workSpeedStat?.defName == "GF_BiomassExtractionSpeed")
                     vanillaJob.def = DefDatabase<JobDef>.GetNamed("GF_ExtractMaterialBiomass");
                 return vanillaJob;
             }
 
-            if (vanillaJob.targetQueueB == null || vanillaJob.targetQueueB.Count != 1)
+            if (vanillaJob.targetQueueB == null)
                 return null;
-            Corpse corpse = vanillaJob.targetQueueB[0].Thing as Corpse;
+            Corpse corpse = vanillaJob.targetQueueB.Select(target => target.Thing).OfType<Corpse>().SingleOrDefault();
             if (!CorpseBiomassUtility.CanProcess(corpse) ||
                 !ArtificialPartRecovery.CanRecoverAll(pawn, corpse.InnerPawn))
                 return null;
 
-            Job result = JobMaker.MakeJob(
-                DefDatabase<JobDef>.GetNamed("GF_ExtractCorpseBiomass"), thing, corpse);
-            result.count = 1;
-            result.bill = vanillaJob.bill;
-            return result;
+            if (enzymaticCorpse)
+            {
+                int remaining = BiomassCalculations.EnzymaticCatalystCount(CorpseBiomassUtility.RecoverableMeat(corpse));
+                var targets = new List<LocalTargetInfo> { corpse };
+                var counts = new List<int> { 1 };
+                foreach (Thing herb in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.MedicineHerbal)
+                    .OrderBy(herb => herb.Position.DistanceToSquared(thing.Position)))
+                {
+                    if (herb.IsForbidden(pawn) || !vanillaJob.bill.ingredientFilter.Allows(herb) ||
+                        herb.Position.DistanceTo(thing.Position) > vanillaJob.bill.ingredientSearchRadius ||
+                        !pawn.CanReserveAndReach(herb, PathEndMode.ClosestTouch, Danger.Some))
+                        continue;
+                    int take = System.Math.Min(remaining, herb.stackCount);
+                    targets.Add(herb);
+                    counts.Add(take);
+                    remaining -= take;
+                    if (remaining == 0)
+                        break;
+                }
+                if (remaining > 0)
+                {
+                    JobFailReason.Is("Not enough accessible herbal medicine for this corpse's material quantity.");
+                    return null;
+                }
+                vanillaJob.targetQueueB = targets;
+                vanillaJob.countQueue = counts;
+            }
+            vanillaJob.def = DefDatabase<JobDef>.GetNamed("GF_ExtractCorpseBiomass");
+            vanillaJob.targetB = corpse;
+            return vanillaJob;
         }
     }
 }
