@@ -21,7 +21,8 @@ namespace GeneFoundry.Research
         // Called during definition resolution, before short hashes and research UI caches are built.
         public static List<GeneCategoryResearchProjectDef> CreateProjects(IEnumerable<GeneDef> genes,
             ResearchProjectDef fabrication, ResearchTabDef tab, ResearchProjectDef archogenetics,
-            int baseCost, int perGene, int perComplexity, int perArchite)
+            int baseCost, int perGene, int perComplexity, int perArchite,
+            int costPercent = 25, int maximumCost = 4000)
         {
             var result = new List<GeneCategoryResearchProjectDef>();
             var groups = genes.Where(gene => gene != null).Distinct().GroupBy(gene => gene.displayCategory)
@@ -32,7 +33,7 @@ namespace GeneFoundry.Research
                 long complexity = members.Sum(gene => (long)Math.Max(0, gene.biostatCpx));
                 long archite = members.Sum(gene => (long)Math.Max(0, gene.biostatArc));
                 int cost = GeneResearchCalculations.CategoryCost(members.Count, complexity, archite,
-                    baseCost, perGene, perComplexity, perArchite);
+                    baseCost, perGene, perComplexity, perArchite, costPercent, maximumCost);
                 string category = group.Key?.label ?? group.Key?.defName ?? "uncategorized";
                 var prerequisites = new List<ResearchProjectDef> { fabrication };
                 if (members.All(gene => gene.biostatArc > 0))
@@ -44,7 +45,7 @@ namespace GeneFoundry.Research
                     label = category + " gene fabrication",
                     description = $"Unlock fabrication of all {members.Count} genes in {category}. " +
                         $"Total complexity: {complexity}. Total archite value: {archite}.\n\n" +
-                        $"Research cost: {baseCost} + {members.Count} × {perGene} + {complexity} × {perComplexity} + {archite} × {perArchite} = {cost}. " +
+                        $"Research cost: ({baseCost} + {members.Count} × {perGene} + {complexity} × {perComplexity} + {archite} × {perArchite}) × {costPercent}%, rounded up and capped at {maximumCost} points = {cost}. " +
                         "Costs are configured in GeneFoundry's Gene research settings and apply after restarting RimWorld.\n\n" +
                         "Genes with an archite cost also require vanilla Archogenetics, even after this category is complete. " +
                         "Categories containing only archite genes require Archogenetics before research can begin.\n\nGenes:\n" +

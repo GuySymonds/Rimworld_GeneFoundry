@@ -23,7 +23,8 @@ namespace GeneFoundry.Research
             fabricationResearch.baseCost = settings.geneFabricationResearchCost;
             var projects = GeneFabricationResearch.CreateProjects(DefDatabase<GeneDef>.AllDefsListForReading,
                 fabricationResearch, researchTab, architeResearch, settings.geneCategoryBaseCost,
-                settings.geneResearchPerGene, settings.geneResearchPerComplexity, settings.geneResearchPerArchite);
+                settings.geneResearchPerGene, settings.geneResearchPerComplexity, settings.geneResearchPerArchite,
+                settings.geneCategoryCostPercent, settings.geneCategoryMaximumCost);
             GeneFabricationResearch.RegisterProjects(projects);
         }
     }

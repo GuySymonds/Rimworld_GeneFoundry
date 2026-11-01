@@ -7,13 +7,14 @@ namespace GeneFoundry.Tests
     public class GeneResearchCalculationsTests
     {
         [Theory]
-        [InlineData(5, 0, 0, 1000)]
-        [InlineData(5, 10, 0, 3000)]
-        [InlineData(10, 20, 0, 5500)]
-        [InlineData(5, 10, 3, 4500)]
-        [InlineData(1, 0, 1, 1100)]
-        [InlineData(0, 0, 0, 500)]
-        [InlineData(-10, -20, -30, 500)]
+        [InlineData(5, 0, 0, 250)]
+        [InlineData(5, 10, 0, 750)]
+        [InlineData(10, 20, 0, 1375)]
+        [InlineData(5, 10, 3, 1125)]
+        [InlineData(1, 0, 1, 275)]
+        [InlineData(0, 0, 0, 125)]
+        [InlineData(-10, -20, -30, 125)]
+        [InlineData(21, 21, 0, 1700)]
         public void DefaultCostCombinesQuantityComplexityAndArchite(int count, long complexity,
             long archite, int expected)
         {
@@ -24,7 +25,7 @@ namespace GeneFoundry.Tests
         public void EveryCostTermCanBeConfiguredIndependently()
         {
             Assert.Equal(10 + 3 * 20 + 5 * 30 + 2 * 40,
-                GeneResearchCalculations.CategoryCost(3, 5, 2, 10, 20, 30, 40));
+                GeneResearchCalculations.CategoryCost(3, 5, 2, 10, 20, 30, 40, 100));
             Assert.Equal(1, GeneResearchCalculations.CategoryCost(50, 100, 20, 0, 0, 0, 0));
             Assert.Equal(1, GeneResearchCalculations.CategoryCost(50, 100, 20, -1, -2, -3, -4));
         }
@@ -32,17 +33,37 @@ namespace GeneFoundry.Tests
         [Fact]
         public void LargeModListsCannotOverflowIntoCheapResearch()
         {
-            Assert.Equal(int.MaxValue, GeneResearchCalculations.CategoryCost(
+            Assert.Equal(4000, GeneResearchCalculations.CategoryCost(
                 int.MaxValue, long.MaxValue, long.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue));
+            Assert.Equal(int.MaxValue, GeneResearchCalculations.CategoryCost(
+                int.MaxValue, long.MaxValue, long.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue,
+                int.MaxValue, int.MaxValue));
         }
 
         [Fact]
-        public void AddingGenesComplexityOrArchiteAlwaysIncreasesDefaultCost()
+        public void AddingGenesComplexityOrArchiteIncreasesCostBelowTheCap()
         {
             int baseline = GeneResearchCalculations.CategoryCost(5, 10, 3);
-            Assert.Equal(baseline + 100, GeneResearchCalculations.CategoryCost(6, 10, 3));
-            Assert.Equal(baseline + 200, GeneResearchCalculations.CategoryCost(5, 11, 3));
-            Assert.Equal(baseline + 500, GeneResearchCalculations.CategoryCost(5, 10, 4));
+            Assert.Equal(baseline + 25, GeneResearchCalculations.CategoryCost(6, 10, 3));
+            Assert.Equal(baseline + 50, GeneResearchCalculations.CategoryCost(5, 11, 3));
+            Assert.Equal(baseline + 125, GeneResearchCalculations.CategoryCost(5, 10, 4));
+        }
+
+        [Theory]
+        [InlineData(15999, 25, 4000, 4000)]
+        [InlineData(16000, 25, 4000, 4000)]
+        [InlineData(16001, 25, 4000, 4000)]
+        [InlineData(19700, 25, 4000, 4000)]
+        [InlineData(19700, 25, 6000, 4925)]
+        [InlineData(6800, 50, 4000, 3400)]
+        [InlineData(6800, 100, 10000, 6800)]
+        [InlineData(1, 1, 4000, 1)]
+        [InlineData(100, 0, 4000, 1)]
+        [InlineData(100, 100, 0, 1)]
+        public void PercentageRoundingAndMaximumApplyInOrder(int raw, int percent, int maximum, int expected)
+        {
+            Assert.Equal(expected, GeneResearchCalculations.CategoryCost(0, 0, 0,
+                raw, 0, 0, 0, percent, maximum));
         }
 
         public static IEnumerable<object[]> UnlockCases()

@@ -27,6 +27,8 @@ namespace GeneFoundry
         public int geneResearchPerGene = 100;
         public int geneResearchPerComplexity = 200;
         public int geneResearchPerArchite = 500;
+        public int geneCategoryCostPercent = 25;
+        public int geneCategoryMaximumCost = 4000;
 
         public void Validate()
         {
@@ -50,6 +52,8 @@ namespace GeneFoundry
             geneResearchPerGene = Math.Max(0, Math.Min(1000, geneResearchPerGene));
             geneResearchPerComplexity = Math.Max(0, Math.Min(2000, geneResearchPerComplexity));
             geneResearchPerArchite = Math.Max(0, Math.Min(5000, geneResearchPerArchite));
+            geneCategoryCostPercent = Math.Max(1, Math.Min(200, geneCategoryCostPercent));
+            geneCategoryMaximumCost = Math.Max(100, Math.Min(10000, geneCategoryMaximumCost));
         }
 
         public override void ExposeData()
@@ -76,6 +80,8 @@ namespace GeneFoundry
             Scribe_Values.Look(ref geneResearchPerGene, "geneResearchPerGene", 100);
             Scribe_Values.Look(ref geneResearchPerComplexity, "geneResearchPerComplexity", 200);
             Scribe_Values.Look(ref geneResearchPerArchite, "geneResearchPerArchite", 500);
+            Scribe_Values.Look(ref geneCategoryCostPercent, "geneCategoryCostPercent", 25);
+            Scribe_Values.Look(ref geneCategoryMaximumCost, "geneCategoryMaximumCost", 4000);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 Validate();
         }
@@ -204,7 +210,14 @@ namespace GeneFoundry
             }
             listing.GapLine();
             listing.Label("Gene research — Fabrication and categories");
-            listing.Label("Research cost = category base + gene count × cost per gene + total complexity × cost per complexity + total archite value × cost per archite value. All loaded genes count, including modded genes. Each gene's negative complexity or archite value contributes zero.");
+            listing.Label("Category costs combine the base, gene count, complexity and archite terms below, then apply the category cost percentage and maximum. Round up to whole points, with at least 1 point. All loaded genes count; negative complexity or archite values contribute zero.");
+            Settings.geneCategoryCostPercent = (int)Math.Round(listing.SliderLabeled(
+                $"Category research cost percentage: {Settings.geneCategoryCostPercent}%",
+                Settings.geneCategoryCostPercent, 1, 200, 0.75f,
+                "Scales the entire category calculation before the maximum is applied. Default: 25%, one quarter of the original costs. 100% restores the original scale. Range: 1–200%. Does not change the fabrication foundation or remove Archogenetics requirements."));
+            Settings.geneCategoryMaximumCost = ResearchCostSlider(listing,
+                "Maximum research cost per category", Settings.geneCategoryMaximumCost, 100, 10000, 100,
+                "Hard limit applied after the category percentage and rounding. Default: 4,000 points. Range: 100–10,000 in 100-point steps. Large categories can reach the same maximum; gene count and complexity still distinguish categories below it. Does not cap the fabrication foundation.");
             listing.Label("Restart RimWorld after changing these costs. Research points already earned remain unchanged; raising costs can require additional research, including for previously completed projects. Earlier biomass research costs are unaffected.");
             Settings.geneFabricationResearchCost = ResearchCostSlider(listing,
                 "Gene fabrication foundation", Settings.geneFabricationResearchCost, 100, 10000, 100,
@@ -228,6 +241,8 @@ namespace GeneFoundry
                 Settings.geneResearchPerGene = 100;
                 Settings.geneResearchPerComplexity = 200;
                 Settings.geneResearchPerArchite = 500;
+                Settings.geneCategoryCostPercent = 25;
+                Settings.geneCategoryMaximumCost = 4000;
             }
             contentHeight = Math.Max(inRect.height, listing.CurHeight + 20f);
             listing.End();
