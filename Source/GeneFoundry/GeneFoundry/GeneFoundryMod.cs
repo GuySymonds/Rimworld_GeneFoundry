@@ -16,6 +16,8 @@ namespace GeneFoundry
         public int corpseHandlingPercent = 30;
         public int expertSpeedPercent = 200;
         public int expertYieldPercent = 20;
+        public int refinedExpertSpeedPercent = 200;
+        public int refinedExpertYieldPercent = 20;
 
         public void Validate()
         {
@@ -29,6 +31,8 @@ namespace GeneFoundry
             corpseHandlingPercent = Math.Max(0, Math.Min(100, corpseHandlingPercent));
             expertSpeedPercent = Math.Max(150, Math.Min(300, expertSpeedPercent));
             expertYieldPercent = Math.Max(0, Math.Min(50, expertYieldPercent));
+            refinedExpertSpeedPercent = Math.Max(150, Math.Min(300, refinedExpertSpeedPercent));
+            refinedExpertYieldPercent = Math.Max(0, Math.Min(50, refinedExpertYieldPercent));
         }
 
         public override void ExposeData()
@@ -44,6 +48,8 @@ namespace GeneFoundry
             Scribe_Values.Look(ref corpseHandlingPercent, "corpseHandlingPercent", 30);
             Scribe_Values.Look(ref expertSpeedPercent, "expertSpeedPercent", 200);
             Scribe_Values.Look(ref expertYieldPercent, "expertYieldPercent", 20);
+            Scribe_Values.Look(ref refinedExpertSpeedPercent, "refinedExpertSpeedPercent", 200);
+            Scribe_Values.Look(ref refinedExpertYieldPercent, "refinedExpertYieldPercent", 20);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 Validate();
         }
@@ -113,8 +119,17 @@ namespace GeneFoundry
                 "Preparation: minimum-skilled operator", Settings.preparationMinutes, 1, 120, 1,
                 "Time spent preparing a batch at Intellectual 5, Crafting 3 and Medicine 2. Range: 1–120 minutes.");
             Settings.minimumPreparationMinutes = DurationSlider(listing,
-                "Preparation: fully skilled operator", Settings.minimumPreparationMinutes, 1, Settings.preparationMinutes, 1,
-                "Shortest preparation time, reached at Intellectual 10, Crafting 8 and Medicine 6. Higher skills give no further benefit. Cannot exceed the minimum-skilled preparation time.");
+                "Preparation at Intellectual 10 / Crafting 8 / Medicine 6", Settings.minimumPreparationMinutes, 1, Settings.preparationMinutes, 1,
+                "Preparation time at the zero-failure skill thresholds, before expert speed gains. Higher skills can shorten preparation further. Cannot exceed the minimum-skilled preparation time.");
+            Settings.refinedExpertSpeedPercent = (int)Math.Round(listing.SliderLabeled(
+                $"Extra preparation speed at level 20: +{(Settings.refinedExpertSpeedPercent / 150f - 1f) * 100f:0.#}%",
+                Settings.refinedExpertSpeedPercent, 150, 300, 0.75f,
+                "Additional preparation speed above Intellectual 10, Crafting 8 and Medicine 6, reaching its maximum when all three skills reach 20. Weights: 60%, 25%, 15%. Default: +33.3% speed, making a 30-minute preparation take 22.5 minutes. Range: +0–100% speed; +0 disables this bonus. Automated processing remains controlled by gene processors."));
+            Settings.refinedExpertYieldPercent = (int)Math.Round(listing.SliderLabeled(
+                $"Maximum extra refined biomass at level 20: +{Settings.refinedExpertYieldPercent}%",
+                Settings.refinedExpertYieldPercent, 0, 50, 0.75f,
+                "Yield bonus earned above Intellectual 10, Crafting 8 and Medicine 6, independently weighted 60%, 25%, 15%, capped at skill 20. Default: +20%. With a base output of 2 this gives 2 guaranteed items plus a 40% chance of a third on success. Captured when processing starts. Range: 0–50%; 0 disables expert yield."));
+            listing.Label($"At level 20, preparation takes {Settings.minimumPreparationMinutes * 150d / Settings.refinedExpertSpeedPercent:0.#} minutes with these settings. Fractional refined biomass becomes a chance of one extra item.");
             Settings.processingMinutes = DurationSlider(listing,
                 "Processing: no gene processors", Settings.processingMinutes, 5, 1440, 5,
                 "Automated processing time without processor assistance. Range: 5 minutes–24 hours, in 5-minute steps.");
@@ -127,13 +142,15 @@ namespace GeneFoundry
                 "Each available processor removes this percentage of the unassisted duration. Reductions add together until the shortest allowed time is reached. 0% disables assistance. Range: 0–25% in 1% steps."));
             listing.Label("Processing settings affect running batches. Preparation settings apply to new preparation jobs.");
             listing.Label("Active gene assemblers have priority. Each powered processor assists at most one refinery.");
-            if (listing.ButtonText("Restore refined biomass timing defaults"))
+            if (listing.ButtonText("Restore refined biomass defaults"))
             {
                 Settings.preparationMinutes = 60;
                 Settings.minimumPreparationMinutes = 30;
                 Settings.processingMinutes = 720;
                 Settings.minimumProcessingMinutes = 360;
                 Settings.processorReductionPercent = 5;
+                Settings.refinedExpertSpeedPercent = 200;
+                Settings.refinedExpertYieldPercent = 20;
             }
             contentHeight = Math.Max(inRect.height, listing.CurHeight + 20f);
             listing.End();

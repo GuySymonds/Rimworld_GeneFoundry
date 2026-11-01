@@ -77,23 +77,26 @@ Before v1, development prioritises current behavior over compatibility with olde
 
 ## Biomass refinery
 
-Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finishes. A successful batch produces **2 refined biomass**. Failed batches produce nothing and do not refund inputs.
+Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finishes. A successful batch produces a base yield of **2 refined biomass**, with expert recovery described below. Failed batches produce nothing and do not refund inputs.
 
 - Build hoppers along any side of a completed refinery with their outlets facing it. Diagonal hoppers do not connect. Keep the interaction cell clear. Multiple hoppers combine their stored biomass without speeding production.
 - Assign an operator to Research work and add a refinement bill. The operator collects neutroamine, prepares the batch and then leaves automated processing to the machine.
-- Minimum skills are Intellectual 5, Crafting 3 and Medicine 2. Benefits cap at 10, 8 and 6 respectively. Their weights are 60%, 25% and 15%.
-- At default settings, preparation scales linearly from 60 to 30 in-game minutes. Failure probability scales from 30% to 0%. The failure probability is captured when processing starts.
+- Minimum skills are Intellectual 5, Crafting 3 and Medicine 2. Failure risk reaches zero at 10, 8 and 6 respectively. Their weights are 60%, 25% and 15%.
+- At default settings, preparation scales from 60 minutes at minimum skills to 30 minutes at the zero-failure thresholds, then to about 22.5 minutes at 20/20/20. Above each threshold, that skill contributes independently toward the expert reward, capped at 20. The same relative 150%-to-200% speed progression as raw extraction gives up to 33.3% extra preparation speed, or 25% shorter preparation compared with 10/8/6. Failure probability remains zero above the thresholds.
+- Expert yield reaches +20% at 20/20/20 by default: a successful batch produces 2 items plus a 40% chance of one extra, for an average of 2.4. Fractional yield uses chance-based whole-item rounding instead of guaranteeing 3 items and inflating the intended bonus. Expected output and failure risk are captured when processing starts. Both the success/failure roll and whole-item yield result are retained if output placement needs retrying. Expert skills do not shorten automated processing.
 - Preparation awards 0.1 total base XP per tick, split across the three skills using the same weights. Vanilla passion and learning modifiers apply. Interrupted preparation retains earned XP; hauling and automated processing award none.
 - Default processing takes 12 in-game hours. Each available gene processor removes 5% of the base duration; ten reach the six-hour minimum. Reductions add together rather than compound.
 - Powered processors must satisfy vanilla facility range and line-of-sight checks. An assembler with an active job takes priority even between operator work sessions. Otherwise, each processor assists the nearest active, powered refinery that can still benefit; ties use building ID. Assistance updates every 60 game ticks.
 - Changing assistance adjusts future processing speed while preserving completed progress. Extra processors beyond a refinery's useful limit remain available to other refineries.
 - Idle power is 100 W; processing power is 1,500 W. Power loss pauses processing. A continuous 5,000-tick outage (two in-game hours) destroys the batch; restoring power resets the timer.
 - **Do X times** counts attempts when processing starts. **Do until X** uses vanilla output-count rules and continues requesting batches until its target is reached.
-- Successful completion rolls only once, including when output placement must be retried. Preparation duration, batch progress, failure probability, completion-roll state and outage time are saved.
+- Successful completion rolls only once, including when output placement must be retried. Preparation duration, batch progress, failure probability, expected yield, chosen output count, completion-roll state and outage time are saved.
 
 ### Settings and testing
 
 Open **Options → Mod Settings → GeneFoundry** to change preparation durations (1–120 minutes), processing durations (5 minutes–24 hours) and processor reduction (0–25%). Minimum durations cannot exceed base durations. Processing changes affect running batches; preparation changes apply to new preparation jobs. Settings are shared across saves. Restore defaults after accelerated testing if desired.
+
+The Refined Biomass section also has independent expert controls: extra preparation speed at level 20 (+0–100%, default +33.3%) and extra output at level 20 (+0–50%, default +20%). Set either to zero to disable that reward. The preparation-time slider for 10/8/6 specifies the pre-expert duration, rather than an absolute minimum. The view previews the resulting level-20 preparation time. Yield settings affect newly started batches; running batches retain their captured expected output. Refined defaults can be restored without changing raw extraction settings.
 
 The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and starts a zero-risk batch.
 

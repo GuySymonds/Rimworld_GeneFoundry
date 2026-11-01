@@ -5,6 +5,53 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        private static double Progress(int level, int minimum, int maximum)
+        {
+            return Math.Max(0d, Math.Min(1d, (level - minimum) / (double)(maximum - minimum)));
+        }
+
+        public static double RefinementSkillProgress(int intellectual, int crafting, int medicine)
+        {
+            return 0.60d * Progress(intellectual, 5, 10) + 0.25d * Progress(crafting, 3, 8) +
+                0.15d * Progress(medicine, 2, 6);
+        }
+
+        public static double RefinementExpertProgress(int intellectual, int crafting, int medicine)
+        {
+            return 0.60d * Progress(intellectual, 10, 20) + 0.25d * Progress(crafting, 8, 20) +
+                0.15d * Progress(medicine, 6, 20);
+        }
+
+        public static float RefinementFailureChance(int intellectual, int crafting, int medicine)
+        {
+            return (float)(0.30d * (1d - RefinementSkillProgress(intellectual, crafting, medicine)));
+        }
+
+        public static int RefinementPreparationTicks(int intellectual, int crafting, int medicine,
+            int maximumMinutes, int minimumMinutes, int expertSpeedPercent = 200)
+        {
+            maximumMinutes = Math.Max(1, maximumMinutes);
+            minimumMinutes = Math.Max(1, Math.Min(maximumMinutes, minimumMinutes));
+            double minutes = maximumMinutes - (maximumMinutes - minimumMinutes) *
+                RefinementSkillProgress(intellectual, crafting, medicine);
+            double expertSpeed = 1d + RefinementExpertProgress(intellectual, crafting, medicine) *
+                (Math.Max(150, Math.Min(300, expertSpeedPercent)) / 150d - 1d);
+            return Math.Max(1, (int)Math.Round(minutes * 2500d / 60d / expertSpeed));
+        }
+
+        public static double RefinementExpectedOutput(int baseCount, int intellectual, int crafting,
+            int medicine, int expertYieldPercent = 20)
+        {
+            return Math.Max(1, baseCount) * (1d + RefinementExpertProgress(intellectual, crafting, medicine) *
+                Math.Max(0, Math.Min(50, expertYieldPercent)) / 100d);
+        }
+
+        public static int RoundRefinementOutput(double expected, double roll)
+        {
+            int whole = Math.Max(1, (int)Math.Floor(expected));
+            return whole + (roll < expected - whole ? 1 : 0);
+        }
+
         public const float CookingWeight = 0.4f;
         public const float MedicineWeight = 0.4f;
         public const float IntellectualWeight = 0.2f;

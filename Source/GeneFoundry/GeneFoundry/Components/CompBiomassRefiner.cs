@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
+using GeneFoundry.Recipes;
 
 namespace GeneFoundry.Components
 {
@@ -14,6 +15,8 @@ namespace GeneFoundry.Components
 
         private float batchFailureChance;
         private bool completionRollMade;
+        private double batchExpectedOutput;
+        private int batchOutputCount;
 
         private bool processing;
 
@@ -63,6 +66,8 @@ namespace GeneFoundry.Components
 
             Scribe_Values.Look(ref batchFailureChance, "gfBatchFailureChance", 0f);
             Scribe_Values.Look(ref completionRollMade, "gfCompletionRollMade", false);
+            Scribe_Values.Look(ref batchExpectedOutput, "gfBatchExpectedOutput", 2d);
+            Scribe_Values.Look(ref batchOutputCount, "gfBatchOutputCount", 0);
         }
 
         public override void CompTick()
@@ -153,6 +158,13 @@ namespace GeneFoundry.Components
                 ? 0f
                 : CalculateFailureChance(operatorPawn);
             completionRollMade = false;
+            batchExpectedOutput = operatorPawn == null ? Props.outputCount :
+                BiomassCalculations.RefinementExpectedOutput(Props.outputCount,
+                    operatorPawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
+                    operatorPawn.skills.GetSkill(SkillDefOf.Crafting).Level,
+                    operatorPawn.skills.GetSkill(SkillDefOf.Medicine).Level,
+                    GeneFoundryMod.Settings.refinedExpertYieldPercent);
+            batchOutputCount = 0;
 
             // Begin automated processing.
             processing = true;
@@ -266,8 +278,12 @@ namespace GeneFoundry.Components
                 }
             }
 
+            // Fractional recovery becomes a chance of one extra item, rolled once
+            // per successful batch and retained if output placement must be retried.
+            if (batchOutputCount == 0)
+                batchOutputCount = BiomassCalculations.RoundRefinementOutput(batchExpectedOutput, Rand.Value);
             Thing output = ThingMaker.MakeThing(Props.outputDef);
-            output.stackCount = Props.outputCount;
+            output.stackCount = batchOutputCount;
 
             bool placed = GenPlace.TryPlaceThing(
                 output,
@@ -278,7 +294,10 @@ namespace GeneFoundry.Components
 
             // Keep the completed batch pending if output cannot be placed.
             if (!placed)
+            {
+                output.Destroy(DestroyMode.Vanish);
                 return;
+            }
 
             processing = false;
 
@@ -355,7 +374,8 @@ namespace GeneFoundry.Components
 
         public override string CompInspectStringExtra()
         {
-            string failureInfo = $"Batch failure chance: {batchFailureChance * 100f:0.#}%";
+            string failureInfo = $"Batch failure chance: {batchFailureChance * 100f:0.#}%\n" +
+                $"Expected output on success: {batchExpectedOutput:0.##} refined biomass";
 
             if (!processing)
             {
@@ -391,40 +411,22 @@ namespace GeneFoundry.Components
                 failureInfo + "\n" + timingInfo;
         }
 
-        private static float SkillProgress(
-            Pawn pawn,
-            SkillDef skill,
-            int minimum,
-            int zeroFailureLevel)
-        {
-            int level = pawn.skills.GetSkill(skill).Level;
-
-            return Math.Max(
-                0f,
-                Math.Min(1f, (level - minimum) / (float)(zeroFailureLevel - minimum))
-            );
-        }
-
-        private static float WeightedSkillProgress(Pawn pawn)
-        {
-            return
-                0.60f * SkillProgress(pawn, SkillDefOf.Intellectual, 5, 10) +
-                0.25f * SkillProgress(pawn, SkillDefOf.Crafting, 3, 8) +
-                0.15f * SkillProgress(pawn, SkillDefOf.Medicine, 2, 6);
-        }
-
         public static float CalculateFailureChance(Pawn pawn)
         {
-            return 0.30f * (1f - WeightedSkillProgress(pawn));
+            return BiomassCalculations.RefinementFailureChance(
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
+                pawn.skills.GetSkill(SkillDefOf.Crafting).Level,
+                pawn.skills.GetSkill(SkillDefOf.Medicine).Level);
         }
 
         public static int CalculatePreparationTicks(Pawn pawn)
         {
             GeneFoundrySettings settings = GeneFoundryMod.Settings;
-            int maximum = Math.Max(1, settings.preparationMinutes);
-            int minimum = Math.Max(1, Math.Min(maximum, settings.minimumPreparationMinutes));
-            float minutes = maximum - (maximum - minimum) * WeightedSkillProgress(pawn);
-            return Math.Max(1, (int)Math.Round(minutes * 2500f / 60f));
+            return BiomassCalculations.RefinementPreparationTicks(
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
+                pawn.skills.GetSkill(SkillDefOf.Crafting).Level,
+                pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
+                settings.preparationMinutes, settings.minimumPreparationMinutes, settings.refinedExpertSpeedPercent);
         }
     }
 }

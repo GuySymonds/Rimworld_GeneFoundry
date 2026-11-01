@@ -6,9 +6,9 @@
     <defName>GF_StartBiomassRefinement</defName>
     <label>refine biomass</label>
 
-    <description>Prepare 10 raw biomass from correctly oriented adjacent hoppers and 1 neutroamine delivered by the operator. A successful batch produces 2 refined biomass.
+    <description>Prepare 10 raw biomass from correctly oriented adjacent hoppers and 1 neutroamine delivered by the operator. A successful batch produces a base yield of 2 refined biomass, with a chance of an extra item for expert operators.
 
-Requires Intellectual 5, Crafting 3 and Medicine 2. Preparation speed and reliability improve with these skills, weighted 60%, 25% and 15% respectively. Failure risk falls from 30% at the minimum requirements to 0% at Intellectual 10, Crafting 8 and Medicine 6. Higher skills give no additional benefit.
+Requires Intellectual 5, Crafting 3 and Medicine 2. Preparation speed and reliability improve with these skills, weighted 60%, 25% and 15% respectively. Failure risk falls from 30% at the minimum requirements to 0% at Intellectual 10, Crafting 8 and Medicine 6. Above these thresholds, each skill contributes further preparation speed and extra biomass recovery up to level 20. At default settings, level 20 in all three skills shortens preparation to about 22.5 minutes and gives 2 output with a 40% chance of a third per successful batch (2.4 on average). Expert speed and yield are configurable under Refined Biomass in GeneFoundry's mod settings. Yield is captured when the batch starts, and the extra-item chance is rolled only once on successful completion.
 
 The operator earns skill experience during preparation and is free to leave once automated processing starts. Available gene processors shorten automated processing. Durations and processor assistance are configurable in GeneFoundry's mod settings.
 
