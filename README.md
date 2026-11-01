@@ -1,7 +1,7 @@
 # Rimworld_GeneFoundry
 GeneFoundry — A RimWorld biotechnology mod that transforms organic matter into genetic resources for refining and fabricating custom genes.
 
-For RimWorld 1.6 with Biotech. The Gene Vat and Biomass Refinery are implemented; the Gene Fabricator is planned.
+For RimWorld 1.6 with Biotech. The Gene Vat, Biomass Refinery and manual Gene Fabricator are implemented.
 
 ## Raw biomass extraction
 
@@ -145,9 +145,7 @@ XML tests validate the tab, all foundation prerequisite paths, category generato
 
 ### Gene fabrication research
 
-All cosmetic categories are automatically researched once **Gene fabrication** is complete, with no additional research work. This includes `Cosmetic` and the `Cosmetic_` category family (hair, skin, body and modded subcategories using that naming convention). Detection uses stable definition names rather than translated labels; unrelated categories are not treated as cosmetic because they contain zero-complexity genes or happen to have a cosmetic label. Cosmetic projects remain visible in the grid and their descriptions explain that they are included automatically. Their nominal point totals are completion markers; no separate research points are charged.
-
-A game component checks once per real-time second while playing, including while paused or after loading an existing colony. It silently finishes unfinished cosmetic projects through vanilla research completion after the foundation is complete. Completed project progress is saved by vanilla, so no extra completion flag is needed. Non-cosmetic projects keep their normal costs. Cosmetic categories complete even if a mod places archite genes there, but those individual genes still require vanilla **Archogenetics**. Automatic completion never researches Archogenetics on the player's behalf.
+Cosmetic categories unlock directly once **Gene fabrication** is complete, with no category research project or extra research work. This includes `Cosmetic` and the `Cosmetic_` category family, including modded categories with those stable definition names. Cosmetic archite genes still require vanilla **Archogenetics**. Older automatically completed cosmetic projects remain supported when present, but new cosmetic projects are not generated.
 
 Gene category projects are generated during definition resolution from the loaded `GeneDef.displayCategory` values. This includes modded and generated genes, zero-complexity cosmetic genes and genes excluded from random gene-set generation. Empty categories do not produce projects; genes without a category share an Uncategorized project. Stable project names use category definition names, not translated labels. All category projects remain in the GeneFoundry tab. Their descriptions list their genes and explain their cost breakdown.
 
@@ -163,7 +161,7 @@ The research view keeps the main progression above a compact four-column categor
 
 The separate **Gene research** settings section provides sliders for the fabrication foundation (100–10,000; default 1,500), category base cost (0–5,000; default 500), cost per gene (0–1,000; default 100), cost per complexity point (0–2,000; default 200) and cost per archite value (0–5,000; default 500). Category cost percentage (1–200%; default 25%), minimum category cost (100–10,000; default 1,000) and maximum category cost (minimum–10,000; default 4,000) apply after these terms. Raising the minimum above the maximum raises the maximum too. These controls do not affect the fabrication foundation or Archogenetics requirements. Missing settings take the new defaults without resetting custom term weights. The section has an independent reset button. Restart RimWorld after changing these settings. Existing research progress remains in points, so increasing costs can make even a formerly completed project require more work. Earlier biomass research costs are unchanged.
 
-This phase implements research projects and the shared `GeneFabricationResearch.IsUnlocked(GeneDef)` permission check. The physical fabricator, resource costs, gene selection and production jobs are not implemented yet; those must use this check when added. Research completion alone does not create genepacks.
+The Fabricator uses the shared `GeneFabricationResearch.IsUnlocked(GeneDef)` permission check both when queuing an order and during work. Research completion alone does not create genepacks.
 
 Pure unit tests cover the formula, configurable terms, minimum costs, overflow, monotonic increases and all combinations of foundation/category/archite gates. Optional installed-game API tests cover category membership, modded/uncategorized genes, mixed and pure archite prerequisites, stable IDs, actual research database registration, duplicate prevention and vanilla UI coordinate generation. The registration fixture bypasses vanilla DLC discovery in `PostLoad`; definition loading with real DLC and the displayed research tree still require an in-game check. Manually verify category descriptions and costs, the archite-only prerequisite, save/reload of category research, and changed costs after a restart.
 
@@ -204,4 +202,46 @@ Use a disposable save and short processing settings:
 4. Check Do X times and Do until X after both successful and failed batches.
 5. Load an existing colony with a refinery built before processor support, and confirm nearby processors can assist it.
 
-Raw and refined biomass production and their research progression are implemented. Gene fabrication research is implemented; the physical Gene Fabricator and gene production remain the next development phase.
+Raw biomass extraction, refinement, gene research and manual gene fabrication are implemented.
+
+## Manual gene fabrication
+
+Build the powered 5×2 Gene Fabricator under **Architect → Biotech** after researching **Gene fabrication**. Select it and choose **Fabricate genepack**. The searchable window groups loaded vanilla and modded genes by their existing categories, uses vanilla gene icons/info cards, marks selections and shows exact material costs, complexity, estimated duration, skill requirements and failure rules. Choose one or more unlocked genes and confirm one order. No sample is required and no repeatable bill is created. Locked genes remain visible for discovery.
+
+Assign a qualified colonist to **Research** work. All three minimums apply: Intellectual 10, Medicine 6 and Crafting 4, with those skills enabled. Operators haul reachable, permitted materials using vanilla carrying and reservations, one stack per trip. The machine reserves a single operator at a time. It holds partial deliveries across interruptions and consumes the complete cost once when manual work begins. Missing ingredients block work; no partial payment creates an unfinished product. Cancellation returns delivered ingredients before work begins; after commitment it destroys the unfinished item without refund.
+
+Manufacturing defaults are centralized in `FabricationCalculations.cs`, separate from research costs:
+
+| Parameter | Default |
+|---|---|
+| Refined biomass | `10 × gene count + 5 × summed positive complexity` |
+| Required work | `2,500 × gene count + 1,000 × summed positive complexity` |
+| Archite capsules | Sum each selected gene's positive vanilla `biostatArc` |
+| Power consumption | 500 W |
+| Skill speed | `0.5 + (0.60 × Intellectual + 0.25 × Medicine + 0.15 × Crafting) / 10`, with each level clamped to 0–20 |
+| Work modifiers | General work speed, manipulation and sight multiply skill speed |
+| Active work XP | 0.1 total base XP per active tick, split 60% Intellectual / 25% Medicine / 15% Crafting |
+
+For example, one complexity-2 gene costs 20 biomass and 4,500 work. Three genes with summed positive complexity 5 cost 55 biomass and 12,500 work. Negative modded complexity or archite values cannot discount another gene. These are initial balancing defaults, not new settings. Estimated game hours use 2,500 ticks/hour and minimum-qualified skills with normal capacities and general work speed. Hauling and interruptions add time.
+
+Operator failure probability is `30% × (0.60 × clamp((16 − Intellectual)/6, 0, 1) + 0.25 × clamp((12 − Medicine)/6, 0, 1) + 0.15 × clamp((10 − Crafting)/6, 0, 1))`. Minimum-qualified operators have 30% risk; 16/12/10 or better gives zero risk. The unfinished item saves actual work and the sum of `work × operator risk`; final risk is that sum divided by work done, clamped to 0–30%. Final-tick work is capped to the remaining amount, so overshoot cannot inflate an operator's contribution. There is no cleanliness penalty and no XP during hauling, travel or waiting. Vanilla passion and learning modifiers apply to each skill's XP.
+
+Drafting, incapacity, higher-priority jobs, leaving the map and power loss stop active work while the machine retains its paid unfinished item. Another qualified operator can resume it. The item is drawn on the workstation. Selected genes, delivered materials, work, weighted risk and the completion result are serialized. A saved generation marker prevents cancelled jobs from acting on replacement orders. A developer-spawned unfinished item has no paid state and cannot produce a free pack.
+
+Completion rolls failure once. Failure loses the paid materials and unfinished item, sends a notification and clears the order. Success calls vanilla `Genepack.Initialize` with exactly the selected genes on a vanilla genepack. The output stays in the machine's saved ThingOwner if placement is blocked, with periodic placement retries and no second completion or roll. It uses vanilla hauling, Gene Bank and Xenogerm Assembler data. Vanilla extraction and assembly are unchanged.
+
+### Fabrication verification
+
+The portable suite covers deterministic costs, skills, risk and work-weighting, plus actual definition/source registration. The optional installed-game suite additionally exercises real unfinished state, partial delivery accounting, exact commitment, repeated commitment, changing workers, overrun clamping, invalid developer state, cancellation, inactive work rejection, success/failure and vanilla multi-gene initialization. The Scribe test round-trips the job fields through saving, loading, cross-reference resolution and post-load initialization. Headless fixtures replace Unity object creation, destruction notifications and map placement; they do not simulate a running colony or a full save-load cycle.
+
+Runtime acceptance still requires RimWorld. Use a disposable colony to check:
+
+1. Load the mod with Biotech; check the log for XML/cross-reference errors, build the 5×2 workstation and inspect the selection window at the intended UI scale. Confirm the artwork and front interaction position.
+2. Try locked foundation/category/Archogenetics gates, cosmetic unlocks and a modded category. Confirm single and multiple gene orders display exact costs and spawn no bills.
+3. Split biomass and capsules across stacks, forbid or reserve an ingredient, and check short supplies block starting/work. Confirm each successful order consumes only its displayed costs.
+4. Compare below-minimum and qualified workers; verify Research assignment picks up work automatically. Draft during hauling and work, incapacitate an operator, switch priorities, remove a worker from the map and let another resume. Check only active work awards the three skills' XP.
+5. Save/reload during partial delivery and manufacturing. Cut power and restore it. Cancel and immediately queue a different order while an old operator is travelling. Confirm no duplicated consumption, lost progress or old-order work.
+6. Complete with minimum-skilled and expert workers; check failure notifications and exact selected gene contents on success. Haul the result into a Gene Bank and use it in the vanilla Xenogerm Assembler. Obstruct output placement and save/reload before clearing space; confirm exactly one output appears.
+7. Load an older colony with a built Fabricator; check it starts idle and existing vats, refineries and research still work. Developer-spawn an unfinished item and inspect/haul it without errors or free production.
+
+No in-game runtime verification is claimed by the automated suite. Build with `/p:PostBuildEvent=` to skip the repository's deployment script when verification should not modify the installed mod.
