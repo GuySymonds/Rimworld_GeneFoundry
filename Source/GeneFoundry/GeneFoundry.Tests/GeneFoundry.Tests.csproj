@@ -17,6 +17,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(RimWorldManagedDir)' != ''">
+    <Compile Include="../GeneFoundry/Components/CompGeneVatRotStink.cs" Link="Production/CompGeneVatRotStink.cs" />
     <Reference Include="Assembly-CSharp">
       <HintPath>$(RimWorldManagedDir)/Assembly-CSharp.dll</HintPath>
     </Reference>

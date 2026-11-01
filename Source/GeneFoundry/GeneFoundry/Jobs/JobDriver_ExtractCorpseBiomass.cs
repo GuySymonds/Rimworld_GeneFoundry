@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GeneFoundry.Components;
 using GeneFoundry.Recipes;
 using RimWorld;
 using Verse;
@@ -134,6 +135,8 @@ namespace GeneFoundry.Jobs
             processing.WithProgressBar(TargetIndex.A,
                 () => 1f - ticksLeftThisToil / (float)System.Math.Max(1, processingTicks));
             processing.AddPreTickIntervalAction(delta => GeneVatSkills.Learn(pawn, delta));
+            processing.AddPreTickIntervalAction(delta =>
+                job.targetA.Thing.TryGetComp<CompGeneVatRotStink>()?.NotifyCorpseExtraction(pawn, delta));
             yield return processing;
 
             yield return Toils_General.Do(() =>

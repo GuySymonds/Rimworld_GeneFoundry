@@ -5,6 +5,9 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public static float CorpseRotStinkRisk(int cooking, int medicine, int intellectual) =>
+            ((cooking < 10 ? 1 : 0) + (medicine < 10 ? 1 : 0) + (intellectual < 10 ? 1 : 0)) * 0.05f;
+
         public static float LiquidationVisualProgress(int total, int remaining) => total <= 0 ? 0f :
             Math.Max(0f, Math.Min(1f, 1f - remaining / (float)total));
         public static float LiquidationVisualScale(float progress) => 1f - .5f * Math.Max(0f, Math.Min(1f, progress));
