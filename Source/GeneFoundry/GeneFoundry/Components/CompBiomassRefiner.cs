@@ -12,6 +12,8 @@ namespace GeneFoundry.Components
         private int progressTicks;
         private int powerOutageTicks;
 
+        private float batchFailureChance;
+
         private bool processing;
 
         private CompProperties_BiomassRefiner Props =>
@@ -34,6 +36,8 @@ namespace GeneFoundry.Components
             Scribe_Values.Look(ref progressTicks, "gfProgressTicks", 0);
             Scribe_Values.Look(ref powerOutageTicks, "gfPowerOutageTicks", 0);
             Scribe_Values.Look(ref processing, "gfProcessing", false);
+
+            Scribe_Values.Look(ref batchFailureChance, "gfBatchFailureChance", 0f);
         }
 
         public override void CompTick()
@@ -109,7 +113,7 @@ namespace GeneFoundry.Components
             return TryConsumeInputs(false);
         }
 
-        public bool TryStartBatch()
+        public bool TryStartBatch(Pawn operatorPawn = null)
         {
             if (!CanStartBatch())
                 return false;
@@ -117,6 +121,12 @@ namespace GeneFoundry.Components
             // Consume the required biomass from adjacent hoppers.
             if (!TryConsumeInputs())
                 return false;
+
+            // Capture the operator's skills once for this batch.
+            // The developer command starts a zero-risk test batch.
+            batchFailureChance = operatorPawn == null
+                ? 0f
+                : CalculateFailureChance(operatorPawn);
 
             // Begin automated processing.
             processing = true;
@@ -297,6 +307,8 @@ namespace GeneFoundry.Components
 
         public override string CompInspectStringExtra()
         {
+            string failureInfo = $"Batch failure chance: {batchFailureChance * 100f:0.#}%";
+
             if (!processing)
             {
                 if (Power == null || !Power.PowerOn)
@@ -318,10 +330,38 @@ namespace GeneFoundry.Components
                 return
                     $"Status: Paused (no power)\n" +
                     $"Progress: {percentage}%\n" +
-                    $"Power outage: {powerOutageTicks}/{MaxPowerOutageTicks} ticks";
+                    $"Power outage: {powerOutageTicks}/{MaxPowerOutageTicks} ticks\n" +
+                    failureInfo;
             }
 
-            return $"Status: Refining biomass\nProgress: {percentage}%";
+            return
+                $"Status: Refining biomass\n" +
+                $"Progress: {percentage}%\n" +
+                failureInfo;
+        }
+
+        private static float SkillProgress(
+            Pawn pawn,
+            SkillDef skill,
+            int minimum,
+            int zeroFailureLevel)
+        {
+            int level = pawn.skills.GetSkill(skill).Level;
+
+            return Math.Max(
+                0f,
+                Math.Min(1f, (level - minimum) / (float)(zeroFailureLevel - minimum))
+            );
+        }
+
+        public static float CalculateFailureChance(Pawn pawn)
+        {
+            float weightedProgress =
+                0.60f * SkillProgress(pawn, SkillDefOf.Intellectual, 5, 10) +
+                0.25f * SkillProgress(pawn, SkillDefOf.Crafting, 3, 8) +
+                0.15f * SkillProgress(pawn, SkillDefOf.Medicine, 2, 6);
+
+            return 0.30f * (1f - weightedProgress);
         }
     }
 }

@@ -81,7 +81,7 @@ namespace GeneFoundry.Jobs
                 }
 
                 // Recheck readiness before consuming anything.
-                if (!Refinery.TryStartBatch())
+                if (!Refinery.TryStartBatch(pawn))
                 {
                     EndJobWith(JobCondition.Incompletable);
                     return;
