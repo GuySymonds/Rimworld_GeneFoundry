@@ -37,5 +37,12 @@ namespace GeneFoundry.Tests
         {
             Assert.Equal("Building_WorkTable", (string)Def("GF_GeneVat").Element("thingClass"));
         }
+        [Fact] public void FabricationUsesNativeRightClickPrioritisationThroughAllJobPhases()
+        {
+            var giver = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"Fixtures","Defs","WorkGiverDefs"),"*.xml")
+                .SelectMany(p=>XDocument.Load(p).Root.Elements()).Single(e=>(string)e.Element("defName")=="GF_FabricateGenePack");
+            Assert.Equal("true", (string)giver.Element("directOrderable"));
+            Assert.Equal("true", (string)giver.Element("prioritizeSustains"));
+        }
     }
 }

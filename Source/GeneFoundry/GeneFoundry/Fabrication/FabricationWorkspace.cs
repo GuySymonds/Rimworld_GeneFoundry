@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GeneFoundry.Research;
-using GeneFoundry.WorkGivers;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -11,33 +10,6 @@ namespace GeneFoundry.Fabrication
 {
     public partial class Building_GeneFabricator
     {
-        public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn pawn)
-        {
-            foreach (var option in base.GetFloatMenuOptions(pawn)) yield return option;
-            if (pawn == null || pawn.Drafted || pawn.Faction != Faction || !Spawned) yield break;
-            var bill = billStack.Bills.OfType<Bill_GeneFabrication>().FirstOrDefault(b => (b != activeBill || !Map.reservationManager.IsReserved(this)) &&
-                b.ShouldDoNow() && !b.HasStarted && b.assignedPawn == null && b.genes.All(GeneFabricationResearch.IsUnlocked));
-            if (bill == null) yield break;
-            string reason = !FabricationSkills.Qualified(pawn) ? "requires Intellectual 10, Medicine 6 and Crafting 4" :
-                pawn.workSettings == null || pawn.workSettings.GetPriority(WorkTypeDefOf.Research) == 0 ? "not assigned to Research work" :
-                !pawn.CanReach(this, PathEndMode.InteractionCell, Danger.Some) ? "no path" : null;
-            if (reason != null) { yield return new FloatMenuOption("Cannot assign fabrication: " + reason, null); yield break; }
-            yield return new FloatMenuOption("Assign fabrication to " + pawn.LabelShortCap + ": " + bill.Label, () =>
-            {
-                if (!billStack.Bills.Contains(bill) || !bill.TryAssign(pawn)) return;
-                if (pawn.Map.reservationManager.IsReserved(this)) return;
-                // Assignment is safe while the bench is occupied; do not interrupt its
-                // reserver. When free, issue the same job used by automatic Research work.
-                var def = DefDatabase<WorkGiverDef>.GetNamed("GF_FabricateGenePack");
-                var giver = (WorkGiver_FabricateGenePack)def.Worker;
-                Job job = giver.JobOnThing(pawn, this, true);
-                if (job != null)
-                {
-                    job.workGiverDef = def;
-                    pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, giver, Position);
-                }
-            });
-        }
         public bool AtWorkSurface(UnfinishedGenePack item) => item != null && item.Spawned && item.Map == Map && item.Position == Position;
         public bool PlaceCurrentItem()
         {
@@ -82,7 +54,6 @@ namespace GeneFoundry.Fabrication
         public bool TryStartBill(Bill_GeneFabrication bill, Pawn pawn)
         {
             if (pawn == null || bill == null || !billStack.Bills.Contains(bill) || bill.HasStarted || !bill.CanBeScheduledFor(pawn) || !TryStart(bill.genes)) return false;
-            if (bill.assignedPawn == null) bill.TryAssign(pawn);
             activeBill = bill;
             return true;
         }

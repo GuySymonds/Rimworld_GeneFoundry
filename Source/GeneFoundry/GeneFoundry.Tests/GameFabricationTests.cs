@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using GeneFoundry.Fabrication;
 using RimWorld;
 using Verse;
@@ -127,7 +128,7 @@ namespace GeneFoundry.Tests
             Assert.True(next.CanBeScheduledFor(bob));
             Assert.Contains("VanillaGene", item.GetInspectString()); Assert.Contains("ModdedGene", item.GetInspectString());
             Assert.Contains("Alice", item.GetInspectString());
-            Assert.Equal("Alice", first.AssignmentLabel); Assert.Equal("Unassigned", next.AssignmentLabel);
+            Assert.Equal("Alice", first.OwnerLabel); Assert.Equal("Not started", next.OwnerLabel);
         }
         [Fact] public void MissingPaidPackCannotRestartItsBillOrChargeMaterialsAgain()
         {
@@ -149,7 +150,7 @@ namespace GeneFoundry.Tests
                 var source = new LinkedWorkData { item = Paid(), bill = new Bill_GeneFabrication { recipe = recipe } };
                 var owner = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
                 owner.def = ItemDef("Human"); owner.def.category = ThingCategory.Pawn; owner.thingIDNumber = 9876; owner.Name = new NameSingle("Alice");
-                source.bill.genes = source.item.genes; Assert.True(source.bill.TryAssign(owner));
+                source.bill.genes = source.item.genes; Assert.True(source.item.TryClaim(owner));
                 source.bill.BindUnfinished(source.item); source.item.AddWork(40, .3f);
                 DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(source.item.genes);
                 Scribe.saver.InitSaving(path, "work");
@@ -164,7 +165,7 @@ namespace GeneFoundry.Tests
                 directory.RegisterLoaded(loaded.bill); directory.RegisterLoaded(loaded.item); directory.RegisterLoaded(owner); Scribe.loader.FinalizeLoading();
                 Assert.Same(loaded.item, loaded.bill.unfinished); Assert.Same(loaded.bill, loaded.item.bill);
                 Assert.True(loaded.bill.HasStarted); Assert.True(loaded.bill.ShouldDoNow()); Assert.Equal(40, loaded.item.workDone);
-                Assert.Same(owner, loaded.bill.assignedPawn); Assert.True(loaded.bill.CanBeScheduledFor(owner));
+                Assert.Same(owner, loaded.item.creator); Assert.True(loaded.bill.CanBeScheduledFor(owner));
                 Assert.False(loaded.bill.CanBeScheduledFor((Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn))));
             }
             finally
@@ -198,16 +199,17 @@ namespace GeneFoundry.Tests
             }
             finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
         }
-        [Fact] public void QueuedAssignmentCannotBeTakenByAnotherPawnAndCanBeClearedBeforeStarting()
+        [Fact] public void UnstartedBillsHaveNoPawnRestrictionButUnfinishedWorkRetainsItsCreator()
         {
             var bill = new Bill_GeneFabrication { genes = Paid().genes };
             var alice = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn)); alice.Name = new NameSingle("Alice");
             var bob = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn)); bob.Name = new NameSingle("Bob");
-            Assert.True(bill.TryAssign(alice)); Assert.Equal("Alice", bill.AssignmentLabel);
-            Assert.False(bill.TryAssign(bob)); Assert.True(bill.CanBeScheduledFor(alice)); Assert.False(bill.CanBeScheduledFor(bob));
-            bill.assignedPawn = null; Assert.True(bill.TryAssign(bob));
-            var item = Paid(); bill.BindUnfinished(item);
-            Assert.True(item.TryClaim(bob)); Assert.False(item.TryClaim(alice)); Assert.False(bill.TryAssign(alice));
+            Assert.True(bill.CanBeScheduledFor(alice)); Assert.True(bill.CanBeScheduledFor(bob));
+            Assert.Equal("Not started", bill.OwnerLabel);
+            var item = Paid(); bill.BindUnfinished(item); Assert.True(item.TryClaim(bob));
+            Assert.False(bill.CanBeScheduledFor(alice)); Assert.True(bill.CanBeScheduledFor(bob));
+            bill.ReleaseUnfinished(item);
+            Assert.True(bill.CanBeScheduledFor(alice)); Assert.True(bill.CanBeScheduledFor(bob));
         }
         [Fact] public void DestroyedUnfinishedWorkResetsItsBillWithoutRefundOrCompletion()
         {
@@ -410,11 +412,17 @@ namespace GeneFoundry.Tests
                 if (completed) data.bill.Notify_IterationCompleted(null, new List<Thing>());
                 DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(expected);
                 Scribe.saver.InitSaving(path, "fabrication"); Scribe_Deep.Look(ref data, "bill"); Scribe.saver.FinalizeSaving();
+                // Old explicit assignments must be ignored, even when the referenced pawn
+                // is absent. Only a physical unfinished pack's creator remains a restriction.
+                var xml = XDocument.Load(path);
+                xml.Root.Element("bill").Add(new XElement("gfBillAssignedPawn", "Thing_Human9999"));
+                xml.Save(path);
                 data = new BillData(); Scribe.loader.InitLoading(path); Scribe.EnterNode("bill");
                 Scribe.loader.curParent = data; Scribe.loader.curPathRelToParent = null; data.ExposeData();
                 Scribe.loader.crossRefs.RegisterForCrossRefResolve(data); Scribe.loader.initer.RegisterForPostLoadInit(data);
                 Scribe.ExitNode(); Scribe.loader.FinalizeLoading();
                 Assert.Equal(expected, data.bill.genes); Assert.Equal(!completed, data.bill.ShouldDoNow());
+                Assert.Equal(!completed, data.bill.CanBeScheduledFor((Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn))));
             }
             finally
             {

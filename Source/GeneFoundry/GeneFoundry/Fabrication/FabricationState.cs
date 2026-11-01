@@ -13,6 +13,9 @@ namespace GeneFoundry.Fabrication
     // selected-gene item lives in its workstation's ThingOwner with its paid job state.
     public class UnfinishedGenePack : ThingWithComps
     {
+        // Visual offsets in map tiles; negative X moves left, positive Z moves up.
+        public const float WorkSurfaceOffsetX = -0.06f;
+        public const float WorkSurfaceOffsetZ = 0.12f;
         public List<GeneDef> genes = new List<GeneDef>();
         public float totalWork, workDone, riskWork;
         public bool committed;
@@ -26,13 +29,17 @@ namespace GeneFoundry.Fabrication
         public string OwnerLabel => creator?.Name?.ToStringShort ?? (creatorAssigned ? "Owner unavailable" : "Unassigned");
         public string IntendedGenes => string.Join(", ", (genes ?? new List<GeneDef>()).Select(g => g?.label ?? g?.defName ?? "missing gene"));
         public override string LabelNoCount => Valid ? "unfinished genepack: " + IntendedGenes : base.LabelNoCount;
-        public bool CanBeWorkedBy(Pawn pawn) => pawn != null && (!creatorAssigned || creator == pawn) && (bill?.assignedPawn == null || bill.assignedPawn == pawn);
+        public bool CanBeWorkedBy(Pawn pawn) => pawn != null && (!creatorAssigned || creator == pawn);
         public override Vector3 DrawPos
         {
             get
             {
                 Vector3 position = base.DrawPos;
-                if (Spawned && fabricator != null && fabricator.AtWorkSurface(this)) position.z += .12f;
+                if (Spawned && fabricator != null && fabricator.AtWorkSurface(this))
+                {
+                    position.x += WorkSurfaceOffsetX;
+                    position.z += WorkSurfaceOffsetZ;
+                }
                 return position;
             }
         }
@@ -82,7 +89,7 @@ namespace GeneFoundry.Fabrication
             Scribe_Values.Look(ref cancellationHandled, "gfCancellationHandled");
         }
         public override string GetInspectString() => Valid
-            ? $"Intended genepack: {IntendedGenes}\nAssigned to: {OwnerLabel}\nProgress: {workDone / totalWork:P0}\nFailure estimate: {Failure:P1}"
+            ? $"Intended genepack: {IntendedGenes}\nStarted by: {OwnerLabel}\nProgress: {workDone / totalWork:P0}\nFailure estimate: {Failure:P1}"
             : "No valid paid fabrication job. Cannot be fabricated.";
         public override IEnumerable<Gizmo> GetGizmos()
         {
