@@ -4,9 +4,7 @@
   <JobDef>
     <defName>GF_PrepareBiomassRefinement</defName>
 
-    <driverClass>
-      GeneFoundry.Jobs.JobDriver_PrepareBiomassRefinement
-    </driverClass>
+    <driverClass>GeneFoundry.Jobs.JobDriver_PrepareBiomassRefinement</driverClass>
 
     <reportString>preparing biomass refinement.</reportString>
   </JobDef>

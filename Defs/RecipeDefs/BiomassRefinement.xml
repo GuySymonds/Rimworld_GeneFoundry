@@ -16,7 +16,7 @@ Once initiated, the refinery operates automatically.</description>
     <workAmount>300</workAmount>
     <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
     <workSkill>Intellectual</workSkill>
-    <requiredGiverWorkType>Crafting</requiredGiverWorkType>
+    <requiredGiverWorkType>Research</requiredGiverWorkType>
 
     <!-- Minimum operator qualifications -->
     <skillRequirements>

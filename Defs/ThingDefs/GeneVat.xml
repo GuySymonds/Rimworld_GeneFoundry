@@ -17,7 +17,7 @@ Colonists manually process biological matter, optionally using herbal medicine t
       <texPath>GeneFoundry/Buildings/GeneVat</texPath>
       <graphicClass>Graphic_Multi</graphicClass>
       <shaderType>CutoutComplex</shaderType>
-      <drawSize>(3,4)</drawSize>
+      <drawSize>(3,3.6)</drawSize>
       <drawRotated>false</drawRotated>
     </graphicData>
 

@@ -14,15 +14,17 @@ Refinement requires substantial electrical power but operates without direct col
     <tickerType>Normal</tickerType>
     <category>Building</category>
 
-    <!-- Temporary artwork -->
+    <!-- GeneFoundry Biomass Refinery artwork -->
     <graphicData>
-      <texPath>Things/Building/Production/TableDrugLab</texPath>
-      <graphicClass>Graphic_Multi</graphicClass>
+      <texPath>GeneFoundry/Buildings/BiomassRefinery</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
       <shaderType>CutoutComplex</shaderType>
-      <drawSize>(3.5,1.5)</drawSize>
+      <drawSize>(3.2,3)</drawSize>
+      <drawRotated>false</drawRotated>
     </graphicData>
-
-    <size>(3,1)</size>
+    
+    <size>(3,2)</size>
+    <rotatable>false</rotatable>
 
     <costList>
       <Steel>200</Steel>
@@ -46,7 +48,7 @@ Refinement requires substantial electrical power but operates without direct col
 
     <!-- Colonist interaction -->
     <hasInteractionCell>true</hasInteractionCell>
-    <interactionCellOffset>(0,0,-1)</interactionCellOffset>
+    <interactionCellOffset>(-1,0,-1)</interactionCellOffset>
     <surfaceType>Item</surfaceType>
 
     <!-- Production bills -->

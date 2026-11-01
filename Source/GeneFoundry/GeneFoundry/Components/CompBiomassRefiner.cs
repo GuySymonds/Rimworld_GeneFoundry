@@ -247,6 +247,30 @@ namespace GeneFoundry.Components
             foreach (Gizmo gizmo in base.CompGetGizmosExtra())
                 yield return gizmo;
 
+            // Allow players to build hoppers directly from the refinery.
+            if (parent.Spawned && parent.Faction == Faction.OfPlayer)
+            {
+                ThingDef hopperDef =
+                    DefDatabase<ThingDef>.GetNamed("GF_BiomassHopper");
+
+                yield return new Command_Action
+                {
+                    defaultLabel = "Build biomass hopper",
+
+                    defaultDesc =
+                        "Construct a raw biomass hopper to supply this refinery.",
+
+                    icon = hopperDef.uiIcon,
+
+                    action = () =>
+                    {
+                        Find.DesignatorManager.Select(
+                            new Designator_Build(hopperDef)
+                        );
+                    }
+                };
+            }
+
             if (!Prefs.DevMode)
                 yield break;
 

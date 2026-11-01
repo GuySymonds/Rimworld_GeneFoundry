@@ -5,11 +5,9 @@
     <defName>GF_RefineBiomass</defName>
     <label>prepare biomass refinement</label>
 
-    <giverClass>
-      GeneFoundry.WorkGivers.WorkGiver_RefineBiomass
-    </giverClass>
+    <giverClass>GeneFoundry.WorkGivers.WorkGiver_RefineBiomass</giverClass>
 
-    <workType>Crafting</workType>
+    <workType>Research</workType>
 
     <verb>refine</verb>
     <gerund>refining</gerund>
