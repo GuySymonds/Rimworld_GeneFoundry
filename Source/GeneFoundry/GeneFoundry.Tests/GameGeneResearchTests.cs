@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using GeneFoundry.Research;
 using RimWorld;
 using Verse;
@@ -36,8 +38,10 @@ namespace GeneFoundry.Tests
             GeneDef normal = Gene("Ordinary", category, 2);
             GeneDef archite = Gene("Archite", category, 3, 2);
             var project = Assert.Single(Build(normal, archite));
-            Assert.Equal(675f, project.baseCost);
-            Assert.Equal(new[] { foundation }, project.prerequisites);
+            Assert.Equal(1000f, project.baseCost);
+            Assert.Empty(project.prerequisites);
+            Assert.Equal(new[] { foundation }, project.hiddenPrerequisites);
+            Assert.Equal("modded category", project.label);
             Assert.Same(tab, project.tab);
             Assert.Equal(new[] { archite, normal }, project.genes);
             Assert.Contains("Archogenetics", project.description);
@@ -49,8 +53,9 @@ namespace GeneFoundry.Tests
         {
             var category = new GeneCategoryDef { defName = "AnyCategory" };
             var project = Assert.Single(Build(Gene("A", category, 0, 1), Gene("B", category, 0, 2)));
-            Assert.Equal(new[] { foundation, archogenetics }, project.prerequisites);
-            Assert.Equal(550f, project.baseCost);
+            Assert.Empty(project.prerequisites);
+            Assert.Equal(new[] { foundation, archogenetics }, project.hiddenPrerequisites);
+            Assert.Equal(1000f, project.baseCost);
         }
 
         [Fact]
@@ -58,7 +63,7 @@ namespace GeneFoundry.Tests
         {
             var category = new GeneCategoryDef { defName = "Modded" };
             var project = Assert.Single(Build(Gene("A", category, -10, -5), Gene("B", category, 2, 1)));
-            Assert.Equal(400f, project.baseCost);
+            Assert.Equal(1000f, project.baseCost);
         }
 
         [Fact]
@@ -69,7 +74,7 @@ namespace GeneFoundry.Tests
             var project = Assert.Single(Build(gene, gene));
             Assert.Single(project.genes);
             Assert.Equal("GF_GeneUncategorized", project.defName);
-            Assert.Equal(200f, project.baseCost);
+            Assert.Equal(1000f, project.baseCost);
             Assert.Empty(Build());
         }
 
@@ -84,8 +89,10 @@ namespace GeneFoundry.Tests
             Assert.Equal(15, first.Select(project => (project.researchViewX, project.researchViewY)).Distinct().Count());
             Assert.All(first, project =>
             {
-                Assert.True(project.researchViewX >= 6);
-                Assert.InRange(project.researchViewY, 0f, 5f);
+                Assert.InRange(project.researchViewX, 0f, 4.5f);
+                Assert.True(project.researchViewY >= 4f);
+                Assert.Empty(project.prerequisites);
+                Assert.Contains(foundation, project.hiddenPrerequisites);
             });
         }
 
@@ -99,7 +106,37 @@ namespace GeneFoundry.Tests
             Assert.Equal(2500f, project.baseCost);
             Assert.Contains("× 50%", project.description);
             Assert.Contains("capped at 2500 points = 2500", project.description);
-            Assert.Contains(archogenetics, project.prerequisites);
+            Assert.Contains(archogenetics, project.hiddenPrerequisites);
+        }
+
+        [Fact]
+        public void UndrawnPrerequisitesStillEnforceFoundationAndArchogeneticsInVanilla()
+        {
+            Game previous = Current.Game;
+            try
+            {
+                var game = (Game)RuntimeHelpers.GetUninitializedObject(typeof(Game));
+                game.researchManager = new ResearchManager();
+                Current.Game = game;
+                foundation.baseCost = 100;
+                archogenetics.baseCost = 100;
+                var progress = (Dictionary<ResearchProjectDef, float>)typeof(ResearchManager)
+                    .GetField("progress", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(game.researchManager);
+                var normal = Assert.Single(Build(Gene("Normal", null)));
+                var archite = Assert.Single(Build(Gene("Archite", null, 1, 1)));
+                Assert.False(normal.PrerequisitesCompleted);
+                Assert.False(archite.PrerequisitesCompleted);
+                progress[foundation] = 100;
+                Assert.True(normal.PrerequisitesCompleted);
+                Assert.False(archite.PrerequisitesCompleted);
+                progress[archogenetics] = 100;
+                Assert.True(archite.PrerequisitesCompleted);
+            }
+            finally
+            {
+                Current.Game = previous;
+            }
         }
 
         [Fact]

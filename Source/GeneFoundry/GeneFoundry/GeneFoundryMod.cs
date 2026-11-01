@@ -29,6 +29,7 @@ namespace GeneFoundry
         public int geneResearchPerArchite = 500;
         public int geneCategoryCostPercent = 25;
         public int geneCategoryMaximumCost = 4000;
+        public int geneCategoryMinimumCost = 1000;
 
         public void Validate()
         {
@@ -53,7 +54,8 @@ namespace GeneFoundry
             geneResearchPerComplexity = Math.Max(0, Math.Min(2000, geneResearchPerComplexity));
             geneResearchPerArchite = Math.Max(0, Math.Min(5000, geneResearchPerArchite));
             geneCategoryCostPercent = Math.Max(1, Math.Min(200, geneCategoryCostPercent));
-            geneCategoryMaximumCost = Math.Max(100, Math.Min(10000, geneCategoryMaximumCost));
+            geneCategoryMinimumCost = Math.Max(100, Math.Min(10000, geneCategoryMinimumCost));
+            geneCategoryMaximumCost = Math.Max(geneCategoryMinimumCost, Math.Min(10000, geneCategoryMaximumCost));
         }
 
         public override void ExposeData()
@@ -82,6 +84,7 @@ namespace GeneFoundry
             Scribe_Values.Look(ref geneResearchPerArchite, "geneResearchPerArchite", 500);
             Scribe_Values.Look(ref geneCategoryCostPercent, "geneCategoryCostPercent", 25);
             Scribe_Values.Look(ref geneCategoryMaximumCost, "geneCategoryMaximumCost", 4000);
+            Scribe_Values.Look(ref geneCategoryMinimumCost, "geneCategoryMinimumCost", 1000);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 Validate();
         }
@@ -210,21 +213,24 @@ namespace GeneFoundry
             }
             listing.GapLine();
             listing.Label("Gene research — Fabrication and categories");
-            listing.Label("Category costs combine the base, gene count, complexity and archite terms below, then apply the category cost percentage and maximum. Round up to whole points, with at least 1 point. All loaded genes count; negative complexity or archite values contribute zero.");
+            listing.Label("Category costs combine the base, gene count, complexity and archite terms below, apply the category percentage, round up, then stay between the minimum and maximum. All loaded genes count; negative complexity or archite values contribute zero.");
             Settings.geneCategoryCostPercent = (int)Math.Round(listing.SliderLabeled(
                 $"Category research cost percentage: {Settings.geneCategoryCostPercent}%",
                 Settings.geneCategoryCostPercent, 1, 200, 0.75f,
                 "Scales the entire category calculation before the maximum is applied. Default: 25%, one quarter of the original costs. 100% restores the original scale. Range: 1–200%. Does not change the fabrication foundation or remove Archogenetics requirements."));
+            Settings.geneCategoryMinimumCost = ResearchCostSlider(listing,
+                "Minimum research cost per category", Settings.geneCategoryMinimumCost, 100, 10000, 100,
+                "Minimum final cost after applying the percentage and rounding. Default: 1,000 points. Range: 100–10,000 in 100-point steps. Raises the maximum if necessary. Does not change the fabrication foundation.");
             Settings.geneCategoryMaximumCost = ResearchCostSlider(listing,
-                "Maximum research cost per category", Settings.geneCategoryMaximumCost, 100, 10000, 100,
-                "Hard limit applied after the category percentage and rounding. Default: 4,000 points. Range: 100–10,000 in 100-point steps. Large categories can reach the same maximum; gene count and complexity still distinguish categories below it. Does not cap the fabrication foundation.");
+                "Maximum research cost per category", Settings.geneCategoryMaximumCost, Settings.geneCategoryMinimumCost, 10000, 100,
+                "Maximum final cost after the category percentage and rounding. Default: 4,000 points. Cannot be below the category minimum. Categories within the limits still scale with gene count and complexity. Does not cap the fabrication foundation.");
             listing.Label("Restart RimWorld after changing these costs. Research points already earned remain unchanged; raising costs can require additional research, including for previously completed projects. Earlier biomass research costs are unaffected.");
             Settings.geneFabricationResearchCost = ResearchCostSlider(listing,
                 "Gene fabrication foundation", Settings.geneFabricationResearchCost, 100, 10000, 100,
                 "Cost of the foundation project after Biomass refinement. Default: 1,500 points. Range: 100–10,000, in 100-point steps.");
             Settings.geneCategoryBaseCost = ResearchCostSlider(listing,
                 "Base cost per gene category", Settings.geneCategoryBaseCost, 0, 5000, 50,
-                "Fixed cost added once per category. Default: 500 points. Range: 0–5,000, in 50-point steps. Final category cost is always at least 1 point.");
+                "Fixed cost added once per category before scaling and applying the minimum/maximum. Default: 500 points. Range: 0–5,000, in 50-point steps.");
             Settings.geneResearchPerGene = ResearchCostSlider(listing,
                 "Additional cost per gene", Settings.geneResearchPerGene, 0, 1000, 25,
                 "Added for every gene in the category, including zero-complexity cosmetic genes. Default: 100 points per gene. Range: 0–1,000, in 25-point steps.");
@@ -243,6 +249,7 @@ namespace GeneFoundry
                 Settings.geneResearchPerArchite = 500;
                 Settings.geneCategoryCostPercent = 25;
                 Settings.geneCategoryMaximumCost = 4000;
+                Settings.geneCategoryMinimumCost = 1000;
             }
             contentHeight = Math.Max(inRect.height, listing.CurHeight + 20f);
             listing.End();

@@ -7,13 +7,13 @@ namespace GeneFoundry.Tests
     public class GeneResearchCalculationsTests
     {
         [Theory]
-        [InlineData(5, 0, 0, 250)]
-        [InlineData(5, 10, 0, 750)]
+        [InlineData(5, 0, 0, 1000)]
+        [InlineData(5, 10, 0, 1000)]
         [InlineData(10, 20, 0, 1375)]
         [InlineData(5, 10, 3, 1125)]
-        [InlineData(1, 0, 1, 275)]
-        [InlineData(0, 0, 0, 125)]
-        [InlineData(-10, -20, -30, 125)]
+        [InlineData(1, 0, 1, 1000)]
+        [InlineData(0, 0, 0, 1000)]
+        [InlineData(-10, -20, -30, 1000)]
         [InlineData(21, 21, 0, 1700)]
         public void DefaultCostCombinesQuantityComplexityAndArchite(int count, long complexity,
             long archite, int expected)
@@ -25,9 +25,9 @@ namespace GeneFoundry.Tests
         public void EveryCostTermCanBeConfiguredIndependently()
         {
             Assert.Equal(10 + 3 * 20 + 5 * 30 + 2 * 40,
-                GeneResearchCalculations.CategoryCost(3, 5, 2, 10, 20, 30, 40, 100));
-            Assert.Equal(1, GeneResearchCalculations.CategoryCost(50, 100, 20, 0, 0, 0, 0));
-            Assert.Equal(1, GeneResearchCalculations.CategoryCost(50, 100, 20, -1, -2, -3, -4));
+                GeneResearchCalculations.CategoryCost(3, 5, 2, 10, 20, 30, 40, 100, 4000, 1));
+            Assert.Equal(1000, GeneResearchCalculations.CategoryCost(50, 100, 20, 0, 0, 0, 0));
+            Assert.Equal(1000, GeneResearchCalculations.CategoryCost(50, 100, 20, -1, -2, -3, -4));
         }
 
         [Fact]
@@ -63,7 +63,21 @@ namespace GeneFoundry.Tests
         public void PercentageRoundingAndMaximumApplyInOrder(int raw, int percent, int maximum, int expected)
         {
             Assert.Equal(expected, GeneResearchCalculations.CategoryCost(0, 0, 0,
-                raw, 0, 0, 0, percent, maximum));
+                raw, 0, 0, 0, percent, maximum, 1));
+        }
+
+        [Theory]
+        [InlineData(3999, 4000, 1000, 1000)]
+        [InlineData(4000, 4000, 1000, 1000)]
+        [InlineData(4001, 4000, 1000, 1001)]
+        [InlineData(0, 4000, 1500, 1500)]
+        [InlineData(100000, 500, 1000, 1000)]
+        [InlineData(100, 0, 0, 1)]
+        public void MinimumIsAppliedAfterScalingAndConflictingMaximumIsRaised(
+            int raw, int maximum, int minimum, int expected)
+        {
+            Assert.Equal(expected, GeneResearchCalculations.CategoryCost(0, 0, 0,
+                raw, 0, 0, 0, 25, maximum, minimum));
         }
 
         public static IEnumerable<object[]> UnlockCases()
