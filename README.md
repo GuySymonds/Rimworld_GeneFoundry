@@ -7,7 +7,7 @@ For RimWorld 1.6 with Biotech. The Gene Vat and Biomass Refinery are implemented
 
 The Gene Vat supports these material extraction bills:
 
-| Input | Raw biomass output |
+| Input | Base raw biomass output (before expert bonus) |
 |---|---:|
 | 50 raw meat | 25 |
 | 50 raw meat + 1 herbal medicine | 38 |
@@ -21,9 +21,11 @@ An additional corpse extraction bill uses a custom job selected through vanilla 
 
 Basic meat and plant extraction require Cooking 3 only. Enzymatic and corpse extraction require Cooking 3, Medicine 3 and Intellectual 2. Vanilla bill selection enforces these recipe requirements. Artificial-part recovery additionally enforces the relevant surgery's requirements, which may be higher. This lets basic processing train an operator toward the advanced recipes.
 
-All four extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%. Each skill is clamped independently to 0–10, then the weighted level determines speed: `0.5 + weighted level / 10`. Balanced operators at 0/0/0 process at 50%, at 5/5/5 at 100%, and at 10/10/10 at 150%. Higher skills provide no further extraction-speed bonus. General work speed, sight and manipulation modify this skill multiplier; these are not additional Cooking-skill bonuses.
+All four extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%. Levels 0–10 determine base speed: `0.5 + weighted level / 10`. Levels 11–20 contribute independently to an expert fraction: the weighted fraction of those ten extra levels completed. This fraction adds speed between the fixed 150% at level 10 and the configurable expert maximum (200% by default). Balanced operators therefore work at 100% at 5/5/5, 150% at 10/10/10, 175% at 15/15/15 and 200% at 20/20/20 with defaults. Each skill caps independently at 20. General work speed, sight and manipulation modify this skill multiplier; these are not additional Cooking-skill bonuses.
 
-Active extraction awards 0.1 total base XP per tick, split using the same weights. Vanilla passion and learning modifiers apply independently, so final earned XP need not retain the exact base proportions. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling, with only the work phase extended to award weighted XP. Vanilla single-skill recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper. Skill affects time, not yield or decay recovery.
+The expert fraction also grants up to 20% extra biomass by default, with no yield bonus at level 10 or below. At level 15 in all three skills the bonus is 10%; at 20 it is 20%. Meat/crop recipes use vanilla recipe efficiency and upward whole-item rounding (default expert outputs: 25 → 30, 38 → 46, 10 → 12). The efficiency factor is biased down by one representable float to prevent floating-point error granting an extra item at an exact integer boundary. Corpse yield applies the expert multiplier after material and decay calculations but before its existing downward rounding and minimum of one. Horns, tusks and artificial-part salvage are not multiplied. Yield is evaluated at completion, so current skill levels and settings apply.
+
+Active extraction awards 0.1 total base XP per tick, split using the same weights. Vanilla passion and learning modifiers apply independently, so final earned XP need not retain the exact base proportions. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling, with only the work phase extended to award weighted XP. Vanilla single-skill recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper.
 
 Artificial-part recovery is separate: its surgical speed, qualifications, chance of success and Medicine XP do not use the extraction weighting. The 100% work-speed timing examples assume 5/5/5 skills, normal capacities and no other work-speed modifiers.
 
@@ -37,7 +39,7 @@ Each completed attempt physically removes its hediff from the corpse before prod
 
 Manual checks: process a corpse with multiple implants; compare low/high qualified medics; confirm no medicine is consumed; compare dirty/clean rooms with identical lighting; interrupt after one removal and verify it does not reappear or produce twice; confirm extraction continues after successful and failed salvage. Mods that supply custom removal effects rather than a standard removal item may need compatibility support.
 
-Corpse biomass is `max(1, floor(material amount × 0.5 × 1.25 × decay))`. Material amount uses vanilla MeatAmount with post-processing disabled: body size, missing natural parts, slaughter condition, nutrition and difficulty still apply, but vanilla's small-animal meat bonus does not. The whole-body multiplier includes the remaining organs, bones and hide even when limbs are missing. Decay multipliers are 1 for fresh, 0.5 for rotting and 0.1 for desiccated bodies. Every eligible corpse yields at least one biomass.
+Corpse biomass is `max(1, floor(material amount × 0.5 × 1.25 × decay × expert yield multiplier))`. Material amount uses vanilla MeatAmount with post-processing disabled: body size, missing natural parts, slaughter condition, nutrition and difficulty still apply, but vanilla's small-animal meat bonus does not. The whole-body multiplier includes the remaining organs, bones and hide even when limbs are missing. Decay multipliers are 1 for fresh, 0.5 for rotting and 0.1 for desiccated bodies. Every eligible corpse yields at least one biomass.
 
 Fresh processing time starts at `setup minutes + material / 50 × extraction minutes`, divided by the operator's weighted biomass extraction speed. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material preserve the original `100 + 20 × material` work baseline. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
 
@@ -54,8 +56,10 @@ Open **Options → Mod Settings → GeneFoundry → Raw biomass**. Sliders have 
 | Fresh extraction per 50 material | 24 minutes | 1–120 minutes | Scales extraction work with body size; lower values speed processing. |
 | Setup time per corpse | 2.4 minutes | 0–15 minutes, 0.1-minute steps | Adds per-body work before other modifiers; discourages processing many tiny bodies for better throughput. |
 | Work unaffected by decay | 30% | 0–100%, 1% steps | At 0%, time scales entirely with recovery. At 100%, decay does not shorten work. |
+| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Expert skill-speed ceiling; 150% disables speed gains above level 10. |
+| Maximum extra biomass at level 20 | +20% | 0–50%, 1% steps | Expert yield ceiling for all extraction bills; 0% disables the yield bonus. |
 
-The view shows current fresh/rotting/desiccated timing percentages. These settings apply to newly started corpse extraction, not running jobs or meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
+The view shows current fresh/rotting/desiccated timing percentages. Corpse duration is captured when extraction starts, while meat/crop speed responds during work. Expert yield settings apply at completion to all extraction bills. The corpse-specific timing sliders do not affect meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
 
 ### Calculation unit tests
 

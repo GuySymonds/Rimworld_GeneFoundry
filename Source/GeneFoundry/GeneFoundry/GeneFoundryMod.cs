@@ -14,6 +14,8 @@ namespace GeneFoundry
         public float corpseMinutesPer50Material = 24f;
         public float corpseSetupMinutes = 2.4f;
         public int corpseHandlingPercent = 30;
+        public int expertSpeedPercent = 200;
+        public int expertYieldPercent = 20;
 
         public void Validate()
         {
@@ -25,6 +27,8 @@ namespace GeneFoundry
             corpseMinutesPer50Material = Math.Max(1f, Math.Min(120f, corpseMinutesPer50Material));
             corpseSetupMinutes = Math.Max(0f, Math.Min(15f, corpseSetupMinutes));
             corpseHandlingPercent = Math.Max(0, Math.Min(100, corpseHandlingPercent));
+            expertSpeedPercent = Math.Max(150, Math.Min(300, expertSpeedPercent));
+            expertYieldPercent = Math.Max(0, Math.Min(50, expertYieldPercent));
         }
 
         public override void ExposeData()
@@ -38,6 +42,8 @@ namespace GeneFoundry
             Scribe_Values.Look(ref corpseMinutesPer50Material, "corpseMinutesPer50Material", 24f);
             Scribe_Values.Look(ref corpseSetupMinutes, "corpseSetupMinutes", 2.4f);
             Scribe_Values.Look(ref corpseHandlingPercent, "corpseHandlingPercent", 30);
+            Scribe_Values.Look(ref expertSpeedPercent, "expertSpeedPercent", 200);
+            Scribe_Values.Look(ref expertYieldPercent, "expertYieldPercent", 20);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 Validate();
         }
@@ -61,12 +67,21 @@ namespace GeneFoundry
             var listing = new Listing_Standard();
             var viewRect = new Rect(0f, 0f, inRect.width - 20f, contentHeight);
             Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
-            listing.Begin(viewRect);
+            // Allow the listing to measure its full height rather than starting a new column.
+            listing.Begin(new Rect(0f, 0f, viewRect.width, 10000f));
             Settings.Validate();
             listing.Label("All times are in-game time. Hover over sliders for explanations. Settings apply across saves.");
             listing.GapLine();
-            listing.Label("Raw biomass — Gene Vat corpse extraction");
-            listing.Label("All extraction uses Cooking 40%, Medicine 40%, Intellectual 20% for speed and XP. Skills give 50% speed at level 0, 100% at 5 and 150% at 10, with no further skill bonus above 10.");
+            listing.Label("Raw biomass — Gene Vat");
+            listing.Label("All extraction uses Cooking 40%, Medicine 40%, Intellectual 20%. Speed is 100% at level 5 and 150% at 10. Skills 11–20 add tapered speed and better biomass recovery.");
+            Settings.expertSpeedPercent = (int)Math.Round(listing.SliderLabeled(
+                $"Maximum extraction speed at level 20: {Settings.expertSpeedPercent}%",
+                Settings.expertSpeedPercent, 150, 300, 0.75f,
+                "Skill multiplier when all three skills reach 20. Default: 200%. Levels 11–20 scale linearly from the fixed 150% at level 10. Each skill contributes independently. Set 150% to disable expert speed gains. General work speed and capacities apply separately. Range: 150–300%."));
+            Settings.expertYieldPercent = (int)Math.Round(listing.SliderLabeled(
+                $"Maximum extra biomass at level 20: +{Settings.expertYieldPercent}%",
+                Settings.expertYieldPercent, 0, 50, 0.75f,
+                "Extra biomass earned only through levels 11–20, weighted Cooking 40%, Medicine 40%, Intellectual 20%. Default: +20%. Applies to meat, enzymatic, crop and corpse extraction, after material and decay calculations. Does not multiply horns, tusks or recovered implants. Set 0% to disable. Range: 0–50%."));
             Settings.corpseMinutesPer50Material = (float)Math.Round(listing.SliderLabeled(
                 $"Fresh extraction per 50 material: {Settings.corpseMinutesPer50Material:0} min",
                 Settings.corpseMinutesPer50Material, 1f, 120f, 0.75f,
@@ -83,11 +98,14 @@ namespace GeneFoundry
             listing.Label($"Current decay timings: fresh 100%, rotting {(handling + (1f - handling) * 0.5f) * 100f:0.#}%, desiccated {(handling + (1f - handling) * 0.1f) * 100f:0.#}% of fresh time.");
             listing.Label("Yields remain 100% / 50% / 10%, with at least 1 biomass. Large bodies receive up to 25% less work. Operator speed also affects duration.");
             listing.Label("Corpse timing changes apply when extraction begins. Existing jobs keep their saved duration. Meat and crop bills are unaffected.");
-            if (listing.ButtonText("Restore raw biomass timing defaults"))
+            listing.Label("Expert speed changes affect ongoing meat/crop work; corpse duration stays fixed once extraction starts. Expert yield is evaluated at completion for all recipes.");
+            if (listing.ButtonText("Restore raw biomass defaults"))
             {
                 Settings.corpseMinutesPer50Material = 24f;
                 Settings.corpseSetupMinutes = 2.4f;
                 Settings.corpseHandlingPercent = 30;
+                Settings.expertSpeedPercent = 200;
+                Settings.expertYieldPercent = 20;
             }
             listing.GapLine();
             listing.Label("Refined biomass — Biomass Refinery");

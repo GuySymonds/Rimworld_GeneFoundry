@@ -10,7 +10,17 @@ namespace GeneFoundry.Recipes
             return BiomassCalculations.ExtractionSkillSpeed(
                 pawn.skills.GetSkill(SkillDefOf.Cooking).Level,
                 pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
-                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level);
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
+                GeneFoundryMod.Settings.expertSpeedPercent);
+        }
+
+        public static float YieldMultiplier(Pawn pawn)
+        {
+            return BiomassCalculations.ExpertYieldMultiplier(
+                pawn.skills.GetSkill(SkillDefOf.Cooking).Level,
+                pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
+                GeneFoundryMod.Settings.expertYieldPercent);
         }
 
         public static void Learn(Pawn pawn, int ticks)
@@ -35,6 +45,22 @@ namespace GeneFoundry.Recipes
             if (!(req.Thing is Pawn pawn) || pawn.skills == null)
                 return null;
             return $"Extraction skills (Cooking 40%, Medicine 40%, Intellectual 20%): x{GeneVatSkills.SkillSpeed(pawn):0.##}";
+        }
+    }
+
+    public class StatPart_GeneVatYield : StatPart
+    {
+        public override void TransformValue(StatRequest req, ref float value)
+        {
+            if (req.Thing is Pawn pawn && pawn.skills != null)
+                value *= BiomassCalculations.MaterialYieldEfficiency(GeneVatSkills.YieldMultiplier(pawn));
+        }
+
+        public override string ExplanationPart(StatRequest req)
+        {
+            if (!(req.Thing is Pawn pawn) || pawn.skills == null)
+                return null;
+            return $"Expert extraction recovery (skills above 10): +{(GeneVatSkills.YieldMultiplier(pawn) - 1f) * 100f:0.#}%";
         }
     }
 }

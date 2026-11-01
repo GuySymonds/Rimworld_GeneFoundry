@@ -7,7 +7,7 @@
     <defName>GF_ExtractBiomassBasic</defName>
     <label>extract raw biomass</label>
 
-    <description>Process raw meat to extract usable biological material, producing raw genetic biomass.</description>
+    <description>Process 50 raw meat into a base yield of 25 raw biomass. Skills above level 10 improve recovery according to the expert yield setting.</description>
 
     <jobString>Extracting raw biomass.</jobString>
 
@@ -17,6 +17,7 @@
 
     <workAmount>1000</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
+    <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>
     <workSkillLearnFactor>0</workSkillLearnFactor>
     <requiredGiverWorkType>Cooking</requiredGiverWorkType>
@@ -58,7 +59,7 @@
 
     <description>Process raw meat using herbal medicine as a biological extraction catalyst.
 
-This process recovers additional genetic biomass.</description>
+The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills above level 10 further improve recovery according to the expert yield setting.</description>
 
     <jobString>Extracting biomass using enzymes.</jobString>
 
@@ -70,6 +71,7 @@ This process recovers additional genetic biomass.</description>
 
     <workAmount>1000</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
+    <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>
     <workSkillLearnFactor>0</workSkillLearnFactor>
     <requiredGiverWorkType>Cooking</requiredGiverWorkType>
@@ -123,7 +125,7 @@ This process recovers additional genetic biomass.</description>
 
     <defName>GF_ExtractBiomassPlant</defName>
     <label>extract biomass from raw plants</label>
-    <description>Process 50 raw plant food into 10 raw biomass. Plant material provides less biomass than the same quantity of raw meat. Different raw plant foods may be mixed within a batch; the bill's ingredient filter controls which foods may be used.</description>
+    <description>Process 50 raw plant food into a base yield of 10 raw biomass. Skills above level 10 improve recovery according to the expert yield setting. Plant material provides less biomass than the same quantity of raw meat. Different raw plant foods may be mixed within a batch; the bill's ingredient filter controls which foods may be used.</description>
     <jobString>Extracting biomass from plant material.</jobString>
 
     <skillRequirements>
@@ -132,6 +134,7 @@ This process recovers additional genetic biomass.</description>
 
     <workAmount>1000</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
+    <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>
     <workSkillLearnFactor>0</workSkillLearnFactor>
     <requiredGiverWorkType>Cooking</requiredGiverWorkType>

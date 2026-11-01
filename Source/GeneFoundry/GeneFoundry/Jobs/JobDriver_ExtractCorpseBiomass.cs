@@ -106,7 +106,7 @@ namespace GeneFoundry.Jobs
                 Corpse corpse = Corpse;
                 Pawn source = corpse.InnerPawn;
                 int amount = CorpseBiomassUtility.Yield(
-                    CorpseBiomassUtility.RecoverableMeat(corpse), corpse.GetRotStage());
+                    CorpseBiomassUtility.RecoverableMeat(corpse), corpse.GetRotStage(), GeneVatSkills.YieldMultiplier(pawn));
                 ThingDef biomassDef = DefDatabase<ThingDef>.GetNamed("GF_RawBiomass");
 
                 // Vanilla body-part definitions determine horns, tusks and modded products.

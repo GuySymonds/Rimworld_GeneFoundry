@@ -3,7 +3,7 @@
   <StatDef>
     <defName>GF_BiomassExtractionSpeed</defName>
     <label>biomass extraction speed</label>
-    <description>Speed of biological processing at a Gene Vat. Cooking contributes 40%, Medicine 40% and Intellectual 20%. The skill multiplier scales linearly from 50% at level 0 to 100% at level 5 and 150% at level 10. Each skill is capped at level 10 for this calculation. General work speed, sight and manipulation also affect the final speed. Artificial-part recovery uses separate medical surgery rules.</description>
+    <description>Speed of biological processing at a Gene Vat. Cooking contributes 40%, Medicine 40% and Intellectual 20%. The skill multiplier scales from 50% at level 0 to 100% at level 5 and 150% at level 10, then more gradually to a configurable expert maximum at level 20 (200% by default). Each skill contributes independently. General work speed, sight and manipulation also affect the final speed. Artificial-part recovery uses separate medical surgery rules.</description>
     <category>PawnWork</category>
     <defaultBaseValue>1</defaultBaseValue>
     <minValue>0.01</minValue>
@@ -25,6 +25,18 @@
     </capacityFactors>
     <parts>
       <li Class="GeneFoundry.Recipes.StatPart_GeneVatSkills" />
+    </parts>
+  </StatDef>
+  <StatDef>
+    <defName>GF_BiomassExtractionYield</defName>
+    <label>biomass extraction yield</label>
+    <description>Recovery of raw biomass from Gene Vat extraction. Skills above level 10 grant extra biomass, reaching a configurable maximum at level 20 (20% extra by default). Cooking contributes 40%, Medicine 40% and Intellectual 20%. Does not increase special body products or artificial-part salvage.</description>
+    <category>PawnWork</category>
+    <defaultBaseValue>1</defaultBaseValue>
+    <minValue>1</minValue>
+    <toStringStyle>PercentZero</toStringStyle>
+    <parts>
+      <li Class="GeneFoundry.Recipes.StatPart_GeneVatYield" />
     </parts>
   </StatDef>
 </Defs>
