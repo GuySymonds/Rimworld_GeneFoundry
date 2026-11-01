@@ -84,6 +84,28 @@ The same test project also checks all mod definition XML for parsing and surroun
 
 The game mod remains .NET Framework 4.7.2. These static checks do not replace RimWorld's definition loading, inheritance and cross-references to vanilla or other mods. UI rendering, job behavior and game-object integration still require in-game testing.
 
+Optional managed game-API regression tests can run with an installed RimWorld 1.6 assembly directory:
+
+```powershell
+dotnet test Source/GeneFoundry/GeneFoundry.Tests/GeneFoundry.Tests.csproj '/p:RimWorldManagedDir=S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed'
+```
+
+These additional tests use isolated managed game objects without launching Unity. They check the actual public `HaulAIUtility.UpdateJobWithPlacedThings` callback, merged and separate ingredient receipts, missing-receipt completion rejection, and all four rotations of the corpse processing cell. Without this property, the portable calculation/XML suite remains independent of the game installation.
+
+### Ingredient consumption and corpse placement
+
+Vanilla hauling only attaches its ingredient-placement tracking callback to a fixed set of vanilla JobDefs. GeneFoundry's custom material and corpse jobs explicitly provide that same public callback when dropping their bill ingredients. This prevents fixed-output material recipes from creating biomass with an empty ingredient list and leaving inputs reusable. Material completion additionally validates that the full recorded recipe cost is still physically present before invoking vanilla recipe completion and consumption. Enzymatic corpse medicine is likewise consumed from tracked, delivered quantities at completion.
+
+Corpses are placed at the front-centre tile **inside** the Gene Vat footprint, one tile behind its operator's interaction cell:
+
+```text
+x x x
+x x x
+x y x
+```
+
+Both corpse bills use this cell during medical recovery and extraction. A corpse already delivered elsewhere among the vat's ingredient cells is positioned there before work; another corpse occupying that spot blocks the job. Moving the processing corpse away interrupts work instead of processing it remotely. Manual regression checks should compare total meat, plant and herb quantities before/after completed batches, confirm catalyst consumption from multiple stacks, and verify corpse positioning and interruption in-game.
+
 Before v1, development prioritises current behavior over compatibility with older development saves. Normal save/load of current jobs and settings remains supported; migration of old development saves is not a release requirement.
 
 ## Biomass refinery

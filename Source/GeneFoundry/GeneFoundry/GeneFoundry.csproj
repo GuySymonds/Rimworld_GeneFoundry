@@ -62,6 +62,7 @@
     <Compile Include="Recipes\GeneVatSkills.cs" />
     <Compile Include="Recipes\RecipeWorkerCounter_CorpseBiomass.cs" />
     <Compile Include="Jobs\JobDriver_ExtractMaterialBiomass.cs" />
+    <Compile Include="Jobs\GeneVatIngredientPlacement.cs" />
     <Compile Include="WorkGivers\WorkGiver_GeneVat.cs" />
     <Compile Include="PlaceWorkers\PlaceWorker_BiomassHopper.cs" />
     <Compile Include="WorkGivers\WorkGiver_RefineBiomass.cs" />

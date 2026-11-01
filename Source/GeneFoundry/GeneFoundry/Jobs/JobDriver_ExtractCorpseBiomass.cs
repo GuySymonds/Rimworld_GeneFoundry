@@ -13,6 +13,7 @@ namespace GeneFoundry.Jobs
         private Hediff recoveryPart;
         private Corpse sourceCorpse;
         private int requiredCatalyst;
+        private bool corpsePositioned;
         private bool Enzymatic => job.bill?.recipe?.defName == "GF_ExtractBiomassCorpseEnzymatic";
         private Corpse Corpse => sourceCorpse ?? job.GetTarget(TargetIndex.B).Thing as Corpse;
 
@@ -32,6 +33,7 @@ namespace GeneFoundry.Jobs
             Scribe_References.Look(ref recoveryPart, "gfRecoveryPart");
             Scribe_References.Look(ref sourceCorpse, "gfSourceCorpse");
             Scribe_Values.Look(ref requiredCatalyst, "gfRequiredCatalyst", 0);
+            Scribe_Values.Look(ref corpsePositioned, "gfCorpsePositioned", false);
         }
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
@@ -45,6 +47,7 @@ namespace GeneFoundry.Jobs
             this.FailOnBurningImmobile(TargetIndex.A);
             this.FailOn(() => job.bill == null || job.bill.DeletedOrDereferenced ||
                 !job.bill.ShouldDoNow() || Corpse == null || Corpse.Destroyed || !CorpseBiomassUtility.CanProcess(Corpse) ||
+                (corpsePositioned && (!Corpse.Spawned || Corpse.Position != GeneVatIngredientPlacement.CorpseCell(job.targetA.Thing))) ||
                 !job.bill.recipe.PawnSatisfiesSkillRequirements(pawn) ||
                 !ArtificialPartRecovery.CanRecoverAll(pawn, Corpse.InnerPawn) ||
                 !(job.targetA.Thing is Building_WorkTable table) || !table.UsableForBillsAfterFueling());
@@ -58,11 +61,32 @@ namespace GeneFoundry.Jobs
                         CorpseBiomassUtility.RecoverableMeat(Corpse));
             });
             foreach (Toil collect in CollectIngredientsToils(TargetIndex.B, TargetIndex.A, TargetIndex.C))
+            {
+                GeneVatIngredientPlacement.Configure(collect, positionCorpse: true);
                 yield return collect;
+            }
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
 
             yield return Toils_General.Do(() =>
             {
+                IntVec3 cell = GeneVatIngredientPlacement.CorpseCell(job.targetA.Thing);
+                if (!Corpse.Spawned || Corpse.Map != pawn.Map || !job.targetA.Thing.OccupiedRect().Contains(cell))
+                {
+                    EndJobWith(JobCondition.Incompletable);
+                    return;
+                }
+                foreach (Thing other in cell.GetThingList(pawn.Map))
+                {
+                    if (other is Corpse && other != Corpse)
+                    {
+                        EndJobWith(JobCondition.Incompletable);
+                        return;
+                    }
+                }
+                // Also handles a corpse already lying among the vat's ingredient cells.
+                // Thing.Position updates the map's spatial registries for a spawned item.
+                Corpse.Position = cell;
+                corpsePositioned = true;
                 // Vanilla stripping preserves the actual items, their condition and taint.
                 Corpse.Strip(false);
             });
