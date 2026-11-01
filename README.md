@@ -125,6 +125,22 @@ Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finish
 - **Do X times** counts attempts when processing starts. **Do until X** uses vanilla output-count rules and continues requesting batches until its target is reached.
 - Successful completion rolls only once, including when output placement must be retried. Preparation duration, batch progress, failure probability, expected yield, chosen output count, completion-roll state and outage time are saved.
 
+### Research progression
+
+All GeneFoundry production is gated behind vanilla **Xenogenetics** (internal definition `Xenogermination`). The three projects appear in their own **GeneFoundry** research tab:
+
+| Project | Cost | Prerequisite | Unlocks |
+| --- | ---: | --- | --- |
+| Biomass extraction | 500 | Xenogenetics | Gene vat and basic meat, plant and corpse extraction |
+| Enzymatic extraction | 750 | Biomass extraction | Herbal medicine recipes for meat, plants and corpses |
+| Biomass refinement | 1,000 | Biomass extraction | Refinery, raw biomass hoppers and refinement bill |
+
+Enzymatic extraction and refinement are independent branches. Buildings and recipes both have research gates, so an existing vat does not bypass recipe research. The tab remains visible before Xenogenetics so players can inspect the progression, but the projects cannot be researched yet.
+
+A paused introduction dialog explains the production chain once Xenogenetics is complete. It also appears when loading a colony that already researched Xenogenetics before installing the mod. This uses a per-game saved flag and checks during game updates, including while paused; acknowledging it and saving prevents it from repeating on subsequent loads. Translation text is included under `Languages/English/Keyed` and copied by the deployment script.
+
+XML tests validate the tab, all three prerequisite paths, building and recipe gates, research costs, distinct layout positions and introduction translation text. In-game checks: verify locked projects/buildings/bills before research; finish Xenogenetics and check the introduction; research each branch and check its unlocks; save/reload to confirm the introduction does not repeat; also load a colony with Xenogenetics already complete and GeneFoundry newly installed. UI layout, automatic component discovery and popup timing require this manual verification.
+
 ### Settings and testing
 
 Open **Options → Mod Settings → GeneFoundry** to change preparation durations (1–120 minutes), processing durations (5 minutes–24 hours) and processor reduction (0–25%). Minimum durations cannot exceed base durations. Processing changes affect running batches; preparation changes apply to new preparation jobs. Settings are shared across saves. Restore defaults after accelerated testing if desired.

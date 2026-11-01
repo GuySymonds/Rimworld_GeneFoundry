@@ -4,6 +4,9 @@
   <ThingDef ParentName="BuildingBase">
 
     <defName>GF_BiomassRefinery</defName>
+    <researchPrerequisites>
+      <li>GF_BiomassRefinement</li>
+    </researchPrerequisites>
     <label>biomass refinery</label>
 
     <description>Purifies 10 raw biomass and 1 neutroamine into a base yield of 2 refined biomass. Raw biomass must be stored in adjacent hoppers with their outlets facing the refinery. A colonist delivers neutroamine and prepares the batch, then automated processing begins.

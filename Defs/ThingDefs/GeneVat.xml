@@ -4,6 +4,9 @@
   <ThingDef ParentName="BenchBase">
 
     <defName>GF_GeneVat</defName>
+    <researchPrerequisites>
+      <li>GF_BiomassExtraction</li>
+    </researchPrerequisites>
     <label>gene vat</label>
 
     <description>A biological processing workstation used to extract raw genetic biomass from organic materials.

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ResearchTabDef>
+    <defName>GF_GeneFoundry</defName>
+    <label>GeneFoundry</label>
+    <generalTitle>GeneFoundry research</generalTitle>
+    <generalDescription>After researching xenogenetics, develop biomass extraction, enzymatic recovery and refinement. Extraction is required for both advanced branches.</generalDescription>
+    <visibleByDefault>true</visibleByDefault>
+  </ResearchTabDef>
+
+  <ResearchProjectDef>
+    <defName>GF_BiomassExtraction</defName>
+    <label>biomass extraction</label>
+    <description>Build gene vats and extract raw biomass from raw meat, raw plant food and organic corpses. Corpses provide variable recovery based on their size, remaining material and decay.</description>
+    <baseCost>500</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>GF_GeneFoundry</tab>
+    <researchViewX>0</researchViewX>
+    <researchViewY>1</researchViewY>
+    <prerequisites>
+      <li>Xenogermination</li>
+    </prerequisites>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>GF_EnzymaticExtraction</defName>
+    <label>enzymatic extraction</label>
+    <description>Use herbal medicine as a catalyst to improve biomass recovery from meat, plants and organic corpses. Corpse catalyst costs scale with body material; all decay stages can be processed.</description>
+    <baseCost>750</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>GF_GeneFoundry</tab>
+    <researchViewX>2</researchViewX>
+    <researchViewY>0</researchViewY>
+    <prerequisites>
+      <li>GF_BiomassExtraction</li>
+    </prerequisites>
+  </ResearchProjectDef>
+
+  <ResearchProjectDef>
+    <defName>GF_BiomassRefinement</defName>
+    <label>biomass refinement</label>
+    <description>Build biomass refineries and raw biomass hoppers. Prepare raw biomass with neutroamine, then allow automated processing to produce refined biomass. Skilled operators and clean rooms reduce failure risk; available gene processors shorten automated processing.</description>
+    <baseCost>1000</baseCost>
+    <techLevel>Industrial</techLevel>
+    <tab>GF_GeneFoundry</tab>
+    <researchViewX>2</researchViewX>
+    <researchViewY>2</researchViewY>
+    <prerequisites>
+      <li>GF_BiomassExtraction</li>
+    </prerequisites>
+  </ResearchProjectDef>
+</Defs>

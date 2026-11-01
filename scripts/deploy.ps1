@@ -16,7 +16,7 @@ if (-not (Test-Path $Dll -PathType Leaf)) {
 }
 
 # Clean existing deployment directories
-foreach ($folder in @("Assemblies", "Defs", "Textures", "Patches")) {
+foreach ($folder in @("Assemblies", "Defs", "Textures", "Patches", "Languages")) {
     $target = Join-Path $mod $folder
 
     if (Test-Path $target) {
@@ -28,8 +28,8 @@ foreach ($folder in @("Assemblies", "Defs", "Textures", "Patches")) {
 New-Item "$mod\Assemblies" -ItemType Directory -Force | Out-Null
 Copy-Item $Dll "$mod\Assemblies\GeneFoundry.dll" -Force
 
-# Deploy XML definitions, textures and patches
-foreach ($folder in @("Defs", "Textures", "Patches")) {
+# Deploy XML definitions, textures, patches and translations
+foreach ($folder in @("Defs", "Textures", "Patches", "Languages")) {
     $source = Join-Path $repo $folder
     $target = Join-Path $mod $folder
 

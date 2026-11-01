@@ -4,6 +4,7 @@
   <RecipeDef>
 
     <defName>GF_StartBiomassRefinement</defName>
+    <researchPrerequisite>GF_BiomassRefinement</researchPrerequisite>
     <label>refine biomass</label>
 
     <description>Prepare 10 raw biomass from correctly oriented adjacent hoppers and 1 neutroamine delivered by the operator. A successful batch produces a base yield of 2 refined biomass, with a chance of an extra item for expert operators.

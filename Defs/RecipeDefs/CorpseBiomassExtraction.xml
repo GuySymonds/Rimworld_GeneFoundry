@@ -11,6 +11,7 @@
   </SpecialThingFilterDef>
   <RecipeDef>
     <defName>GF_ExtractBiomassCorpse</defName>
+    <researchPrerequisite>GF_BiomassExtraction</researchPrerequisite>
     <label>extract biomass from corpse (variable yield)</label>
     <workerCounterClass>GeneFoundry.Recipes.RecipeWorkerCounter_CorpseBiomass</workerCounterClass>
     <uiIconThing>GF_RawBiomass</uiIconThing>
@@ -69,6 +70,7 @@
   </RecipeDef>
   <RecipeDef>
     <defName>GF_ExtractBiomassCorpseEnzymatic</defName>
+    <researchPrerequisite>GF_EnzymaticExtraction</researchPrerequisite>
     <label>extract corpse biomass (enzymatic, variable yield)</label>
     <description>Process an organic corpse with herbal enzymes for 50% more biomass than basic corpse extraction, before final rounding. Requires 1 herbal medicine per 50 units of body material, rounded up with a minimum of 1. The ingredient listing shows the minimum catalyst amount; the actual cost scales with the selected corpse and does not decrease with decay. Fresh, rotting and desiccated corpses are allowed, with their normal decay yield and timing modifiers. Expert yield applies after the enzyme bonus. Clothing is stripped and installed artificial parts are handled before extraction. Enzymes do not multiply horns, tusks or recovered implants. Catalyst is gathered before work and consumed only when extraction completes. Mechanoid, drone and non-organic corpses cannot be processed. Actual yield depends on remaining body material, decay and operator skills; it is never a fixed one-item product.</description>
     <workerCounterClass>GeneFoundry.Recipes.RecipeWorkerCounter_CorpseBiomass</workerCounterClass>

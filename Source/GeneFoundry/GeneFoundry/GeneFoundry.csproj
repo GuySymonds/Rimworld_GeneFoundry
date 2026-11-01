@@ -52,6 +52,7 @@
     <Compile Include="Bootstrap.cs" />
     <Compile Include="GeneFoundryMod.cs" />
     <Compile Include="Components\GeneProcessorAssistance.cs" />
+    <Compile Include="Components\GameComponent_GeneFoundryIntroduction.cs" />
     <Compile Include="Components\CompBiomassRefiner.cs" />
     <Compile Include="Components\CompProperties_BiomassRefiner.cs" />
     <Compile Include="Jobs\JobDriver_PrepareBiomassRefinement.cs" />

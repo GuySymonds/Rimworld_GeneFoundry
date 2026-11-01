@@ -4,6 +4,9 @@
   <ThingDef ParentName="BuildingBase">
 
     <defName>GF_BiomassHopper</defName>
+    <researchPrerequisites>
+      <li>GF_BiomassRefinement</li>
+    </researchPrerequisites>
     <label>raw biomass hopper</label>
 
     <description>Stores raw biomass for an adjacent biomass refinery. Build beside any side of a completed refinery and rotate the hopper so its mechanical outlet faces the refinery. Diagonal connections are not supported, and the operator's interaction cell must remain clear.
