@@ -106,4 +106,44 @@ This process recovers additional genetic biomass.</description>
 
   </RecipeDef>
 
+  <!-- PLANT EXTRACTION -->
+  <RecipeDef>
+
+    <defName>GF_ExtractBiomassPlant</defName>
+    <label>extract biomass from raw plants</label>
+    <description>Process 50 raw plant food into 10 raw biomass. Plant material provides less biomass than the same quantity of raw meat. Different raw plant foods may be mixed within a batch; the bill's ingredient filter controls which foods may be used.</description>
+    <jobString>Extracting biomass from plant material.</jobString>
+
+    <workAmount>1000</workAmount>
+    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSkill>Cooking</workSkill>
+    <requiredGiverWorkType>Cooking</requiredGiverWorkType>
+
+    <effectWorking>Cook</effectWorking>
+    <soundWorking>Recipe_CookMeal</soundWorking>
+    <allowMixingIngredients>true</allowMixingIngredients>
+
+    <ingredients>
+      <li>
+        <filter>
+          <categories>
+            <li>PlantFoodRaw</li>
+          </categories>
+        </filter>
+        <count>50</count>
+      </li>
+    </ingredients>
+
+    <fixedIngredientFilter>
+      <categories>
+        <li>PlantFoodRaw</li>
+      </categories>
+    </fixedIngredientFilter>
+
+    <products>
+      <GF_RawBiomass>10</GF_RawBiomass>
+    </products>
+
+  </RecipeDef>
+
 </Defs>

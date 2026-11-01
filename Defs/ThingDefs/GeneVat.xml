@@ -8,11 +8,11 @@
 
     <description>A biological processing workstation used to extract raw genetic biomass from organic materials.
 
-Colonists manually process biological matter, optionally using herbal medicine to improve extraction efficiency.</description>
+Colonists manually process raw meat or raw plant food. A batch of 50 raw meat produces 25 raw biomass, or 38 when combined with 1 herbal medicine. A batch of 50 raw plant food produces 10 raw biomass. Separate bills let you control which ingredients are used.</description>
 
     <thingClass>Building_WorkTable</thingClass>
 
-    <!-- Temporary vanilla artwork -->
+    <!-- GeneFoundry Gene Vat artwork -->
     <graphicData>
       <texPath>GeneFoundry/Buildings/GeneVat</texPath>
       <graphicClass>Graphic_Multi</graphicClass>
@@ -54,6 +54,7 @@ Colonists manually process biological matter, optionally using herbal medicine t
     <recipes>
       <li>GF_ExtractBiomassBasic</li>
       <li>GF_ExtractBiomassEnzymatic</li>
+      <li>GF_ExtractBiomassPlant</li>
     </recipes>
 
     <!-- Bills interface -->

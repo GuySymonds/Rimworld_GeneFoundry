@@ -3,6 +3,20 @@ GeneFoundry — A RimWorld biotechnology mod that transforms organic matter into
 
 For RimWorld 1.6 with Biotech. The Gene Vat and Biomass Refinery are implemented; the Gene Fabricator is planned.
 
+## Raw biomass extraction
+
+The Gene Vat currently supports three vanilla production bills:
+
+| Input | Raw biomass output |
+|---|---:|
+| 50 raw meat | 25 |
+| 50 raw meat + 1 herbal medicine | 38 |
+| 50 raw plant food | 10 |
+
+Each recipe currently requires 1,000 work units, uses Cooking work and CookSpeed, and allows mixing eligible ingredient types. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
+
+Whole-corpse extraction, artificial-part recovery and the weighted Cooking/Medicine/Intellectual skill system are planned and are not implemented yet.
+
 ## Biomass refinery
 
 Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finishes. A successful batch produces **2 refined biomass**. Failed batches produce nothing and do not refund inputs.
