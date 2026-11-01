@@ -379,14 +379,23 @@ namespace GeneFoundry.Components
             );
         }
 
-        public static float CalculateFailureChance(Pawn pawn)
+        private static float WeightedSkillProgress(Pawn pawn)
         {
-            float weightedProgress =
+            return
                 0.60f * SkillProgress(pawn, SkillDefOf.Intellectual, 5, 10) +
                 0.25f * SkillProgress(pawn, SkillDefOf.Crafting, 3, 8) +
                 0.15f * SkillProgress(pawn, SkillDefOf.Medicine, 2, 6);
+        }
 
-            return 0.30f * (1f - weightedProgress);
+        public static float CalculateFailureChance(Pawn pawn)
+        {
+            return 0.30f * (1f - WeightedSkillProgress(pawn));
+        }
+
+        public static int CalculatePreparationTicks(Pawn pawn)
+        {
+            // One in-game hour is 2,500 ticks; skill can halve preparation time.
+            return (int)Math.Round(2500f - 1250f * WeightedSkillProgress(pawn));
         }
     }
 }

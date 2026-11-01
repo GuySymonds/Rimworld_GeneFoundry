@@ -10,7 +10,13 @@ namespace GeneFoundry.Jobs
         private const TargetIndex RefineryIndex = TargetIndex.A;
         private const TargetIndex NeutroamineIndex = TargetIndex.B;
 
-        private const int PreparationTicks = 300;
+        private int preparationTicks;
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.Look(ref preparationTicks, "gfPreparationTicks", 0);
+        }
 
         private CompBiomassRefiner Refinery =>
             job.GetTarget(RefineryIndex)
@@ -56,8 +62,12 @@ namespace GeneFoundry.Jobs
                 RefineryIndex,
                 PathEndMode.InteractionCell);
 
+            // Capture the duration once per job and retain it across save/load.
+            if (preparationTicks <= 0)
+                preparationTicks = CompBiomassRefiner.CalculatePreparationTicks(pawn);
+
             // Perform manual preparation.
-            Toil preparation = Toils_General.Wait(PreparationTicks);
+            Toil preparation = Toils_General.Wait(preparationTicks);
 
             preparation.WithProgressBarToilDelay(RefineryIndex);
 
