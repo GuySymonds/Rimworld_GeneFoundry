@@ -23,6 +23,12 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(RimWorldManagedDir)/UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(RimWorldManagedDir)/UnityEngine.IMGUIModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(RimWorldManagedDir)/UnityEngine.TextRenderingModule.dll</HintPath></Reference>
+    <Compile Include="../GeneFoundry/Fabrication/FabricationState.cs" Link="Production/FabricationState.cs" />
+    <Compile Include="../GeneFoundry/Fabrication/Dialog_GeneFabrication.cs" Link="Production/Dialog_GeneFabrication.cs" />
+    <Compile Include="../GeneFoundry/Fabrication/FabricationJobs.cs" Link="Production/FabricationJobs.cs" />
+    <Compile Include="../GeneFoundry/WorkGivers/WorkGiver_FabricateGenePack.cs" Link="Production/WorkGiver_FabricateGenePack.cs" />
     <Compile Include="../GeneFoundry/Jobs/GeneVatIngredientPlacement.cs" Link="Production/GeneVatIngredientPlacement.cs" />
     <Compile Include="../GeneFoundry/Research/GeneFabricationResearch.cs" Link="Production/GeneFabricationResearch.cs" />
   </ItemGroup>
@@ -37,4 +43,3 @@
     <Content Include="../GeneFoundry/GeneFoundry.csproj" Link="Fixtures/GeneFoundry.csproj" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
-

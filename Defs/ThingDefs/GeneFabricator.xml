@@ -8,7 +8,9 @@
 
     <description>A sophisticated genetic engineering workstation used to manufacture custom genepacks from refined biomass.</description>
 
-    <thingClass>Building_WorkTable</thingClass>
+    <thingClass>GeneFoundry.Fabrication.Building_GeneFabricator</thingClass>
+    <tickerType>Rare</tickerType>
+    <inspectorTabs Inherit="False" />
 
     <!-- Gene Fabricator artwork -->
     <graphicData>
@@ -56,6 +58,12 @@
 
     <surfaceType>Item</surfaceType>
 
+    <placeWorkers Inherit="False" />
+    <comps Inherit="False">
+      <li Class="CompProperties_Power"><compClass>CompPowerTrader</compClass><basePowerConsumption>500</basePowerConsumption><shortCircuitInRain>true</shortCircuitInRain></li>
+      <li Class="CompProperties_Flickable" />
+      <li Class="CompProperties_Breakdownable" />
+    </comps>
     <building>
       <workTableRoomRole>Laboratory</workTableRoomRole>
     </building>

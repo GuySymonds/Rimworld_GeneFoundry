@@ -35,6 +35,8 @@
       <HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath><Private>False</Private></Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -51,6 +53,10 @@
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Fabrication\FabricationCalculations.cs" />
+    <Compile Include="Fabrication\FabricationState.cs" />
+    <Compile Include="Fabrication\FabricationJobs.cs" />
+    <Compile Include="WorkGivers\WorkGiver_FabricateGenePack.cs" />
+    <Compile Include="Fabrication\Dialog_GeneFabrication.cs" />
     <Compile Include="GeneFoundryMod.cs" />
     <Compile Include="Research\GeneResearchCalculations.cs" />
     <Compile Include="Research\GeneFabricationResearch.cs" />

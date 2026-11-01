@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <WorkGiverDef>
+    <defName>GF_FabricateGenePack</defName>
+    <label>fabricate genepacks</label>
+    <giverClass>GeneFoundry.WorkGivers.WorkGiver_FabricateGenePack</giverClass>
+    <workType>Research</workType>
+    <verb>fabricate</verb>
+    <gerund>fabricating genepacks</gerund>
+    <priorityInType>100</priorityInType>
+    <requiredCapacities><li>Manipulation</li><li>Sight</li></requiredCapacities>
+  </WorkGiverDef>
+</Defs>
