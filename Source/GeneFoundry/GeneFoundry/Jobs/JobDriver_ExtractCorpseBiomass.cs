@@ -39,6 +39,7 @@ namespace GeneFoundry.Jobs
             this.FailOnBurningImmobile(TargetIndex.A);
             this.FailOn(() => job.bill == null || job.bill.DeletedOrDereferenced ||
                 !job.bill.ShouldDoNow() || !CorpseBiomassUtility.CanProcess(Corpse) ||
+                !job.bill.recipe.PawnSatisfiesSkillRequirements(pawn) ||
                 !ArtificialPartRecovery.CanRecoverAll(pawn, Corpse.InnerPawn) ||
                 !(job.targetA.Thing is Building_WorkTable table) || !table.UsableForBillsAfterFueling());
 

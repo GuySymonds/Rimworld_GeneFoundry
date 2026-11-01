@@ -11,6 +11,10 @@
 
     <jobString>Extracting raw biomass.</jobString>
 
+    <skillRequirements>
+      <Cooking>3</Cooking>
+    </skillRequirements>
+
     <workAmount>1000</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <workSkill>Cooking</workSkill>
@@ -57,6 +61,12 @@
 This process recovers additional genetic biomass.</description>
 
     <jobString>Extracting biomass using enzymes.</jobString>
+
+    <skillRequirements>
+      <Cooking>3</Cooking>
+      <Medicine>3</Medicine>
+      <Intellectual>2</Intellectual>
+    </skillRequirements>
 
     <workAmount>1000</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
@@ -115,6 +125,10 @@ This process recovers additional genetic biomass.</description>
     <label>extract biomass from raw plants</label>
     <description>Process 50 raw plant food into 10 raw biomass. Plant material provides less biomass than the same quantity of raw meat. Different raw plant foods may be mixed within a batch; the bill's ingredient filter controls which foods may be used.</description>
     <jobString>Extracting biomass from plant material.</jobString>
+
+    <skillRequirements>
+      <Cooking>3</Cooking>
+    </skillRequirements>
 
     <workAmount>1000</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>

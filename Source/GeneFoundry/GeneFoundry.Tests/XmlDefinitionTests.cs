@@ -153,5 +153,20 @@ namespace GeneFoundry.Tests
             Assert.Equal("GeneFoundry.Jobs.JobDriver_ExtractMaterialBiomass",
                 (string)Def("GF_ExtractMaterialBiomass").Element("driverClass"));
         }
+
+        [Theory]
+        [InlineData("GF_ExtractBiomassBasic", false)]
+        [InlineData("GF_ExtractBiomassPlant", false)]
+        [InlineData("GF_ExtractBiomassEnzymatic", true)]
+        [InlineData("GF_ExtractBiomassCorpse", true)]
+        public void ExtractionRequirementsReflectProcessComplexity(string recipeName, bool advanced)
+        {
+            XElement skills = Def(recipeName).Element("skillRequirements");
+            Assert.NotNull(skills);
+            Assert.Equal("3", (string)skills.Element("Cooking"));
+            Assert.Equal(advanced ? "3" : null, (string)skills.Element("Medicine"));
+            Assert.Equal(advanced ? "2" : null, (string)skills.Element("Intellectual"));
+            Assert.Equal(advanced ? 3 : 1, skills.Elements().Count());
+        }
     }
 }

@@ -19,6 +19,8 @@ An additional corpse extraction bill uses a custom job selected through vanilla 
 
 ### Gene Vat skills
 
+Basic meat and plant extraction require Cooking 3 only. Enzymatic and corpse extraction require Cooking 3, Medicine 3 and Intellectual 2. Vanilla bill selection enforces these recipe requirements. Artificial-part recovery additionally enforces the relevant surgery's requirements, which may be higher. This lets basic processing train an operator toward the advanced recipes.
+
 All four extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%. Each skill is clamped independently to 0–10, then the weighted level determines speed: `0.5 + weighted level / 10`. Balanced operators at 0/0/0 process at 50%, at 5/5/5 at 100%, and at 10/10/10 at 150%. Higher skills provide no further extraction-speed bonus. General work speed, sight and manipulation modify this skill multiplier; these are not additional Cooking-skill bonuses.
 
 Active extraction awards 0.1 total base XP per tick, split using the same weights. Vanilla passion and learning modifiers apply independently, so final earned XP need not retain the exact base proportions. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling, with only the work phase extended to award weighted XP. Vanilla single-skill recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper. Skill affects time, not yield or decay recovery.
