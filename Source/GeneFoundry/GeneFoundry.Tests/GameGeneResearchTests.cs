@@ -11,6 +11,7 @@ using Xunit;
 
 namespace GeneFoundry.Tests
 {
+    [Collection("GeneFoundry.Tests.GameGeneResearchTests")]
     public class GameGeneResearchTests
     {
         private class HeadlessCategoryProject : GeneCategoryResearchProjectDef

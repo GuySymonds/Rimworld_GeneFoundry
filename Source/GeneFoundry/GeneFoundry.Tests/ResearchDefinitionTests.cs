@@ -112,6 +112,9 @@ namespace GeneFoundry.Tests
             Assert.Equal("GF_GeneFabrication", (string)generator.Element("fabricationResearch"));
             Assert.Equal("GF_GeneFoundry", (string)generator.Element("researchTab"));
             Assert.Equal("Archogenetics", (string)generator.Element("architeResearch"));
+            Assert.Contains("All cosmetic categories are automatically researched at no additional cost",
+                Definitions().Single(def => (string)def.Element("defName") == "GF_GeneFabrication")
+                    .Element("description").Value);
         }
     }
 }

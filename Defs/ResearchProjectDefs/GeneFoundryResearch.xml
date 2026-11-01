@@ -52,7 +52,7 @@
   <ResearchProjectDef>
     <defName>GF_GeneFabrication</defName>
     <label>gene fabrication</label>
-    <description>Develop the foundation for fabricating genes from refined biomass. Unlocks independent research projects for each loaded gene category. Completing a category permits fabrication of all of its genes; genes with an archite cost also require vanilla archogenetics. Category costs depend on gene count, total complexity and total archite value. Configure research costs in GeneFoundry's Gene research settings, then restart RimWorld.</description>
+    <description>Develop the foundation for fabricating genes from refined biomass. All cosmetic categories are automatically researched at no additional cost. Other gene categories require independent research. Completing a category permits fabrication of all of its genes; genes with an archite cost also require vanilla archogenetics, including cosmetic genes. Category costs depend on gene count, total complexity and total archite value. Configure research costs in GeneFoundry's Gene research settings, then restart RimWorld.</description>
     <baseCost>1500</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>GF_GeneFoundry</tab>

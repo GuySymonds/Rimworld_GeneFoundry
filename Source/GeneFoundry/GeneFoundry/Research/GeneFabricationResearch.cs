@@ -9,6 +9,7 @@ namespace GeneFoundry.Research
     public class GeneCategoryResearchProjectDef : ResearchProjectDef
     {
         public List<GeneDef> genes;
+        public bool automaticallyResearched;
     }
 
     public static class GeneFabricationResearch
@@ -35,9 +36,14 @@ namespace GeneFoundry.Research
                 int cost = GeneResearchCalculations.CategoryCost(members.Count, complexity, archite,
                     baseCost, perGene, perComplexity, perArchite, costPercent, maximumCost, minimumCost);
                 string category = group.Key?.label ?? group.Key?.defName ?? "uncategorized";
+                bool automatic = GeneResearchCalculations.IsCosmeticCategory(group.Key?.defName);
                 var prerequisites = new List<ResearchProjectDef> { fabrication };
-                if (members.All(gene => gene.biostatArc > 0))
+                if (!automatic && members.All(gene => gene.biostatArc > 0))
                     prerequisites.Add(archogenetics);
+                string researchDescription = automatic
+                    ? "Automatically researched at no additional research cost once Gene fabrication is complete.\n\n"
+                    : $"Research cost: ({baseCost} + {members.Count} × {perGene} + {complexity} × {perComplexity} + {archite} × {perArchite}) × {costPercent}%, rounded up, minimum {minimumCost}, capped at {maximumCost} points = {cost}. " +
+                        "Costs are configured in GeneFoundry's Gene research settings and apply after restarting RimWorld.\n\n";
                 int index = result.Count;
                 result.Add(new GeneCategoryResearchProjectDef
                 {
@@ -45,10 +51,10 @@ namespace GeneFoundry.Research
                     label = category,
                     description = $"Unlock fabrication of all {members.Count} genes in {category}. " +
                         $"Total complexity: {complexity}. Total archite value: {archite}.\n\n" +
-                        $"Research cost: ({baseCost} + {members.Count} × {perGene} + {complexity} × {perComplexity} + {archite} × {perArchite}) × {costPercent}%, rounded up, minimum {minimumCost}, capped at {maximumCost} points = {cost}. " +
-                        "Costs are configured in GeneFoundry's Gene research settings and apply after restarting RimWorld.\n\n" +
+                        researchDescription +
                         "Genes with an archite cost also require vanilla Archogenetics, even after this category is complete. " +
-                        "Categories containing only archite genes require Archogenetics before research can begin.\n\nGenes:\n" +
+                        (automatic ? "" : "Categories containing only archite genes require Archogenetics before research can begin. ") +
+                        "\n\nGenes:\n" +
                         string.Join("\n", members.Select(gene => gene.label ?? gene.defName)),
                     baseCost = cost,
                     techLevel = TechLevel.Industrial,
@@ -59,10 +65,21 @@ namespace GeneFoundry.Research
                     researchViewX = 1.5f * (index % 4),
                     researchViewY = 4f + index / 4,
                     modContentPack = fabrication.modContentPack,
-                    genes = members
+                    genes = members,
+                    automaticallyResearched = automatic
                 });
             }
             return result;
+        }
+
+        public static IEnumerable<GeneCategoryResearchProjectDef> AutomaticProjectsToComplete(
+            ResearchProjectDef fabrication, IEnumerable<GeneCategoryResearchProjectDef> projects)
+        {
+            if (fabrication == null || !fabrication.IsFinished)
+                yield break;
+            foreach (GeneCategoryResearchProjectDef project in projects)
+                if (project.automaticallyResearched && !project.IsFinished && project.PrerequisitesCompleted)
+                    yield return project;
         }
 
         public static void RegisterProjects(IEnumerable<GeneCategoryResearchProjectDef> projects)

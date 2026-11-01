@@ -4,6 +4,12 @@ namespace GeneFoundry.Research
 {
     public static class GeneResearchCalculations
     {
+        public static bool IsCosmeticCategory(string categoryName)
+        {
+            return categoryName == "Cosmetic" ||
+                (categoryName != null && categoryName.StartsWith("Cosmetic_", StringComparison.Ordinal));
+        }
+
         public static int CategoryCost(int geneCount, long complexity, long archite,
             int baseCost = 500, int perGene = 100, int perComplexity = 200, int perArchite = 500,
             int costPercent = 25, int maximumCost = 4000, int minimumCost = 1000)
