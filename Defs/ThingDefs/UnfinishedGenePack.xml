@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef ParentName="UnfinishedBase">
+
+    <defName>GF_UnfinishedGenePack</defName>
+    <label>unfinished genepack</label>
+
+    <description>A partially fabricated genepack containing incomplete genetic sequences. Additional work at a gene fabricator is required to complete its manufacture.</description>
+
+    <!-- Artwork -->
+    <graphicData>
+      <texPath>GeneFoundry/UnfinishedGenePack</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+      <drawSize>(1,1)</drawSize>
+    </graphicData>
+
+    <!-- Each unfinished genepack is an individual item -->
+    <stackLimit>1</stackLimit>
+
+    <!-- Not manufactured from variable stuff materials -->
+    <stuffCategories Inherit="False" />
+
+    <statBases>
+      <Mass>0.5</Mass>
+      <Flammability>0.2</Flammability>
+      <DeteriorationRate>0</DeteriorationRate>
+    </statBases>
+
+  </ThingDef>
+
+</Defs>
