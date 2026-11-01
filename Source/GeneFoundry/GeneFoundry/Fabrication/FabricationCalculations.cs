@@ -10,8 +10,15 @@ namespace GeneFoundry.Fabrication
         public const int WorkPerGene = 2500, WorkPerComplexity = 1000;
         public const float IntellectualWeight = 0.60f, MedicineWeight = 0.25f, CraftingWeight = 0.15f;
         public const float XpPerTick = 0.1f;
-        public static int Biomass(int genes, int complexity) =>
-            checked(Math.Max(0, genes) * BiomassPerGene + Math.Max(0, complexity) * BiomassPerComplexity);
+        public const int DiscountPerAdditionalGene = 10, MaximumDiscount = 50;
+        public static int BiomassDiscountPercent(int genes) =>
+            (int)Math.Min(MaximumDiscount, Math.Max(0L, (long)genes - 1) * DiscountPerAdditionalGene);
+        public static int Biomass(int genes, int complexity)
+        {
+            long baseCost = Math.Max(0, genes) * (long)BiomassPerGene + Math.Max(0, complexity) * (long)BiomassPerComplexity;
+            // Integer ceiling avoids floating point rounding granting or charging an extra unit.
+            return checked((int)((baseCost * (100 - BiomassDiscountPercent(genes)) + 99) / 100));
+        }
         public static float Work(int genes, int complexity) =>
             Math.Max(0, genes) * (float)WorkPerGene + Math.Max(0, complexity) * (float)WorkPerComplexity;
         public static bool Qualified(int intellectual, int medicine, int crafting) =>
