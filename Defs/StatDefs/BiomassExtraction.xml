@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <StatDef>
+    <defName>GF_BiomassExtractionSpeed</defName>
+    <label>biomass extraction speed</label>
+    <description>Speed of biological processing at a Gene Vat. Cooking contributes 40%, Medicine 40% and Intellectual 20%. The skill multiplier scales linearly from 50% at level 0 to 100% at level 5 and 150% at level 10. Each skill is capped at level 10 for this calculation. General work speed, sight and manipulation also affect the final speed. Artificial-part recovery uses separate medical surgery rules.</description>
+    <category>PawnWork</category>
+    <defaultBaseValue>1</defaultBaseValue>
+    <minValue>0.01</minValue>
+    <toStringStyle>PercentZero</toStringStyle>
+    <postProcessStatFactors>
+      <li>WorkSpeedGlobal</li>
+    </postProcessStatFactors>
+    <capacityFactors>
+      <li>
+        <capacity>Sight</capacity>
+        <weight>0.2</weight>
+        <max>1.5</max>
+      </li>
+      <li>
+        <capacity>Manipulation</capacity>
+        <weight>0.8</weight>
+        <max>1.5</max>
+      </li>
+    </capacityFactors>
+    <parts>
+      <li Class="GeneFoundry.Recipes.StatPart_GeneVatSkills" />
+    </parts>
+  </StatDef>
+</Defs>

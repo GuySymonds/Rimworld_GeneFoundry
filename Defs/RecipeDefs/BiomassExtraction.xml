@@ -12,8 +12,9 @@
     <jobString>Extracting raw biomass.</jobString>
 
     <workAmount>1000</workAmount>
-    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <workSkill>Cooking</workSkill>
+    <workSkillLearnFactor>0</workSkillLearnFactor>
     <requiredGiverWorkType>Cooking</requiredGiverWorkType>
 
     <effectWorking>Cook</effectWorking>
@@ -58,8 +59,9 @@ This process recovers additional genetic biomass.</description>
     <jobString>Extracting biomass using enzymes.</jobString>
 
     <workAmount>1000</workAmount>
-    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <workSkill>Cooking</workSkill>
+    <workSkillLearnFactor>0</workSkillLearnFactor>
     <requiredGiverWorkType>Cooking</requiredGiverWorkType>
 
     <effectWorking>Cook</effectWorking>
@@ -115,8 +117,9 @@ This process recovers additional genetic biomass.</description>
     <jobString>Extracting biomass from plant material.</jobString>
 
     <workAmount>1000</workAmount>
-    <workSpeedStat>CookSpeed</workSpeedStat>
+    <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <workSkill>Cooking</workSkill>
+    <workSkillLearnFactor>0</workSkillLearnFactor>
     <requiredGiverWorkType>Cooking</requiredGiverWorkType>
 
     <effectWorking>Cook</effectWorking>

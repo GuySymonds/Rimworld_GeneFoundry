@@ -71,7 +71,7 @@ namespace GeneFoundry.Jobs
                 if (processingTicks <= 0)
                     processingTicks = CorpseBiomassUtility.WorkTicks(
                         CorpseBiomassUtility.RecoverableMeat(Corpse),
-                        pawn.GetStatValue(DefDatabase<StatDef>.GetNamed("CookSpeed")), Corpse.GetRotStage());
+                        pawn.GetStatValue(DefDatabase<StatDef>.GetNamed("GF_BiomassExtractionSpeed")), Corpse.GetRotStage());
             });
 
             // A fixed loop of toils keeps save/load indices stable as parts are removed.
@@ -97,7 +97,7 @@ namespace GeneFoundry.Jobs
             processing.initAction = () => ticksLeftThisToil = processingTicks;
             processing.WithProgressBar(TargetIndex.A,
                 () => 1f - ticksLeftThisToil / (float)System.Math.Max(1, processingTicks));
-            processing.AddPreTickIntervalAction(delta => pawn.skills.Learn(SkillDefOf.Cooking, 0.1f * delta));
+            processing.AddPreTickIntervalAction(delta => GeneVatSkills.Learn(pawn, delta));
             yield return processing;
 
             yield return Toils_General.Do(() =>

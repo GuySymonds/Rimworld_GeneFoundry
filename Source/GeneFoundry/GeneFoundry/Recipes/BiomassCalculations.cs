@@ -5,6 +5,19 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public const float CookingWeight = 0.4f;
+        public const float MedicineWeight = 0.4f;
+        public const float IntellectualWeight = 0.2f;
+        public const float ExtractionXpPerTick = 0.1f;
+
+        public static float ExtractionSkillSpeed(int cooking, int medicine, int intellectual)
+        {
+            float weightedLevel = CookingWeight * Math.Max(0, Math.Min(10, cooking)) +
+                MedicineWeight * Math.Max(0, Math.Min(10, medicine)) +
+                IntellectualWeight * Math.Max(0, Math.Min(10, intellectual));
+            return 0.5f + weightedLevel / 10f;
+        }
+
         public static int MedicalRecoveryTicks(float workAmount, float workSpeed)
         {
             return Math.Max(1, (int)Math.Ceiling(Math.Max(0f, workAmount) / Math.Max(0.01f, workSpeed)));

@@ -10,9 +10,15 @@ namespace GeneFoundry.WorkGivers
         public override Job JobOnThing(Pawn pawn, Thing thing, bool forced = false)
         {
             Job vanillaJob = base.JobOnThing(pawn, thing, forced);
-            if (vanillaJob == null || vanillaJob.def != JobDefOf.DoBill ||
-                vanillaJob.bill?.recipe?.defName != "GF_ExtractBiomassCorpse")
+            if (vanillaJob == null || vanillaJob.def != JobDefOf.DoBill)
                 return vanillaJob;
+
+            if (vanillaJob.bill?.recipe?.defName != "GF_ExtractBiomassCorpse")
+            {
+                if (vanillaJob.bill?.recipe?.workSpeedStat?.defName == "GF_BiomassExtractionSpeed")
+                    vanillaJob.def = DefDatabase<JobDef>.GetNamed("GF_ExtractMaterialBiomass");
+                return vanillaJob;
+            }
 
             if (vanillaJob.targetQueueB == null || vanillaJob.targetQueueB.Count != 1)
                 return null;

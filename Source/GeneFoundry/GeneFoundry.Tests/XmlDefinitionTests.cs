@@ -135,5 +135,23 @@ namespace GeneFoundry.Tests
             Assert.Contains("AllowRotten", recipe.Element("defaultIngredientFilter")
                 .Element("specialFiltersToAllow").Elements().Select(element => element.Value));
         }
+
+        [Fact]
+        public void ExtractionBillsUseWeightedSpeedAndDisableVanillaSingleSkillXp()
+        {
+            foreach (string name in new[] { "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic",
+                "GF_ExtractBiomassPlant", "GF_ExtractBiomassCorpse" })
+            {
+                XElement recipe = Def(name);
+                Assert.Equal("GF_BiomassExtractionSpeed", (string)recipe.Element("workSpeedStat"));
+                Assert.Equal("0", (string)recipe.Element("workSkillLearnFactor"));
+            }
+            XElement stat = Def("GF_BiomassExtractionSpeed");
+            Assert.Equal("StatDef", stat.Name.LocalName);
+            Assert.Equal("GeneFoundry.Recipes.StatPart_GeneVatSkills",
+                (string)stat.Element("parts").Element("li").Attribute("Class"));
+            Assert.Equal("GeneFoundry.Jobs.JobDriver_ExtractMaterialBiomass",
+                (string)Def("GF_ExtractMaterialBiomass").Element("driverClass"));
+        }
     }
 }

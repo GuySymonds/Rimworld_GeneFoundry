@@ -14,6 +14,34 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
+        [InlineData(0, 0, 0, 0.5f)]
+        [InlineData(5, 5, 5, 1f)]
+        [InlineData(10, 10, 10, 1.5f)]
+        [InlineData(10, 0, 0, 0.9f)]
+        [InlineData(0, 10, 0, 0.9f)]
+        [InlineData(0, 0, 10, 0.7f)]
+        [InlineData(5, 10, 0, 1.1f)]
+        [InlineData(20, 0, 0, 0.9f)]
+        [InlineData(20, 20, 20, 1.5f)]
+        [InlineData(-5, -5, -5, 0.5f)]
+        public void ExtractionSpeedUsesIndependentWeightedSkillCaps(
+            int cooking, int medicine, int intellectual, float expected)
+        {
+            Assert.Equal(expected, BiomassCalculations.ExtractionSkillSpeed(cooking, medicine, intellectual), 5);
+        }
+
+        [Fact]
+        public void WeightedSkillsChangeDurationWithoutChangingRecovery()
+        {
+            float novice = BiomassCalculations.ExtractionSkillSpeed(0, 0, 0);
+            float ordinary = BiomassCalculations.ExtractionSkillSpeed(5, 5, 5);
+            float expert = BiomassCalculations.ExtractionSkillSpeed(10, 10, 10);
+            int baseline = Work(560f, speed: ordinary);
+            Assert.InRange(Work(560f, speed: novice), baseline * 2 - 1, baseline * 2 + 1);
+            Assert.InRange(Work(560f, speed: expert), baseline / 1.5d - 1d, baseline / 1.5d + 1d);
+        }
+
+        [Theory]
         [InlineData(2000f, 1f, 2000)]
         [InlineData(2000f, 2f, 1000)]
         [InlineData(2000f, 0.5f, 4000)]

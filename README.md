@@ -13,9 +13,17 @@ The Gene Vat supports these material extraction bills:
 | 50 raw meat + 1 herbal medicine | 38 |
 | 50 raw plant food | 10 |
 
-Each recipe currently requires 1,000 work units, uses Cooking work and CookSpeed, and allows mixing eligible ingredient types. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
+Each material recipe requires 1,000 work units, uses Cooking work assignment and allows mixing eligible ingredient types. Processing uses the weighted biomass extraction speed described below. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
 
-An additional corpse extraction bill uses a custom job selected through vanilla bill and ingredient selection. It defaults to animal corpses; other organic corpses require explicit ingredient-filter changes. Non-organic corpses are excluded. Installed artificial parts are removed medically before biomass extraction. Weighted Cooking/Medicine/Intellectual processing remains a future iteration.
+An additional corpse extraction bill uses a custom job selected through vanilla bill and ingredient selection. It defaults to animal corpses; other organic corpses require explicit ingredient-filter changes. Non-organic corpses are excluded. Installed artificial parts are removed medically before biomass extraction.
+
+### Gene Vat skills
+
+All four extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%. Each skill is clamped independently to 0–10, then the weighted level determines speed: `0.5 + weighted level / 10`. Balanced operators at 0/0/0 process at 50%, at 5/5/5 at 100%, and at 10/10/10 at 150%. Higher skills provide no further extraction-speed bonus. General work speed, sight and manipulation modify this skill multiplier; these are not additional Cooking-skill bonuses.
+
+Active extraction awards 0.1 total base XP per tick, split using the same weights. Vanilla passion and learning modifiers apply independently, so final earned XP need not retain the exact base proportions. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling, with only the work phase extended to award weighted XP. Vanilla single-skill recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper. Skill affects time, not yield or decay recovery.
+
+Artificial-part recovery is separate: its surgical speed, qualifications, chance of success and Medicine XP do not use the extraction weighting. The 100% work-speed timing examples assume 5/5/5 skills, normal capacities and no other work-speed modifiers.
 
 ### Artificial-part recovery
 
@@ -29,7 +37,7 @@ Manual checks: process a corpse with multiple implants; compare low/high qualifi
 
 Corpse biomass is `max(1, floor(material amount × 0.5 × 1.25 × decay))`. Material amount uses vanilla MeatAmount with post-processing disabled: body size, missing natural parts, slaughter condition, nutrition and difficulty still apply, but vanilla's small-animal meat bonus does not. The whole-body multiplier includes the remaining organs, bones and hide even when limbs are missing. Decay multipliers are 1 for fresh, 0.5 for rotting and 0.1 for desiccated bodies. Every eligible corpse yields at least one biomass.
 
-Fresh processing time starts at `setup minutes + material / 50 × extraction minutes`, divided by the operator's CookSpeed for this iteration. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material preserve the original `100 + 20 × material` work baseline. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
+Fresh processing time starts at `setup minutes + material / 50 × extraction minutes`, divided by the operator's weighted biomass extraction speed. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material preserve the original `100 + 20 × material` work baseline. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
 
 Decay then multiplies processing time by `handling share + (1 - handling share) × decay multiplier`. With the default 30% handling share, fresh bodies take 100%, rotting bodies 65% and desiccated bodies 37% of fresh time. This makes a large desiccated body slower to process than a small fresh body yielding the same biomass. Time is captured after delivery/stripping, using the settings, operator speed and corpse condition at that point, and saved per job. Yield uses the condition at completion; a body that decays during work can therefore give less output without shortening a job already underway.
 

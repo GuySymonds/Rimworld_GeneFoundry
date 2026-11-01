@@ -66,6 +66,7 @@ namespace GeneFoundry
             listing.Label("All times are in-game time. Hover over sliders for explanations. Settings apply across saves.");
             listing.GapLine();
             listing.Label("Raw biomass — Gene Vat corpse extraction");
+            listing.Label("All extraction uses Cooking 40%, Medicine 40%, Intellectual 20% for speed and XP. Skills give 50% speed at level 0, 100% at 5 and 150% at 10, with no further skill bonus above 10.");
             Settings.corpseMinutesPer50Material = (float)Math.Round(listing.SliderLabeled(
                 $"Fresh extraction per 50 material: {Settings.corpseMinutesPer50Material:0} min",
                 Settings.corpseMinutesPer50Material, 1f, 120f, 0.75f,
