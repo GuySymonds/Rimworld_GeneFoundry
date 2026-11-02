@@ -7,19 +7,11 @@
     <researchPrerequisite>GF_BiomassRefinement</researchPrerequisite>
     <label>refine biomass</label>
 
-    <description>Prepare 10 raw biomass from correctly oriented adjacent hoppers and 1 neutroamine delivered by the operator. A successful batch produces a base yield of 2 refined biomass, with a chance of an extra item for expert operators.
-
-Requires Intellectual 5, Crafting 3 and Medicine 2. Preparation speed and reliability improve with these skills, weighted 60%, 25% and 15% respectively. Operator skill-based failure risk falls from 30% at the minimum requirements to 0% at Intellectual 10, Crafting 8 and Medicine 6. Above these thresholds, each skill contributes further preparation speed and extra biomass recovery up to level 20. At default settings, level 20 in all three skills shortens preparation to about 22.5 minutes and gives 2 output with a 40% chance of a third per successful batch (2.4 on average). Expert speed and yield are configurable under Refined Biomass in GeneFoundry's mod settings. Yield is captured when the batch starts, and the extra-item chance is rolled only once on successful completion.
-
-The operator earns skill experience during preparation and is free to leave once automated processing starts. Available gene processors shorten automated processing. Durations and processor assistance are configurable in GeneFoundry's mod settings.
-
-Do X times counts batches started, including batches that later fail. Do until X continues requesting batches until the stored output target is reached. Ingredients are consumed when processing starts and are lost if the batch fails.
-
-Room cleanliness also affects failure probability. By default, cleanliness -2 adds 15 percentage points, cleanliness 0 has no effect, and cleanliness +0.6 reduces risk by 5 points, with linear changes between these values. An outdoor or partly unroofed room instead adds 15 points. Final risk is limited to 0–100% and captured when processing starts. These effects can be changed or disabled under Refined Biomass in the mod settings. They do not affect speed or yield.</description>
+    <description>Consume 40 raw biomass from adjacent hoppers and 1 neutroamine to produce exactly 10 refined biomass on success. Failure loses all ingredients. Requires Intellectual 5, Crafting 3, Medicine 2. Weighted skill (60% Intellectual, 25% Crafting, 15% Medicine), clamped to 5–20, linearly reduces preparation from 90 to 30 minutes and operator failure from 30% to 0%. Indoor dirt adds up to 15 percentage points at cleanliness -2; sterile rooms give no bonus. Outdoor or unroofed exposure instead adds 10 points. Risk is captured at batch start and rolled once at completion. Automated processing defaults to 36 hours, reduced by 5% per available gene processor to a minimum of 18 hours. Power loss pauses processing and spoils a batch after two continuous hours. Do X times counts batches started; Do until X targets stored output.</description>
 
     <jobString>Preparing biomass refinement.</jobString>
 
-    <!-- Default base work metadata. The custom preparation job uses skill-based Mod Settings timings. -->
+    <!-- Default base work metadata. The custom preparation job uses fixed linear skill-based timings. -->
     <workAmount>2500</workAmount>
     <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
     <workSkill>Intellectual</workSkill>
@@ -52,7 +44,7 @@ Room cleanliness also affects failure probability. By default, cleanliness -2 ad
 
     <!-- Declared output for vanilla bill configuration -->
     <products>
-      <GF_RefinedBiomass>2</GF_RefinedBiomass>
+      <GF_RefinedBiomass>10</GF_RefinedBiomass>
     </products>
 
   </RecipeDef>

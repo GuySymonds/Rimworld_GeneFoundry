@@ -106,7 +106,7 @@ namespace GeneFoundry.Recipes
             Matrix4x4 translation = Matrix4x4.Translate(center);
             foreach (Part part in state.parts)
                 if (part.stage == stage)
-                    GenDraw.DrawMeshNowOrLater(part.mesh, translation * part.matrix, part.material, false);
+                    GenDraw.DrawMeshNowOrLater(part.mesh, translation * part.matrix, Graphic_GeneVat.ContentsMaterial(part.material), false);
             DrawBubbles(state.basinSize, state.top, state.startedAt, center);
         }
         private bool PrepareCorpse(Corpse corpse, Thing vat, Presentation state)
@@ -186,7 +186,7 @@ namespace GeneFoundry.Recipes
             float bubbleHeight = Mathf.Min(basinWidth, basinHeight * 500f / 203f) * 203f / 500f;
             return vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) +
                 new Vector3(size.x * BasinCenterX, .02f,
-                    size.y * BasinCenterZ - (basinHeight - bubbleHeight) * .5f);
+                    size.y * BasinCenterZ - (basinHeight - bubbleHeight) * .5f + .25f);
         }
         internal static void DrawMaterialBubbles(Thing vat, int startedAt)
         {
@@ -213,7 +213,7 @@ namespace GeneFoundry.Recipes
                         bubbleMaterials = null;
                         return;
                     }
-                    bubbleMaterials[i] = MaterialPool.MatFrom(new MaterialRequest(texture, ShaderDatabase.Transparent));
+                    bubbleMaterials[i] = MaterialPool.MatFrom(new MaterialRequest(texture, ShaderDatabase.Transparent) { renderQueue = Graphic_GeneVat.BubblesQueue });
                 }
                 bubbleMesh = MeshPool.GridPlane(Vector2.one);
             }

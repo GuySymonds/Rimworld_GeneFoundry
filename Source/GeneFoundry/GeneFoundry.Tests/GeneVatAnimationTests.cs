@@ -37,9 +37,12 @@ namespace GeneFoundry.Tests
             Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "*.png").Length);
             for (int i = 0; i < 8; i++)
             {
-                string name = i.ToString("00") + ".png";
-                Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "SourceFrames", name)),
-                    File.ReadAllBytes(Path.Combine(fixtures, "Frames", name)));
+                string name = "vat_" + i.ToString("00") + ".png";
+                byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Frames", name));
+                Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "SourceFrames", name)), png);
+                Assert.Equal(1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
+                Assert.Equal(1448, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
+                Assert.Equal(6, png[25]);
             }
         }
 

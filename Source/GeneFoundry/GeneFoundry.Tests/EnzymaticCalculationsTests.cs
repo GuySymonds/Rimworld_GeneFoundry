@@ -20,12 +20,15 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(28f, 1f, 26)]
-        [InlineData(28f, 0.5f, 13)]
-        [InlineData(28f, 0.1f, 2)]
-        [InlineData(560f, 1f, 525)]
-        [InlineData(560f, 0.5f, 262)]
-        [InlineData(560f, 0.1f, 52)]
+        [InlineData(100f, 1f, 55)]
+        [InlineData(100f, 0.5f, 27)]
+        [InlineData(100f, 0.1f, 5)]
+        [InlineData(28f, 1f, 15)]
+        [InlineData(28f, 0.5f, 7)]
+        [InlineData(28f, 0.1f, 1)]
+        [InlineData(560f, 1f, 308)]
+        [InlineData(560f, 0.5f, 154)]
+        [InlineData(560f, 0.1f, 30)]
         [InlineData(0f, 0.1f, 1)]
         public void EnzymaticYieldAppliesFiftyPercentBeforeFinalRounding(float material, float decay, int expected)
         {
@@ -33,10 +36,10 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void EnzymesAndExpertRecoveryCombineWithoutChangingCatalystCost()
+        public void EnzymesUseFixedRecoveryWithoutChangingCatalystCost()
         {
-            Assert.Equal(630, BiomassCalculations.CorpseYield(560, 1, 1.2f, true));
-            Assert.Equal(63, BiomassCalculations.CorpseYield(560, 0.1f, 1.2f, true));
+            Assert.Equal(308, BiomassCalculations.CorpseYield(560, 1, true));
+            Assert.Equal(30, BiomassCalculations.CorpseYield(560, 0.1f, true));
             Assert.Equal(12, BiomassCalculations.EnzymaticCatalystCount(560));
         }
 

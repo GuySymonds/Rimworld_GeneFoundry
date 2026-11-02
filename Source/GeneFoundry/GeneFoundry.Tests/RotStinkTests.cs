@@ -38,13 +38,14 @@ namespace GeneFoundry.Tests
             string source = File.ReadAllText(Path.Combine(AppContext.BaseDirectory,
                 "Fixtures/Source/Jobs/JobDriver_ExtractCorpseBiomass.cs"));
             int processing = source.IndexOf("Toil processing =");
-            int notify = source.IndexOf("NotifyCorpseExtraction(pawn, delta)");
+            int notify = source.IndexOf("NotifyExtraction(pawn, delta)");
             Assert.True(notify > processing);
             Assert.True(notify < source.IndexOf("yield return processing;", processing));
-            Assert.Equal(notify, source.LastIndexOf("NotifyCorpseExtraction(pawn, delta)"));
+            Assert.Equal(notify, source.LastIndexOf("NotifyExtraction(pawn, delta)"));
             string material = File.ReadAllText(Path.Combine(AppContext.BaseDirectory,
                 "Fixtures/Source/Jobs/JobDriver_ExtractMaterialBiomass.cs"));
-            Assert.DoesNotContain("NotifyCorpseExtraction", material);
+            Assert.Contains("NotifyExtraction(pawn, delta)", material);
+            Assert.True(material.IndexOf("NotifyExtraction") > material.IndexOf("toil.debugName == nameof(Toils_Recipe.DoRecipeWork)"));
         }
     }
 }

@@ -5,9 +5,7 @@
     <defName>GF_RefinedBiomass</defName>
     <label>refined biomass</label>
 
-    <description>Highly purified biological material produced in a biomass refinery. Each successful batch converts 10 raw biomass and 1 neutroamine into 2 refined biomass.
-
-A concentrated feedstock intended for future genepack fabrication. Gene fabrication is not yet available.</description>
+    <description>Highly purified biological material produced in a biomass refinery. Each successful batch converts 40 raw biomass and 1 neutroamine into 10 refined biomass. Used by the Gene Fabricator to manufacture genepacks.</description>
 
     <graphicData>
       <texPath>GeneFoundry/RefinedBiomass</texPath>

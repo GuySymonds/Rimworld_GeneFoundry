@@ -17,6 +17,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(RimWorldManagedDir)' != ''">
+    <Compile Include="../GeneFoundry/GeneFoundryMod.cs" Link="Production/GeneFoundryMod.cs" />
+    <Compile Include="../GeneFoundry/Components/CompBiomassRefiner.cs" Link="Production/CompBiomassRefiner.cs" />
+    <Compile Include="../GeneFoundry/Components/CompProperties_BiomassRefiner.cs" Link="Production/CompProperties_BiomassRefiner.cs" />
+    <Compile Include="../GeneFoundry/Components/GeneProcessorAssistance.cs" Link="Production/GeneProcessorAssistance.cs" />
+    <Compile Include="../GeneFoundry/Recipes/GeneVatSkills.cs" Link="Production/GeneVatSkills.cs" />
+    <Compile Include="../GeneFoundry/Jobs/JobDriver_ExtractMaterialBiomass.cs" Link="Production/JobDriver_ExtractMaterialBiomass.cs" />
+    <Compile Include="../GeneFoundry/Recipes/Graphic_GeneVat.cs" Link="Production/Graphic_GeneVat.cs" />
     <Compile Include="../GeneFoundry/Components/CompGeneVatAnimation.cs" Link="Production/CompGeneVatAnimation.cs" />
     <Compile Include="../GeneFoundry/Components/CompGeneVatRotStink.cs" Link="Production/CompGeneVatRotStink.cs" />
     <Reference Include="Assembly-CSharp">
@@ -41,8 +48,8 @@
   <ItemGroup>
     <Compile Include="../GeneFoundry/Fabrication/FabricationCalculations.cs" Link="Production/FabricationCalculations.cs" />
     <Compile Include="../GeneFoundry/Components/GeneVatAnimationTiming.cs" Link="Production/GeneVatAnimationTiming.cs" />
-    <Content Include="../../../Textures/GeneFoundry/Buildings/GeneVatFrames/*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../Textures/GeneVatFrames/*.png" Link="Fixtures/SourceFrames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../Textures/GeneVatFrames/vat_*.png" Link="Fixtures/SourceFrames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../Textures/BubbleMass/*.png" Link="Fixtures/SourceBubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->

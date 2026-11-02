@@ -9,15 +9,7 @@
     </researchPrerequisites>
     <label>biomass refinery</label>
 
-    <description>Purifies 10 raw biomass and 1 neutroamine into a base yield of 2 refined biomass. Raw biomass must be stored in adjacent hoppers with their outlets facing the refinery. A colonist delivers neutroamine and prepares the batch, then automated processing begins.
-
-Operators require Intellectual 5, Crafting 3 and Medicine 2. Operator skill-based failure risk reaches zero at Intellectual 10, Crafting 8 and Medicine 6. Skills above these thresholds further improve preparation speed and successful-batch yield, independently weighted 60%, 25% and 15%, up to level 20. By default, a fully expert operator prepares in about 22.5 minutes and a successful batch produces 2 items with a 40% chance of a third. Expert rewards are configurable under Refined Biomass in the mod settings and are captured per batch. Preparation awards experience in all three skills. A failed batch consumes its ingredients and produces nothing.
-
-Default preparation takes 60 minutes at minimum skills, 30 minutes at the zero-failure thresholds and about 22.5 minutes at level 20 in all three skills. Automated processing takes 12 hours, reduced by 5% per available gene processor to a minimum of 6 hours. Operator expertise does not shorten automated processing. Processors must be powered and within normal connection range with a clear line of sight. Active gene assembler jobs take priority, including while their operators are away. Each processor assists only one refinery at a time. Timing and processor bonuses can be changed in GeneFoundry's mod settings.
-
-Consumes 100 W while idle and 1,500 W while processing. Power loss pauses processing; two consecutive in-game hours without power destroy the batch. Restoring power resets the outage timer.
-
-Room cleanliness also affects failure probability. By default, cleanliness -2 adds 15 percentage points, cleanliness 0 has no effect, and cleanliness +0.6 reduces risk by 5 points, with linear changes between these values. An outdoor or partly unroofed room instead adds 15 points. Final risk is limited to 0–100% and captured when processing starts. These effects can be changed or disabled under Refined Biomass in the mod settings. They do not affect speed or yield.</description>
+    <description>Refine 40 raw biomass from correctly oriented adjacent hoppers and 1 delivered neutroamine into exactly 10 refined biomass on success. Failure consumes all inputs. Requires Intellectual 5, Crafting 3 and Medicine 2. Weighted skill (60/25/15), clamped to 5-20, linearly reduces preparation from 90 to 30 minutes and operator failure from 30% to 0%. Dirt adds up to 15 percentage points at cleanliness -2; cleanliness 0 or above gives no adjustment. Outdoor or unroofed exposure instead adds 10 points. Final risk is captured at batch start and rolled once at completion. Automated processing defaults to 36 hours, reduced by 5% per available gene processor to a minimum of 18 hours. Processor allocation, power pausing and spoilage after two continuous hours without power apply. Processing duration and assistance are configurable.</description>
 
     <thingClass>Building_WorkTable</thingClass>
     <tickerType>Normal</tickerType>
@@ -95,8 +87,8 @@ Room cleanliness also affects failure probability. By default, cleanliness -2 ad
         <inputDef>GF_RawBiomass</inputDef>
         <outputDef>GF_RefinedBiomass</outputDef>
 
-        <inputCount>10</inputCount>
-        <outputCount>2</outputCount>
+        <inputCount>40</inputCount>
+        <outputCount>10</outputCount>
 
         <!-- Legacy duration for migrating pre-settings saves only. Runtime timings use Mod Settings. -->
         <processingTicks>2500</processingTicks>

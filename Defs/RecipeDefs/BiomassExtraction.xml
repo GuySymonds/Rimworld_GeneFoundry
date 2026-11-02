@@ -8,7 +8,7 @@
     <researchPrerequisite>GF_BiomassExtraction</researchPrerequisite>
     <label>extract raw biomass from meat</label>
 
-    <description>Process 50 raw meat into a base yield of 25 raw biomass. Skills above level 10 improve recovery according to the expert yield setting.</description>
+    <description>50 raw meat yields up to 20 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
 
     <jobString>Extracting raw biomass from meat.</jobString>
 
@@ -46,7 +46,7 @@
     </fixedIngredientFilter>
 
     <products>
-      <GF_RawBiomass>25</GF_RawBiomass>
+      <GF_RawBiomass>20</GF_RawBiomass>
     </products>
 
   </RecipeDef>
@@ -59,9 +59,7 @@
     <researchPrerequisite>GF_EnzymaticExtraction</researchPrerequisite>
     <label>extract raw biomass from meat (enzymatic)</label>
 
-    <description>Process raw meat using herbal medicine as a biological extraction catalyst.
-
-The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills above level 10 further improve recovery according to the expert yield setting.</description>
+    <description>50 raw meat and 1 herbal medicine yield up to 25 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
 
     <jobString>Extracting raw biomass from meat using enzymes.</jobString>
 
@@ -117,7 +115,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
     </fixedIngredientFilter>
 
     <products>
-      <GF_RawBiomass>38</GF_RawBiomass>
+      <GF_RawBiomass>25</GF_RawBiomass>
     </products>
 
   </RecipeDef>
@@ -128,7 +126,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
     <defName>GF_ExtractBiomassPlant</defName>
     <researchPrerequisite>GF_BiomassExtraction</researchPrerequisite>
     <label>extract raw biomass from plants</label>
-    <description>Process 50 raw plant food into a base yield of 10 raw biomass. Skills above level 10 improve recovery according to the expert yield setting. Plant material provides less biomass than the same quantity of raw meat. Different raw plant foods may be mixed within a batch; the bill's ingredient filter controls which foods may be used.</description>
+    <description>50 raw plant food yields up to 8 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
     <jobString>Extracting raw biomass from plants.</jobString>
 
     <skillRequirements>
@@ -164,7 +162,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
     </fixedIngredientFilter>
 
     <products>
-      <GF_RawBiomass>10</GF_RawBiomass>
+      <GF_RawBiomass>8</GF_RawBiomass>
     </products>
 
   </RecipeDef>
@@ -173,7 +171,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
     <defName>GF_ExtractBiomassPlantEnzymatic</defName>
     <researchPrerequisite>GF_EnzymaticExtraction</researchPrerequisite>
     <label>extract raw biomass from plants (enzymatic)</label>
-    <description>Process 50 raw plant food and 1 herbal medicine into a base yield of 15 raw biomass, 50% more than basic plant extraction. Different raw plant foods can be mixed within a batch. Expert recovery bonuses apply afterward. Requires Cooking 3, Medicine 3 and Intellectual 2.</description>
+    <description>50 raw plant food and 1 herbal medicine yield up to 10 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
     <jobString>Extracting raw biomass from plants using enzymes.</jobString>
     <skillRequirements>
       <Cooking>3</Cooking>
@@ -216,7 +214,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
       </thingDefs>
     </fixedIngredientFilter>
     <products>
-      <GF_RawBiomass>15</GF_RawBiomass>
+      <GF_RawBiomass>10</GF_RawBiomass>
     </products>
   </RecipeDef>
 </Defs>

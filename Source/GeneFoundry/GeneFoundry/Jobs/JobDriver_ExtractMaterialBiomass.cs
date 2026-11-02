@@ -8,6 +8,16 @@ namespace GeneFoundry.Jobs
 {
     public class JobDriver_ExtractMaterialBiomass : JobDriver_DoBill, IGeneVatProcessing
     {
+        private int completedOutput = -1;
+        public float CompletionEfficiency => completedOutput < 0 ? 1f :
+            BiomassCalculations.MaterialYieldEfficiency(completedOutput / (float)job.RecipeDef.products[0].count);
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.Look(ref completedOutput, "gfCompletedOutput", -1);
+        }
+
         public bool ProcessingBiomass => HaveCurToil && CurToil.debugName == nameof(Toils_Recipe.DoRecipeWork);
 
         protected override IEnumerable<Toil> MakeNewToils()
@@ -20,6 +30,7 @@ namespace GeneFoundry.Jobs
                 if (toil.debugName == nameof(Toils_Recipe.DoRecipeWork))
                 {
                     toil.AddPreTickIntervalAction(delta => GeneVatSkills.Learn(pawn, delta));
+                    toil.AddPreTickIntervalAction(delta => job.targetA.Thing.TryGetComp<CompGeneVatRotStink>()?.NotifyExtraction(pawn, delta));
                     toil.AddPreTickIntervalAction(delta => job.targetA.Thing.TryGetComp<CompGeneVatAnimation>()?.NotifyProcessing(pawn));
                 }
                 if (toil.debugName == nameof(Toils_Recipe.FinishRecipeAndStartStoringProduct))
@@ -32,6 +43,8 @@ namespace GeneFoundry.Jobs
                             EndJobWith(JobCondition.Incompletable);
                             return;
                         }
+                        if (completedOutput < 0)
+                            completedOutput = GeneVatSkills.Output(pawn, job.RecipeDef.products[0].count);
                         finish();
                     };
                 }

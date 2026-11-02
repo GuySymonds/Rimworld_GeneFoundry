@@ -14,14 +14,10 @@ namespace GeneFoundry.Recipes
                 GeneFoundryMod.Settings.expertSpeedPercent);
         }
 
-        public static float YieldMultiplier(Pawn pawn)
-        {
-            return BiomassCalculations.ExpertYieldMultiplier(
-                pawn.skills.GetSkill(SkillDefOf.Cooking).Level,
-                pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
-                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
-                GeneFoundryMod.Settings.expertYieldPercent);
-        }
+        public static int Output(Pawn pawn, int baseOutput) => BiomassCalculations.ExtractionOutput(
+            baseOutput, pawn.skills.GetSkill(SkillDefOf.Cooking).Level,
+            pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
+            pawn.skills.GetSkill(SkillDefOf.Intellectual).Level, Rand.Value);
 
         public static void Learn(Pawn pawn, int ticks)
         {
@@ -53,14 +49,14 @@ namespace GeneFoundry.Recipes
         public override void TransformValue(StatRequest req, ref float value)
         {
             if (req.Thing is Pawn pawn && pawn.skills != null)
-                value *= BiomassCalculations.MaterialYieldEfficiency(GeneVatSkills.YieldMultiplier(pawn));
+                value *= (pawn.jobs?.curDriver as GeneFoundry.Jobs.JobDriver_ExtractMaterialBiomass)?.CompletionEfficiency ?? 1f;
         }
 
         public override string ExplanationPart(StatRequest req)
         {
             if (!(req.Thing is Pawn pawn) || pawn.skills == null)
                 return null;
-            return $"Expert extraction recovery (skills above 10): +{(GeneVatSkills.YieldMultiplier(pawn) - 1f) * 100f:0.#}%";
+            return "Operator wastage is rolled once at extraction completion.";
         }
     }
 }

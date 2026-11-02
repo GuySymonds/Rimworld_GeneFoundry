@@ -20,8 +20,6 @@ namespace GeneFoundry.Components
         private bool batchExposed;
         private bool batchCleanlinessEnabled;
         private bool completionRollMade;
-        private double batchExpectedOutput;
-        private int batchOutputCount;
 
         private bool processing;
 
@@ -76,8 +74,6 @@ namespace GeneFoundry.Components
             Scribe_Values.Look(ref batchExposed, "gfBatchExposed", false);
             Scribe_Values.Look(ref batchCleanlinessEnabled, "gfBatchCleanlinessEnabled", true);
             Scribe_Values.Look(ref completionRollMade, "gfCompletionRollMade", false);
-            Scribe_Values.Look(ref batchExpectedOutput, "gfBatchExpectedOutput", 2d);
-            Scribe_Values.Look(ref batchOutputCount, "gfBatchOutputCount", 0);
         }
 
         public override void CompTick()
@@ -172,13 +168,6 @@ namespace GeneFoundry.Components
                 out batchRoomCleanliness, out batchExposed);
             batchFailureChance = BiomassCalculations.CombinedRefinementFailure(batchOperatorRisk, batchCleanlinessAdjustment);
             completionRollMade = false;
-            batchExpectedOutput = operatorPawn == null ? Props.outputCount :
-                BiomassCalculations.RefinementExpectedOutput(Props.outputCount,
-                    operatorPawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
-                    operatorPawn.skills.GetSkill(SkillDefOf.Crafting).Level,
-                    operatorPawn.skills.GetSkill(SkillDefOf.Medicine).Level,
-                    GeneFoundryMod.Settings.refinedExpertYieldPercent);
-            batchOutputCount = 0;
 
             // Begin automated processing.
             processing = true;
@@ -292,12 +281,9 @@ namespace GeneFoundry.Components
                 }
             }
 
-            // Fractional recovery becomes a chance of one extra item, rolled once
-            // per successful batch and retained if output placement must be retried.
-            if (batchOutputCount == 0)
-                batchOutputCount = BiomassCalculations.RoundRefinementOutput(batchExpectedOutput, Rand.Value);
+            // Fixed recovery requires no yield roll, including output-placement retries.
             Thing output = ThingMaker.MakeThing(Props.outputDef);
-            output.stackCount = batchOutputCount;
+            output.stackCount = Props.outputCount;
 
             bool placed = GenPlace.TryPlaceThing(
                 output,
@@ -393,7 +379,7 @@ namespace GeneFoundry.Components
                 $"Captured room cleanliness: {batchRoomCleanliness:0.##} ({batchCleanlinessAdjustment * 100f:+0.#;-0.#;0} percentage points)";
             string failureInfo = $"Operator risk: {batchOperatorRisk * 100f:0.#}%\n" + environmentInfo + "\n" +
                 $"Batch failure chance: {batchFailureChance * 100f:0.#}%\n" +
-                $"Expected output on success: {batchExpectedOutput:0.##} refined biomass";
+                $"Expected output on success: {Props.outputCount} refined biomass";
 
             if (!processing)
             {
@@ -448,17 +434,15 @@ namespace GeneFoundry.Components
             cleanliness = exposed ? 0f : room.GetStat(RoomStatDefOf.Cleanliness);
             GeneFoundrySettings settings = GeneFoundryMod.Settings;
             return BiomassCalculations.RefinementCleanlinessAdjustment(cleanliness, exposed, enabled,
-                settings.refinementDirtyPenalty, settings.refinementSterileReduction, settings.refinementExposurePenalty);
+                settings.refinementDirtyPenalty, settings.refinementExposurePenalty);
         }
 
         public static int CalculatePreparationTicks(Pawn pawn)
         {
-            GeneFoundrySettings settings = GeneFoundryMod.Settings;
             return BiomassCalculations.RefinementPreparationTicks(
                 pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
                 pawn.skills.GetSkill(SkillDefOf.Crafting).Level,
-                pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
-                settings.preparationMinutes, settings.minimumPreparationMinutes, settings.refinedExpertSpeedPercent);
+                pawn.skills.GetSkill(SkillDefOf.Medicine).Level);
         }
     }
 }

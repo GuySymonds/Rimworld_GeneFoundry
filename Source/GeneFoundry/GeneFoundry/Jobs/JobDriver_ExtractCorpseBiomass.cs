@@ -140,7 +140,7 @@ namespace GeneFoundry.Jobs
             processing.AddPreTickIntervalAction(delta => GeneVatSkills.Learn(pawn, delta));
             processing.AddPreTickIntervalAction(delta => job.targetA.Thing.TryGetComp<CompGeneVatAnimation>()?.NotifyProcessing(pawn));
             processing.AddPreTickIntervalAction(delta =>
-                job.targetA.Thing.TryGetComp<CompGeneVatRotStink>()?.NotifyCorpseExtraction(pawn, delta));
+                job.targetA.Thing.TryGetComp<CompGeneVatRotStink>()?.NotifyExtraction(pawn, delta));
             yield return processing;
 
             yield return Toils_General.Do(() =>
@@ -152,9 +152,9 @@ namespace GeneFoundry.Jobs
                 }
                 Corpse corpse = Corpse;
                 Pawn source = corpse.InnerPawn;
-                int amount = CorpseBiomassUtility.Yield(
+                int amount = GeneVatSkills.Output(pawn, CorpseBiomassUtility.Yield(
                     CorpseBiomassUtility.RecoverableMeat(corpse), corpse.GetRotStage(),
-                    GeneVatSkills.YieldMultiplier(pawn), Enzymatic);
+                    Enzymatic));
                 ThingDef biomassDef = DefDatabase<ThingDef>.GetNamed("GF_RawBiomass");
 
                 // Vanilla body-part definitions determine horns, tusks and modded products.

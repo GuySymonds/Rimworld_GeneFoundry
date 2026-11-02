@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using GeneFoundry.Components;
+using GeneFoundry.Recipes;
 using Verse;
 using Xunit;
 
@@ -9,6 +10,15 @@ namespace GeneFoundry.Tests
 {
     public class MaterialVisualTests
     {
+        [Fact]
+        public void TransparentTransitionsStayBelowContentsAndForegroundBubbles()
+        {
+            Assert.True(Graphic_GeneVat.TransitionQueue < Graphic_GeneVat.ContentsQueue);
+            Assert.True(Graphic_GeneVat.ContentsQueue < Graphic_GeneVat.BubblesQueue);
+            // The base graphic's material selection remains native and static.
+            Assert.NotEqual(typeof(Graphic_GeneVat), typeof(Graphic_GeneVat).GetMethod("MatAt").DeclaringType);
+        }
+
         [Fact]
         public void DespawningVatRestoresIngredientGraphicsWithoutMovingOrConsumingThem()
         {

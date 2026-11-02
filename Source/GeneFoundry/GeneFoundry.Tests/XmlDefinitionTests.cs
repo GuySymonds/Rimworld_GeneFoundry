@@ -106,6 +106,37 @@ namespace GeneFoundry.Tests
                 Assert.True(types.Contains(reference), $"Custom class missing from compiled sources: {reference}");
         }
 
+        [Theory]
+        [InlineData("GF_ExtractBiomassBasic", 20)]
+        [InlineData("GF_ExtractBiomassEnzymatic", 25)]
+        [InlineData("GF_ExtractBiomassPlant", 8)]
+        [InlineData("GF_ExtractBiomassPlantEnzymatic", 10)]
+        public void MaterialConversionsUseFullRecoveryQuantities(string name, int count)
+        {
+            var recipe = Def(name);
+            Assert.Equal(count, (int)recipe.Element("products").Element("GF_RawBiomass"));
+            Assert.Equal(50, (int)recipe.Element("ingredients").Element("li").Element("count"));
+            if(name.EndsWith("Enzymatic"))
+                Assert.Equal(1, (int)recipe.Element("ingredients").Elements().Last().Element("count"));
+        }
+
+        [Fact]
+        public void RefineryConversionAndQualificationsRemainFixed()
+        {
+            var comp = Def("GF_BiomassRefinery").Element("comps").Elements().Single(e =>
+                (string)e.Attribute("Class") == "GeneFoundry.Components.CompProperties_BiomassRefiner");
+            Assert.Equal(40, (int)comp.Element("inputCount"));
+            Assert.Equal(10, (int)comp.Element("outputCount"));
+            var recipe = Def("GF_StartBiomassRefinement");
+            Assert.Equal(10, (int)recipe.Element("products").Element("GF_RefinedBiomass"));
+            Assert.Equal(1, (int)Assert.Single(recipe.Element("ingredients").Elements()).Element("count"));
+            Assert.Equal("Neutroamine", (string)recipe.Element("ingredients").Descendants("thingDefs").Single().Element("li"));
+            Assert.Equal(5, (int)recipe.Element("skillRequirements").Element("Intellectual"));
+            Assert.Equal(3, (int)recipe.Element("skillRequirements").Element("Crafting"));
+            Assert.Equal(2, (int)recipe.Element("skillRequirements").Element("Medicine"));
+            Assert.True((float)Def("GF_BiomassExtractionYield").Element("minValue") < 1f);
+        }
+
         [Fact]
         public void AllSixExtractionRecipesHaveHalvedWork()
         {
@@ -165,7 +196,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void OnlyMaterialRecipesUseVanillaEfficiencyForExpertYield()
+        public void OnlyMaterialRecipesUseVanillaEfficiencyForCachedWastage()
         {
             foreach (string name in new[] { "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic", "GF_ExtractBiomassPlant",
                 "GF_ExtractBiomassPlantEnzymatic" })
@@ -218,7 +249,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void EnzymaticPlantsUseFiftyPlantsOneHerbalMedicineAndFifteenBiomass()
+        public void EnzymaticPlantsUseFiftyPlantsOneHerbalMedicineAndTenBiomass()
         {
             XElement recipe = Def("GF_ExtractBiomassPlantEnzymatic");
             XElement[] ingredients = recipe.Element("ingredients").Elements().ToArray();
@@ -227,7 +258,7 @@ namespace GeneFoundry.Tests
             Assert.Equal("PlantFoodRaw", (string)ingredients[0].Element("filter").Element("categories").Element("li"));
             Assert.Equal("1", (string)ingredients[1].Element("count"));
             Assert.Equal("MedicineHerbal", (string)ingredients[1].Element("filter").Element("thingDefs").Element("li"));
-            Assert.Equal("15", (string)recipe.Element("products").Element("GF_RawBiomass"));
+            Assert.Equal("10", (string)recipe.Element("products").Element("GF_RawBiomass"));
         }
 
         [Fact]

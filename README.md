@@ -7,12 +7,12 @@ For RimWorld 1.6 with Biotech. The Gene Vat, Biomass Refinery and manual Gene Fa
 
 The Gene Vat supports these material extraction bills:
 
-| Input | Base raw biomass output (before expert bonus) |
+| Input | Base raw biomass output (before operator wastage) |
 |---|---:|
-| 50 raw meat | 25 |
-| 50 raw meat + 1 herbal medicine | 38 |
-| 50 raw plant food | 10 |
-| 50 raw plant food + 1 herbal medicine | 15 |
+| 50 raw meat | 20 |
+| 50 raw meat + 1 herbal medicine | 25 |
+| 50 raw plant food | 8 |
+| 50 raw plant food + 1 herbal medicine | 10 |
 
 Each material recipe requires 500 work units, uses Cooking work assignment and allows mixing eligible ingredient types. Processing uses the weighted biomass extraction speed described below. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
 
@@ -20,9 +20,9 @@ Basic and enzymatic corpse extraction bills use a custom job selected through va
 
 ### Enzymatic crops and corpses
 
-Enzymatic crops consume 50 raw plant food and 1 herbal medicine for a base yield of 15 biomass, versus 10 without enzymes. Enzymatic corpses multiply recovery by 1.5 before final rounding, then apply expert recovery. Each corpse costs `max(1, ceil(material / 50))` herbal medicine. The material basis is the same body-size/remaining-material calculation used for extraction; catalyst cost does not decrease for rotting or desiccated bodies. Both enzymatic bills require Cooking 3, Medicine 3 and Intellectual 2.
+Enzymatic crops consume 50 plant food and 1 herbal medicine for up to 10 biomass, versus 8 without enzymes. Corpses recover 40% basic or 50% enzymatic from material multiplied by 1.10. Each enzymatic corpse costs `max(1, ceil(material / 50))` herbal medicine, using the original material before uplift or decay. Qualification requirements are unchanged.
 
-All decay stages remain eligible: freshness changes recovery and processing time as usual. Enzymes do not multiply special butcher products or artificial-part salvage. An intact, cleanly slaughtered adult rat (28 material) costs 1 herbal medicine and yields 26/13/2 biomass when fresh/rotting/desiccated before expert bonuses. An equivalent thrumbo (560 material) costs 12 and yields 525/262/52. Damage, nutrition, age and difficulty can change material quantities.
+All decay stages remain eligible. Fresh/rotting/desiccated multipliers are 100%/50%/10%. For 28 material, enzymatic base outputs are 15/7/1; for 560 material, 308/154/30. Wastage applies afterward. Enzymes do not affect salvage.
 
 For corpse bills the workgiver locates the selected body through vanilla ingredient selection, calculates the full catalyst cost, and only schedules work when enough permitted, reachable, reservable herbal medicine exists within the bill's search radius. Vanilla bill collection toils deliver ingredients, including multiple medicine stacks. Medical salvage occurs first. The delivered catalyst is consumed at extraction completion, after checking that the full delivered quantity still exists; no partial catalyst charge is made when the full cost is missing. Interrupted extraction leaves unconsumed catalyst available, while completed medical removals remain completed.
 
@@ -32,13 +32,13 @@ Corpse recipe output is genuinely variable. Their labels say so, and no fixed `p
 
 Basic meat and plant extraction require Cooking 3 only. All enzymatic and corpse extraction bills require Cooking 3, Medicine 3 and Intellectual 2. Vanilla bill selection enforces these recipe requirements. Artificial-part recovery additionally enforces the relevant surgery's requirements, which may be higher. This lets basic processing train an operator toward the advanced recipes.
 
-All six extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%. Levels 0–10 determine base speed: `0.5 + weighted level / 10`. Levels 11–20 contribute independently to an expert fraction: the weighted fraction of those ten extra levels completed. This fraction adds speed between the fixed 150% at level 10 and the configurable expert maximum (200% by default). Balanced operators therefore work at 100% at 5/5/5, 150% at 10/10/10, 175% at 15/15/15 and 200% at 20/20/20 with defaults. Each skill caps independently at 20. General work speed, sight and manipulation modify this skill multiplier; these are not additional Cooking-skill bonuses.
+All six extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%, with reference levels 10/6/4. These are recovery references, not minimum qualifications. Each skill below reference contributes `weight * max(0, reference - level) / reference` to shortfall S. One roll per completed extraction chooses loss uniformly between 0.5S and S; output is `max(1, floor(baseOutput * (1 - loss)))`. Above-reference skills cannot compensate for another skill's shortfall. Cooking 5 / Medicine 6 / Intellectual 4 gives 10-20% loss: a 25-unit batch yields 20-22.
 
-The expert fraction also grants up to 20% extra biomass by default, with no yield bonus at level 10 or below. At level 15 in all three skills the bonus is 10%; at 20 it is 20%. Meat/crop recipes use vanilla recipe efficiency and upward whole-item rounding (default expert outputs: 25 → 30, 38 → 46, 10 → 12). The efficiency factor is biased down by one representable float to prevent floating-point error granting an extra item at an exact integer boundary. Corpse yield applies the expert multiplier after material and decay calculations but before its existing downward rounding and minimum of one. Horns, tusks and artificial-part salvage are not multiplied. Yield is evaluated at completion, so current skill levels and settings apply.
+Speed stays at 100% when all skills are at or below reference. Above reference, each skill independently progresses from its reference to 20 using the same weights: `1 + weightedProgress * (maximumSpeed - 1)`. Default maximum is 200%. General work speed, sight and manipulation still apply. No skill grants extra yield. Vanilla material bill completion uses a cached loss result while retaining normal ingredient consumption and output handling.
 
 Active extraction awards 0.1 total base XP per tick, split using the same weights. Vanilla passion and learning modifiers apply independently, so final earned XP need not retain the exact base proportions. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling, with only the work phase extended to award weighted XP. Vanilla single-skill recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper.
 
-Artificial-part recovery is separate: its surgical speed, qualifications, chance of success and Medicine XP do not use the extraction weighting. The 100% work-speed timing examples assume 5/5/5 skills, normal capacities and no other work-speed modifiers.
+Artificial-part recovery is separate: its surgical speed, qualifications, chance of success and Medicine XP do not use the extraction weighting. The 100% work-speed timing examples assume reference 10/6/4 skills, normal capacities and no other work-speed modifiers.
 
 ### Artificial-part recovery
 
@@ -50,9 +50,9 @@ Each completed attempt physically removes its hediff from the corpse before prod
 
 Manual checks: process a corpse with multiple implants; compare low/high qualified medics; confirm no medicine is consumed; compare dirty/clean rooms with identical lighting; interrupt after one removal and verify it does not reappear or produce twice; confirm extraction continues after successful and failed salvage. Mods that supply custom removal effects rather than a standard removal item may need compatibility support.
 
-Corpse biomass is `max(1, floor(material amount × 0.5 × 1.25 × decay × expert yield multiplier))`. Material amount uses vanilla MeatAmount with post-processing disabled: body size, missing natural parts, slaughter condition, nutrition and difficulty still apply, but vanilla's small-animal meat bonus does not. The whole-body multiplier includes the remaining organs, bones and hide even when limbs are missing. Decay multipliers are 1 for fresh, 0.5 for rotting and 0.1 for desiccated bodies. Every eligible corpse yields at least one biomass.
+Corpse base biomass is `max(1, floor(material * 1.10 * efficiency * decay))`, using 0.40 basic or 0.50 enzymatic efficiency. Existing MeatAmount body-size, missing-part, slaughter, nutrition and difficulty adjustments remain, without the small-animal post-processing bonus. Operator wastage applies to this base output. 100 material yields 44 basic or 55 enzymatic before wastage.
 
-Fresh processing time starts at `setup minutes + material / 50 × extraction minutes`, divided by the operator's weighted biomass extraction speed. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material preserve the original `100 + 20 × material` work baseline. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
+Fresh processing time starts at `(setup minutes + material / 50 * extraction minutes) / 2`, divided by the operator's weighted biomass extraction speed. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material give 1.2 setup minutes and 12 minutes per 50 material before other modifiers. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
 
 Decay then multiplies processing time by `handling share + (1 - handling share) × decay multiplier`. With the default 30% handling share, fresh bodies take 100%, rotting bodies 65% and desiccated bodies 37% of fresh time. This makes a large desiccated body slower to process than a small fresh body yielding the same biomass. Time is captured after delivery/stripping, using the settings, operator speed and corpse condition at that point, and saved per job. Yield uses the condition at completion; a body that decays during work can therefore give less output without shortening a job already underway.
 
@@ -64,13 +64,12 @@ Open **Options → Mod Settings → GeneFoundry → Raw biomass**. Sliders have 
 
 | Setting | Default | Range | Effect |
 |---|---:|---:|---|
-| Fresh extraction per 50 material | 24 minutes | 1–120 minutes | Scales extraction work with body size; lower values speed processing. |
-| Setup time per corpse | 2.4 minutes | 0–15 minutes, 0.1-minute steps | Adds per-body work before other modifiers; discourages processing many tiny bodies for better throughput. |
+| Fresh extraction per 50 material | 24 minutes | 1–120 minutes | Halved to 12 minutes before other modifiers; scales with body size. |
+| Setup time per corpse | 2.4 minutes | 0–15 minutes, 0.1-minute steps | Halved to 1.2 minutes before other modifiers; adds per-body work. |
 | Work unaffected by decay | 30% | 0–100%, 1% steps | At 0%, time scales entirely with recovery. At 100%, decay does not shorten work. |
-| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Expert skill-speed ceiling; 150% disables speed gains above level 10. |
-| Maximum extra biomass at level 20 | +20% | 0–50%, 1% steps | Expert yield ceiling for all extraction bills; 0% disables the yield bonus. |
+| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Skill-speed ceiling at all skills 20; progress starts at each reference. |
 
-The view shows current fresh/rotting/desiccated timing percentages. Corpse duration is captured when extraction starts, while meat/crop speed responds during work. Expert yield settings apply at completion to all extraction bills. The corpse-specific timing sliders do not affect meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
+The view shows current fresh/rotting/desiccated timing percentages. Corpse duration is captured when extraction starts, while meat/crop speed responds during work. Operator wastage applies at completion to all extraction bills. The corpse-specific timing sliders do not affect meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
 
 ### Calculation unit tests
 
@@ -110,20 +109,18 @@ Before v1, development prioritises current behavior over compatibility with olde
 
 ## Biomass refinery
 
-Each attempt consumes **10 raw biomass + 1 neutroamine** when preparation finishes. A successful batch produces a base yield of **2 refined biomass**, with expert recovery described below. Failed batches produce nothing and do not refund inputs.
+Each attempt consumes **40 raw biomass + 1 neutroamine** when preparation finishes. Success produces exactly **10 refined biomass**; failure produces zero with no refund.
 
-- Build hoppers along any side of a completed refinery with their outlets facing it. Diagonal hoppers do not connect. Keep the interaction cell clear. Multiple hoppers combine their stored biomass without speeding production.
-- Assign an operator to Research work and add a refinement bill. The operator collects neutroamine, prepares the batch and then leaves automated processing to the machine.
-- Minimum skills are Intellectual 5, Crafting 3 and Medicine 2. Operator skill-based failure risk reaches zero at 10, 8 and 6 respectively; dirt or exposure can still add risk. Their weights are 60%, 25% and 15%.
-- At default settings, preparation scales from 60 minutes at minimum skills to 30 minutes at the zero-failure thresholds, then to about 22.5 minutes at 20/20/20. Above each threshold, that skill contributes independently toward the expert reward, capped at 20. The same relative 150%-to-200% speed progression as raw extraction gives up to 33.3% extra preparation speed, or 25% shorter preparation compared with 10/8/6. Operator skill-based failure probability remains zero above the thresholds; room conditions can still add risk.
-- Expert yield reaches +20% at 20/20/20 by default: a successful batch produces 2 items plus a 40% chance of one extra, for an average of 2.4. Fractional yield uses chance-based whole-item rounding instead of guaranteeing 3 items and inflating the intended bonus. Expected output and failure risk are captured when processing starts. Both the success/failure roll and whole-item yield result are retained if output placement needs retrying. Expert skills do not shorten automated processing.
-- Preparation awards 0.1 total base XP per tick, split across the three skills using the same weights. Vanilla passion and learning modifiers apply. Interrupted preparation retains earned XP; hauling and automated processing award none.
-- Default processing takes 12 in-game hours. Each available gene processor removes 5% of the base duration; ten reach the six-hour minimum. Reductions add together rather than compound.
-- Powered processors must satisfy vanilla facility range and line-of-sight checks. An assembler with an active job takes priority even between operator work sessions. Otherwise, each processor assists the nearest active, powered refinery that can still benefit; ties use building ID. Assistance updates every 60 game ticks.
-- Changing assistance adjusts future processing speed while preserving completed progress. Extra processors beyond a refinery's useful limit remain available to other refineries.
-- Idle power is 100 W; processing power is 1,500 W. Power loss pauses processing. A continuous 5,000-tick outage (two in-game hours) destroys the batch; restoring power resets the timer.
-- **Do X times** counts attempts when processing starts. **Do until X** uses vanilla output-count rules and continues requesting batches until its target is reached.
-- Successful completion rolls only once, including when output placement must be retried. Preparation duration, batch progress, failure probability, expected yield, chosen output count, completion-roll state and outage time are saved.
+Hoppers must touch a side of the refinery and face it. Multiple hoppers combine their stock; ingredient validation, bill counting and hauling remain unchanged. Qualifications remain Intellectual 5, Crafting 3 and Medicine 2. The single weighted skill is `clamp(0.60 * Intellectual + 0.25 * Crafting + 0.15 * Medicine, 5, 20)`.
+
+| Weighted skill | Preparation | Operator failure |
+|---|---:|---:|
+| 5 | 90 minutes | 30% |
+| 10 | 70 minutes | 20% |
+| 15 | 50 minutes | 10% |
+| 20 | 30 minutes | 0% |
+
+Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is `0.30 * (20 - skill) / 15`. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **36 hours**, **5% reduction per available gene processor**, **18-hour minimum** by default. Existing processor allocation gives active gene assemblers priority. Power loss pauses work and spoils the batch after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
 
 ### Research progression
 
@@ -167,28 +164,13 @@ Pure unit tests cover the formula, configurable terms, minimum costs, overflow, 
 
 ### Settings and testing
 
-Open **Options → Mod Settings → GeneFoundry** to change preparation durations (1–120 minutes), processing durations (5 minutes–24 hours) and processor reduction (0–25%). Minimum durations cannot exceed base durations. Processing changes affect running batches; preparation changes apply to new preparation jobs. Settings are shared across saves. Restore defaults after accelerated testing if desired.
-
-The Refined Biomass section also has independent expert controls: extra preparation speed at level 20 (+0–100%, default +33.3%) and extra output at level 20 (+0–50%, default +20%). Set either to zero to disable that reward. The preparation-time slider for 10/8/6 specifies the pre-expert duration, rather than an absolute minimum. The view previews the resulting level-20 preparation time. Yield settings affect newly started batches; running batches retain their captured expected output. Refined defaults can be restored without changing raw extraction settings.
+Open **Options -> Mod Settings -> GeneFoundry** for automated processing durations (5 minutes to 72 hours), processor assistance, raw extraction maximum speed and corpse timings. Corpse timing parameters are halved in the existing job; their stored defaults remain 24 and 2.4 minutes. Preparation follows the fixed linear formula. Reset buttons restore the new defaults; existing saved useful settings remain configurable. Expert yield, expert preparation and sterile-room bonus controls are removed.
 
 ### Refinement cleanliness
 
-Room cleanliness affects refinement failure risk by default. The refinery reads the game's Cleanliness room stat, rather than checking floor types, so modded floors and cleaning systems can contribute normally. The effects are additive percentage points:
+Environmental failure is additive at every operator level. Indoors, `clamp(-cleanliness / 2, 0, 1) * 0.15` gives no penalty at 0 or above, +7.5 percentage points at -1 and +15 at -2 or worse. Sterile rooms give no bonus. Outdoor, map-edge or unroofed rooms instead add a fixed 10 points; penalties do not stack. `totalFailure = clamp(operatorFailure + environmentFailure, 0, 1)` is captured at batch start. A level-20 operator therefore still has 7.5% risk at cleanliness -1, 15% at -2, or 10% outdoors. Dirty/exposure penalty controls and the environment enable checkbox remain. Changes affect new batches only.
 
-| Condition | Default adjustment |
-|---|---:|
-| Enclosed, fully roofed room at cleanliness -2 or worse | +15 points |
-| Cleanliness -1 | +7.5 points |
-| Cleanliness 0 | No adjustment |
-| Cleanliness +0.3 | -2.5 points |
-| Cleanliness +0.6 or better | -5 points |
-| Outdoor, map-edge or partly unroofed room | +15 points instead of the cleanliness adjustment |
-
-Intermediate cleanliness values interpolate linearly. Final failure probability is `clamp(operator risk + room adjustment, 0, 1)`. For example, an operator with 12% risk has 27% risk in a very dirty room, 12% at cleanliness zero and 7% at +0.6. Even an expert with zero operator risk has 15% risk in the very dirty room. No environmental penalty changes preparation, automated processing time or output quantity.
-
-Refined Biomass options include an enable checkbox and independent sliders for the maximum dirty-room penalty (0–50 points), sterile-room reduction (0–30 points), and exposure penalty (0–50 points). The fixed cleanliness breakpoints are -2, 0 and +0.6. All environment values and the final risk are captured when processing starts and saved with the batch; later cleaning, dirt, roof changes or settings changes do not alter an existing batch. The inspect panel shows the operator risk, captured environment adjustment and final batch risk. A ready refinery previews its current room adjustment. Developer-started zero-risk batches bypass cleanliness as well as operator preparation.
-
-Manual checks: use normal bills to compare dirty, clean and sterile rooms with the same operator; remove a roof tile and check the exposure penalty replaces the room effect; clean or change settings after a batch starts and verify its captured risk remains unchanged; disable cleanliness influence and confirm a newly started batch uses operator risk alone. Artificial-part salvage still ignores cleanliness and is unaffected by these settings.
+Manual verification: compare all input types, qualification levels, clean/dirty/outdoor rooms, hopper orientation, interrupted preparation, power spoilage, processor assistance, save/load during work and blocked-output retries. No in-game validation is claimed by the unit suite.
 
 The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and starts a zero-risk batch.
 
@@ -261,14 +243,14 @@ Manual checks still required in RimWorld: process rats, hares, humans, muffalo, 
 
 ### Gene Vat rot stink
 
-During actual corpse dissolution (normal or enzymatic, at every decay stage), the current operator has a 250-tick incident check: Cooking, Medicine and Intellectual each add 5% risk when below level 10 (0/5/10/15% total). Hauling, stripping, implant recovery and meat/plant extraction do not make checks. Partial check progress is retained on the vat across work sessions; active incidents suspend checks.
+During active meat, plant or corpse extraction (normal or enzymatic, at every decay stage), the current operator has a 250-tick incident check: Cooking, Medicine and Intellectual each add 5% risk when below level 10 (0/5/10/15% total). Hauling, idle time, stripping and implant recovery do not make checks. Partial check progress is retained on the vat across work sessions; active incidents suspend checks.
 
 Each vat persists its own incident deadline and emission schedule. An incident lasts 2,500 game ticks despite interruptions, operator replacement or power loss. It emits 50 vanilla rot stink gas units at the corpse cell immediately and every 250 ticks thereafter (10 releases, 500 total). Despawned/destroyed vats emit nothing; despawned time still counts toward expiry. Existing gas disperses naturally. Vanilla controls visuals, diffusion, dissipation, exposure and lung rot; natural corpse gas is unchanged. The inspection warning appears only while an incident is active.
 
 ### Gene Vat machine animation
 
-The north-facing vat uses the original idle sprite until a pawn reaches actual biomass extraction. Meat, plant and corpse extraction use eight unchanged runtime frames, held for 6 game ticks each, in the sequence 00–07–01 (14 displayed frames, 84 ticks). Pausing freezes the frame; game speed controls playback. Each vat starts its own visual cycle. Hauling and artificial-part recovery remain static. The native Multi graphic supplies geometry, offsets and other directions; realtime drawing replaces the north material without a second baked machine underneath. Missing animation assets log once and fall back to the static sprite. No animation state is saved.
+The north-facing vat uses the original idle sprite until a pawn reaches actual biomass extraction. Meat, plant and corpse extraction use eight unchanged runtime frames, held for 6 game ticks each, in the sequence 00–07–01 (14 displayed frames, 84 ticks). Pausing freezes the frame; game speed controls playback. Each vat starts its own visual cycle. Hauling and artificial-part recovery remain static. The native Multi graphic supplies geometry, offsets and other directions; realtime drawing adds only the transparent transition layer above the original north image. Explicit material queues order transitions, corpse/ingredients and foreground BubbleMass in that order. Missing animation assets log once and fall back to the static sprite. No animation state is saved.
 
 In-game checks still required: exercise all six extraction bills, check idle/hauling/part recovery, draft or interrupt the worker, cut power, finish a bill, and save/reload during work. Check two vats with different start times. Confirm alpha edges, alignment, dimensions, corpse placement/liquidation and selection/placement previews remain correct. Automated tests verify timing, sequence, definition wiring and byte-identical runtime assets; they do not verify Unity rendering.
 
-Material extraction draws delivered meat/crop stacks inside the lower basin beneath the bubbles. Their ordinary map graphics return on interruption; map positions and tracked quantities are unchanged. Biomass extraction work is halved for meat, crops and corpses; artificial-part recovery and animation cadence are unchanged.
+Material extraction draws delivered meat/crop stacks inside the lower basin beneath the bubbles, shifted 0.25 cells towards the top so more of the ingredients remain visible. Their ordinary map graphics return on interruption; map positions and tracked quantities are unchanged. Biomass extraction work is halved for meat, crops and corpses; artificial-part recovery and animation cadence are unchanged.

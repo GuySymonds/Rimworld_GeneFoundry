@@ -22,10 +22,10 @@ namespace GeneFoundry.Recipes
             return Math.Max(0f, corpse.InnerPawn.GetStatValue(StatDefOf.MeatAmount, false));
         }
 
-        public static int Yield(float meatAmount, RotStage stage, float expertMultiplier = 1f, bool enzymatic = false)
+        public static int Yield(float meatAmount, RotStage stage, bool enzymatic = false)
         {
             // Include remaining organs, bones and hide, even when limbs are missing.
-            return BiomassCalculations.CorpseYield(meatAmount, DecayMultiplier(stage), expertMultiplier, enzymatic);
+            return BiomassCalculations.CorpseYield(meatAmount, DecayMultiplier(stage), enzymatic);
         }
 
         public static float DecayMultiplier(RotStage stage)

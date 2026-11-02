@@ -22,8 +22,8 @@ namespace GeneFoundry.Components
 
         internal bool ActiveAt(int tick) => tick < incidentEndTick;
 
-        // Called exclusively by the corpse dissolution toil, for its current operator.
-        public void NotifyCorpseExtraction(Pawn pawn, int delta)
+        // Called exclusively by active extraction toils, for its current operator.
+        public void NotifyExtraction(Pawn pawn, int delta)
         {
             if (!parent.Spawned || parent.Destroyed)
                 return;

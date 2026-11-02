@@ -14,94 +14,40 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(0, 0, 0, 0.5f)]
-        [InlineData(5, 5, 5, 1f)]
-        [InlineData(10, 10, 10, 1.5f)]
-        [InlineData(10, 0, 0, 0.9f)]
-        [InlineData(0, 10, 0, 0.9f)]
-        [InlineData(0, 0, 10, 0.7f)]
-        [InlineData(5, 10, 0, 1.1f)]
-        [InlineData(15, 15, 15, 1.75f)]
-        [InlineData(20, 0, 0, 1.1f)]
-        [InlineData(20, 20, 20, 2f)]
-        [InlineData(30, 30, 30, 2f)]
-        [InlineData(-5, -5, -5, 0.5f)]
-        public void ExtractionSpeedUsesIndependentWeightedSkillCaps(
-            int cooking, int medicine, int intellectual, float expected)
+        [InlineData(0,0,0,1f)]
+        [InlineData(10,6,4,1f)]
+        [InlineData(5,3,2,1f)]
+        [InlineData(20,6,4,1.4f)]
+        [InlineData(10,20,4,1.4f)]
+        [InlineData(10,6,20,1.2f)]
+        [InlineData(20,20,20,2f)]
+        public void IndependentSpeedProgress(int c,int m,int i,float expected) =>
+            Assert.Equal(expected, BiomassCalculations.ExtractionSkillSpeed(c,m,i),5);
+
+        [Theory]
+        [InlineData(150,1.5f)] [InlineData(200,2f)] [InlineData(300,3f)]
+        public void MaximumSpeedSetting(int maximum,float expected)
         {
-            Assert.Equal(expected, BiomassCalculations.ExtractionSkillSpeed(cooking, medicine, intellectual), 5);
+            Assert.Equal(expected,BiomassCalculations.ExtractionSkillSpeed(20,20,20,maximum),5);
+            Assert.Equal(1f,BiomassCalculations.ExtractionSkillSpeed(10,6,4,maximum));
         }
 
         [Theory]
-        [InlineData(150, 1.5f)]
-        [InlineData(200, 2f)]
-        [InlineData(300, 3f)]
-        [InlineData(0, 1.5f)]
-        [InlineData(400, 3f)]
-        public void ExpertSpeedSettingControlsOnlyTheExpertRange(int maximum, float expected)
-        {
-            Assert.Equal(expected, BiomassCalculations.ExtractionSkillSpeed(20, 20, 20, maximum), 5);
-            Assert.Equal(1.5f, BiomassCalculations.ExtractionSkillSpeed(10, 10, 10, maximum), 5);
-            Assert.Equal(1f, BiomassCalculations.ExtractionSkillSpeed(5, 5, 5, maximum), 5);
-        }
-
-        [Theory]
-        [InlineData(0, 0, 0, 1f)]
-        [InlineData(10, 10, 10, 1f)]
-        [InlineData(15, 15, 15, 1.1f)]
-        [InlineData(20, 20, 20, 1.2f)]
-        [InlineData(20, 10, 10, 1.08f)]
-        [InlineData(10, 20, 10, 1.08f)]
-        [InlineData(10, 10, 20, 1.04f)]
-        [InlineData(30, 30, 30, 1.2f)]
-        public void ExpertYieldRewardsOnlyLevelsAboveTenWithIndependentCaps(
-            int cooking, int medicine, int intellectual, float expected)
-        {
-            Assert.Equal(expected, BiomassCalculations.ExpertYieldMultiplier(cooking, medicine, intellectual), 5);
-        }
-
-        [Theory]
-        [InlineData(0, 1f)]
-        [InlineData(20, 1.2f)]
-        [InlineData(50, 1.5f)]
-        [InlineData(-1, 1f)]
-        [InlineData(100, 1.5f)]
-        public void ExpertYieldSettingCanDisableOrAdjustBonus(int percent, float expected)
-        {
-            Assert.Equal(expected, BiomassCalculations.ExpertYieldMultiplier(20, 20, 20, percent), 5);
-        }
-
-        [Theory]
-        [InlineData(25, 30)]
-        [InlineData(10, 12)]
-        [InlineData(38, 46)]
-        public void VanillaMaterialRoundingDoesNotInflateExactWholeNumberBonuses(int baseline, int expected)
-        {
-            float efficiency = BiomassCalculations.MaterialYieldEfficiency(
-                BiomassCalculations.ExpertYieldMultiplier(20, 20, 20));
-            Assert.Equal(expected, (int)Math.Ceiling((float)(baseline * efficiency)));
-            Assert.Equal(baseline, (int)Math.Ceiling(baseline * BiomassCalculations.MaterialYieldEfficiency(1f)));
-        }
+        [InlineData(5,6,4,0d,22)] [InlineData(5,6,4,1d,20)]
+        [InlineData(10,6,4,0d,25)] [InlineData(10,6,4,1d,25)]
+        [InlineData(20,20,20,0d,25)] [InlineData(20,20,20,1d,25)]
+        [InlineData(5,20,20,1d,20)]
+        [InlineData(0,0,0,0d,12)] [InlineData(0,0,0,1d,1)]
+        public void OneRollWastageBoundaries(int c,int m,int i,double roll,int expected) =>
+            Assert.Equal(expected,BiomassCalculations.ExtractionOutput(25,c,m,i,roll));
 
         [Fact]
-        public void ExpertCorpseYieldAppliesAfterDecayAndRetainsMinimum()
+        public void MinimumOutputAndVanillaCeilingMatchDesiredRecovery()
         {
-            float bonus = BiomassCalculations.ExpertYieldMultiplier(20, 20, 20);
-            Assert.Equal(420, BiomassCalculations.CorpseYield(560f, 1f, bonus));
-            Assert.Equal(210, BiomassCalculations.CorpseYield(560f, 0.5f, bonus));
-            Assert.Equal(42, BiomassCalculations.CorpseYield(560f, 0.1f, bonus));
-            Assert.Equal(1, BiomassCalculations.CorpseYield(0f, 0.1f, bonus));
-        }
-
-        [Fact]
-        public void WeightedSkillsChangeDurationWithoutChangingRecovery()
-        {
-            float novice = BiomassCalculations.ExtractionSkillSpeed(0, 0, 0);
-            float ordinary = BiomassCalculations.ExtractionSkillSpeed(5, 5, 5);
-            float expert = BiomassCalculations.ExtractionSkillSpeed(10, 10, 10);
-            int baseline = Work(560f, speed: ordinary);
-            Assert.InRange(Work(560f, speed: novice), baseline * 2 - 1, baseline * 2 + 1);
-            Assert.InRange(Work(560f, speed: expert), baseline / 1.5d - 1d, baseline / 1.5d + 1d);
+            Assert.Equal(1,BiomassCalculations.ExtractionOutput(1,0,0,0,1));
+            foreach (int baseline in new[] {8,10,20,25})
+                for(int output=1;output<=baseline;output++)
+                    Assert.Equal(output,(int)Math.Ceiling(baseline * BiomassCalculations.MaterialYieldEfficiency(output/(float)baseline)));
         }
 
         [Theory]
@@ -127,12 +73,15 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(28f, 1f, 17)]
-        [InlineData(28f, 0.5f, 8)]
+        [InlineData(100f, 1f, 44)]
+        [InlineData(100f, 0.5f, 22)]
+        [InlineData(100f, 0.1f, 4)]
+        [InlineData(28f, 1f, 12)]
+        [InlineData(28f, 0.5f, 6)]
         [InlineData(28f, 0.1f, 1)]
-        [InlineData(560f, 1f, 350)]
-        [InlineData(560f, 0.5f, 175)]
-        [InlineData(560f, 0.1f, 35)]
+        [InlineData(560f, 1f, 246)]
+        [InlineData(560f, 0.5f, 123)]
+        [InlineData(560f, 0.1f, 24)]
         public void YieldIncludesWholeBodyBonusAndDecay(float material, float decay, int expected)
         {
             Assert.Equal(expected, BiomassCalculations.CorpseYield(material, decay));
@@ -153,8 +102,8 @@ namespace GeneFoundry.Tests
         public void MissingMaterialStillReceivesWholeBodyBonus()
         {
             // An initially 100-material body has lost 20 material in missing parts.
-            Assert.Equal(50, BiomassCalculations.CorpseYield(80f, 1f));
-            Assert.True(BiomassCalculations.CorpseYield(80f, 1f) > 80f * 0.5f);
+            Assert.Equal(35, BiomassCalculations.CorpseYield(80f, 1f));
+            Assert.True(BiomassCalculations.CorpseYield(80f, 1f) > 80f * 0.4f);
         }
 
         [Theory]

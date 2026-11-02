@@ -24,7 +24,7 @@ namespace GeneFoundry.Recipes
         }
 
         public override string ProductsDescription(Bill_Production bill) =>
-            "Raw biomass: variable yield from body material, decay and operator expertise (minimum 1).";
+            "Raw biomass: variable yield from body material, decay and operator wastage (minimum 1).";
 
         public override bool CanPossiblyStore(Bill_Production bill, ISlotGroup group) =>
             group.Settings.filter.Allows(Biomass);
