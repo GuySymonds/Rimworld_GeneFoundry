@@ -31,7 +31,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void RuntimeFramesAreByteIdenticalToTheEightSourceImages()
+        public void RuntimeFramesHaveEightAlignedTransparentCanvases()
         {
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
             Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "*.png").Length);
@@ -39,7 +39,6 @@ namespace GeneFoundry.Tests
             {
                 string name = "vat_" + i.ToString("00") + ".png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Frames", name));
-                Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "SourceFrames", name)), png);
                 Assert.Equal(1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
                 Assert.Equal(1448, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
                 Assert.Equal(6, png[25]);
@@ -47,7 +46,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void RuntimeBubblesAreByteIdenticalAndHaveAlignedTransparentCanvases()
+        public void RuntimeBubblesHaveEightAlignedTransparentCanvases()
         {
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
             Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Bubbles"), "*.png").Length);
@@ -55,7 +54,6 @@ namespace GeneFoundry.Tests
             {
                 string name = i.ToString("00") + ".png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Bubbles", name));
-                Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "SourceBubbles", name)), png);
                 // PNG IHDR uses big-endian dimensions; colour type 6 is RGBA.
                 Assert.Equal(500, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
                 Assert.Equal(203, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
@@ -64,7 +62,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void VatUsesOneRotatingRealtimeGraphicWithAlignedSourceExports()
+        public void VatUsesDirectionalAnimatedGraphicAndFinalRuntimeArtwork()
         {
             var vat = XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Fixtures/Defs/ThingDefs/GeneVat.xml"))
                 .Descendants("ThingDef").Single(x => (string)x.Element("defName") == "GF_GeneVat");
@@ -80,8 +78,8 @@ namespace GeneFoundry.Tests
             Assert.Equal("true", (string)vat.Element("rotatable"));
             Assert.Equal("false", (string)vat.Element("graphicData").Element("drawRotated"));
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
-            Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "Vat/Source.png")),
-                File.ReadAllBytes(Path.Combine(fixtures, "Vat/GeneVat.png")));
+            byte[] finalArtwork = File.ReadAllBytes(Path.Combine(fixtures, "Vat/GeneVat.png"));
+            Assert.Equal(new byte[] {137, 80, 78, 71, 13, 10, 26, 10}, finalArtwork.Take(8));
             Assert.Equal("(3,3)", (string)vat.Element("size"));
             Assert.Contains(vat.Element("comps").Elements(), x =>
                 (string)x.Attribute("Class") == "GeneFoundry.Components.CompProperties_GeneVatAnimation");

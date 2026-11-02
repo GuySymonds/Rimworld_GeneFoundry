@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts/Release.ps1 -RimWorldManagedDir 'C:\Path To\RimWor
 pwsh -NoProfile -File scripts/Test-ReleaseWorkflow.ps1
 ```
 
-The workflow regression script uses only disposable `.artifacts/ReleaseWorkflow` fixtures to check publication-ID preservation, stale-file removal, target safety and negative package validation. It never deploys to the game.
+The workflow regression script uses only a uniquely named temporary directory, removed automatically afterward to check publication-ID preservation, stale-file removal, target safety and negative package validation. It never deploys to the game.
 
 The integration suite exercises installed managed game APIs without starting Unity. It does not replace loading the final packaged mod in-game. The developer previously tested the implementation in-game; every release still needs a smoke test of its actual package.
 
@@ -69,7 +69,7 @@ For later updates, retain the same publication ID and package ID, rebuild/valida
 
 ## Development deployment
 
-Normal local builds synchronize the explicit Gene Vat PNG exports into Mod/ and deploy after every Build/Rebuild, even when compilation is already up to date. Source XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/deploy.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
+Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/deploy.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
 
 ```powershell
 $env:GENEFOUNDRY_MOD_DIR = 'C:\Path To\RimWorld\Mods\GeneFoundry'

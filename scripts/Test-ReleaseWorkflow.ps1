@@ -4,15 +4,13 @@ param()
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'ModContent.ps1')
 $repo = Split-Path $PSScriptRoot -Parent
-$fixture = Assert-PlainModDirectory (Join-Path $repo '.artifacts/ReleaseWorkflow')
+$tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+$fixture = Assert-PlainModDirectory (Join-Path $tempRoot ('GeneFoundry-ReleaseWorkflow-' + [Guid]::NewGuid().ToString('N')))
 $target = Join-Path $fixture 'GeneFoundry'
 $dll = Join-Path $repo 'dist/GeneFoundry/Assemblies/GeneFoundry.dll'
 $validator = Join-Path $PSScriptRoot 'Test-ReleasePackage.ps1'
 if (-not (Test-Path -LiteralPath $dll)) { throw 'Run scripts/Release.ps1 first.' }
-if (Test-Path -LiteralPath $fixture) {
-    if ($fixture -ne [IO.Path]::GetFullPath((Join-Path $repo '.artifacts/ReleaseWorkflow'))) { throw 'Unsafe fixture cleanup.' }
-    Remove-Item -LiteralPath $fixture -Recurse -Force
-}
+try {
 New-Item -ItemType Directory -Path $fixture -Force | Out-Null
 $sentinel = Join-Path $fixture 'outside-mod.txt'
 Set-Content -LiteralPath $sentinel -Value 'Do not change'
@@ -82,4 +80,13 @@ Expect-Rejection 'input DLL inside the cleanup destination' {
 }
 Expect-Rejection 'filesystem root' { Assert-PlainModDirectory ([IO.Path]::GetPathRoot($repo)) }
 & $validator -PackagePath $target
-Write-Host 'Release workflow regression checks passed. Disposable fixtures remain under .artifacts/ReleaseWorkflow.'
+Write-Host 'Release workflow regression checks passed.'
+}
+finally {
+    if (-not $fixture.StartsWith($tempRoot, [StringComparison]::OrdinalIgnoreCase) -or
+        (Split-Path $fixture -Leaf) -notmatch '^GeneFoundry-ReleaseWorkflow-[a-f0-9]{32}$') {
+        throw 'Unsafe temporary fixture cleanup.'
+    }
+    $checked = Assert-PlainModDirectory $fixture
+    if (Test-Path -LiteralPath $checked) { Remove-Item -LiteralPath $checked -Recurse -Force }
+}

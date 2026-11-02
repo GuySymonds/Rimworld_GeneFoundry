@@ -49,11 +49,8 @@
     <Compile Include="../GeneFoundry/Fabrication/FabricationCalculations.cs" Link="Production/FabricationCalculations.cs" />
     <Compile Include="../GeneFoundry/Components/GeneVatAnimationTiming.cs" Link="Production/GeneVatAnimationTiming.cs" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVat_north.png" Link="Fixtures/Vat/GeneVat.png" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../Textures/GeneVatFrames/GeneVat_north.png" Link="Fixtures/Vat/Source.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../Textures/GeneVatFrames/vat_*.png" Link="Fixtures/SourceFrames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../Textures/BubbleMass/*.png" Link="Fixtures/SourceBubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
     <Content Include="../../../Mod/About/*" Exclude="../../../Mod/About/PublishedFileId.txt" Link="Fixtures/About/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/LICENSE" Link="Fixtures/Mod-LICENSE" CopyToOutputDirectory="PreserveNewest" />
