@@ -54,9 +54,10 @@ namespace GeneFoundry.Tests
             Assert.True(vat > Altitudes.AltitudeFor(AltitudeLayer.Building));
             Assert.True(vat < Altitudes.AltitudeFor(AltitudeLayer.Item));
             Assert.True(vat < Altitudes.AltitudeFor(AltitudeLayer.Pawn));
-            Assert.InRange(MapComponent_CorpseLiquidationVisuals.BasinCenterZ,-.2f,0f);
-            Assert.True(MapComponent_CorpseLiquidationVisuals.BasinWidthFraction < 1f);
-            Assert.True(MapComponent_CorpseLiquidationVisuals.BasinHeightFraction < .5f);
+            var bounds = MapComponent_CorpseLiquidationVisuals.BasinBounds(Rot4.North, new Vector2(3f, 3.6f));
+            Assert.True(bounds.center.y < 0f);
+            Assert.InRange(bounds.width, 0f, 3f);
+            Assert.InRange(bounds.height, 0f, 3.6f);
         }
         [Fact] public void ActiveJobDrivesPresentationWithoutDependingOnBuildingClass()
         {

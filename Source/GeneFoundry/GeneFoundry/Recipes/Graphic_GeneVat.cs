@@ -5,7 +5,7 @@ using Verse;
 
 namespace GeneFoundry.Recipes
 {
-    // Native directional base artwork, with a shared animation rotated independently.
+    // Directional base artwork and matching directional animation canvases.
     public class Graphic_GeneVat : Graphic_Multi
     {
         // Processing follows the building, independently of GraphicData.drawRotated.
@@ -20,40 +20,49 @@ namespace GeneFoundry.Recipes
         internal const int ContentsQueue = 3001;
         internal const int BubblesQueue = 3002;
         private static readonly Dictionary<Material, Material> contentsMaterials = new Dictionary<Material, Material>();
-        private Material[] frames;
+        private Material[][] frames;
+        private static readonly string[] Directions = { "north", "east", "south", "west" };
+        internal static string FramePath(int frame, Rot4 rotation) =>
+            $"GeneFoundry/Buildings/GeneVatFrames/vat_{frame:00}_{Directions[rotation.AsInt]}";
 
         public override void Init(GraphicRequest req)
         {
             base.Init(req);
-            frames = new Material[8];
-            for (int i = 0; i < frames.Length; i++)
+            frames = new Material[4][];
+            for (int direction = 0; direction < 4; direction++)
             {
-                string framePath = "GeneFoundry/Buildings/GeneVatFrames/vat_" + i.ToString("00");
-                Texture2D texture = ContentFinder<Texture2D>.Get(framePath, false);
-                if (texture == null)
+                var set = new Material[8];
+                for (int i = 0; i < set.Length; i++)
                 {
-                    Log.ErrorOnce("GeneFoundry: missing Gene Vat transition " + framePath + "; using the idle image.", 1745020 + i);
-                    frames = null;
-                    return;
+                    string framePath = FramePath(i, new Rot4(direction));
+                    Texture2D texture = ContentFinder<Texture2D>.Get(framePath, false);
+                    if (texture == null)
+                    {
+                        Log.ErrorOnce("GeneFoundry: missing directional transition " + framePath +
+                            "; using the idle image for this direction.", 1745020 + direction);
+                        set = null;
+                        break;
+                    }
+                    set[i] = MaterialPool.MatFrom(new MaterialRequest(texture, ShaderDatabase.Transparent, req.color)
+                    {
+                        renderQueue = TransitionQueue
+                    });
                 }
-                frames[i] = MaterialPool.MatFrom(new MaterialRequest(texture, ShaderDatabase.Transparent, req.color)
-                {
-                    renderQueue = TransitionQueue
-                });
+                frames[direction] = set;
             }
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
             base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            if (frames == null || thing == null) return;
+            Material[] set = frames?[rot.AsInt];
+            if (set == null || thing == null) return;
             int frame = thing.TryGetComp<CompGeneVatAnimation>()?.FrameAt(Find.TickManager.TicksGame) ?? -1;
             if (frame < 0) return;
-            Quaternion rotation = Orientation(rot);
-            if (extraRotation != 0f) rotation *= Quaternion.Euler(Vector3.up * extraRotation);
+            // Directional canvases already include their orientation; match the base mesh exactly.
+            Quaternion rotation = extraRotation == 0f ? Quaternion.identity : Quaternion.Euler(Vector3.up * extraRotation);
             Vector3 position = loc + DrawOffset(rot) + Vector3.up * .002f;
-            // Frames are north-aligned; rotating an east/west mesh would swap dimensions twice.
-            GenDraw.DrawMeshNowOrLater(MeshAt(Rot4.North), position, rotation, frames[frame], false);
+            GenDraw.DrawMeshNowOrLater(MeshAt(rot), position, rotation, set[frame], false);
         }
 
         // Preserve every shader property on native corpse/item materials, without

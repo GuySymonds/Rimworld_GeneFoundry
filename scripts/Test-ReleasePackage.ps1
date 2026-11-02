@@ -106,9 +106,20 @@ foreach ($file in Get-ChildItem -LiteralPath (Join-Path $package 'Languages') -F
     Require ($translation.DocumentElement.Name -eq 'LanguageData') "Wrong translation root: $($file.Name)"
 }
 for ($frame = 0; $frame -lt 8; $frame++) {
-    foreach ($path in @('Textures/GeneFoundry/Buildings/GeneVatFrames/vat_{0:00}.png',
-        'Textures/GeneFoundry/Effects/BubbleMass/{0:00}.png')) {
-        Require (Test-Path -LiteralPath (Join-Path $package ($path -f $frame))) "Missing animation frame: $($path -f $frame)"
+    foreach ($direction in @('north', 'east', 'south', 'west')) {
+        $relative = 'Textures/GeneFoundry/Buildings/GeneVatFrames/vat_{0:00}_{1}.png' -f $frame, $direction
+        $framePath = Join-Path $package $relative
+        Require (Test-Path -LiteralPath $framePath) "Missing animation frame: $relative"
+        $basePath = Join-Path $package "Textures/GeneFoundry/Buildings/GeneVat_$direction.png"
+        Require (Test-Path -LiteralPath $basePath) "Missing directional base: $direction"
+        $frameImage = [Drawing.Image]::FromFile($framePath)
+        $baseImage = [Drawing.Image]::FromFile($basePath)
+        try {
+            Require ($frameImage.Size -eq $baseImage.Size) "Frame canvas differs from $direction base: $relative"
+        }
+        finally { $frameImage.Dispose(); $baseImage.Dispose() }
     }
+    $bubble = 'Textures/GeneFoundry/Effects/BubbleMass/{0:00}.png' -f $frame
+    Require (Test-Path -LiteralPath (Join-Path $package $bubble)) "Missing animation frame: $bubble"
 }
 Write-Host "Validated GeneFoundry v${version}: $($expected.Count) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."

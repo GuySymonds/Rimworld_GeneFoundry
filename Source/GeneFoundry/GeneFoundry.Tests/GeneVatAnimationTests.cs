@@ -31,16 +31,18 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void RuntimeFramesHaveEightAlignedTransparentCanvases()
+        public void EveryDirectionHasEightFramesMatchingItsBaseCanvas()
         {
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
-            Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "*.png").Length);
+            Assert.Equal(32, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "vat_*_*.png").Length);
+            foreach (string direction in new[] { "north", "east", "south", "west" })
             for (int i = 0; i < 8; i++)
             {
-                string name = "vat_" + i.ToString("00") + ".png";
+                string name = $"vat_{i:00}_{direction}.png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Frames", name));
-                Assert.Equal(1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
-                Assert.Equal(1448, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
+                bool horizontal = direction == "east" || direction == "west";
+                Assert.Equal(horizontal ? 1448 : 1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
+                Assert.Equal(horizontal ? 1086 : 1448, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
                 Assert.Equal(6, png[25]);
             }
         }

@@ -26,8 +26,8 @@ namespace GeneFoundry.Tests
             string source = System.IO.File.ReadAllText(System.IO.Path.Combine(System.AppContext.BaseDirectory,
                 "Fixtures/Source/Recipes/Graphic_GeneVat.cs"));
             Assert.DoesNotContain("rot != Rot4.North", source);
-            Assert.Contains("Quaternion rotation = Orientation(rot)", source);
-            Assert.Contains("MeshAt(Rot4.North)", source);
+            Assert.Contains("Material[] set = frames?[rot.AsInt]", source);
+            Assert.Contains("MeshAt(rot)", source);
         }
 
         [Theory]
@@ -63,16 +63,44 @@ namespace GeneFoundry.Tests
 
         [Theory]
         [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]
-        public void ActualMaterialProcessingCenterRotatesWithTheVat(int direction)
+        public void ActualMaterialProcessingCenterFitsEachDirectionalBasin(int direction)
         {
-            var vat = new OrientedVat { Rotation = Rot4.North };
-            var north = MapComponent_CorpseLiquidationVisuals.MaterialContentsCenter(vat);
-            vat.Rotation = new Rot4(direction);
+            var vat = new OrientedVat { Rotation = new Rot4(direction) };
             var actual = MapComponent_CorpseLiquidationVisuals.MaterialContentsCenter(vat);
-            var expected = Graphic_GeneVat.Orientation(vat.Rotation) * north;
-            Assert.Equal(expected.x, actual.x, 5);
-            Assert.Equal(expected.y, actual.y, 5);
-            Assert.Equal(expected.z, actual.z, 5);
+            var basin = MapComponent_CorpseLiquidationVisuals.BasinBounds(vat.Rotation, vat.Graphic.drawSize);
+            Assert.True(basin.Contains(new UnityEngine.Vector2(actual.x, actual.z)));
+            Assert.Equal(.02f, actual.y, 5);
+            switch (direction)
+            {
+                case 0: Assert.True(basin.center.y < 0f); break;
+                case 1: Assert.True(basin.center.x < 0f); break;
+                case 2: Assert.True(basin.center.y > 0f); break;
+                case 3: Assert.True(basin.center.x > 0f); break;
+            }
+        }
+
+        [Theory]
+        [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]
+        public void BubbleOverlayFitsInsideEachMeasuredBasinWithoutStretching(int direction)
+        {
+            var rot = new Rot4(direction);
+            var size = new UnityEngine.Vector2(3f, 3.6f);
+            var basin = MapComponent_CorpseLiquidationVisuals.BasinBounds(rot, size);
+            var bubbles = MapComponent_CorpseLiquidationVisuals.BubbleBounds(rot, size);
+            Assert.True(bubbles.xMin >= basin.xMin - .00001f && bubbles.xMax <= basin.xMax + .00001f);
+            Assert.True(bubbles.yMin >= basin.yMin - .00001f && bubbles.yMax <= basin.yMax + .00001f);
+            Assert.True(bubbles.width > 0f && bubbles.height > 0f);
+            Assert.Equal(500f / 203f, rot.IsHorizontal ? bubbles.height / bubbles.width : bubbles.width / bubbles.height, 4);
+        }
+
+        [Theory]
+        [InlineData(0, "north")] [InlineData(1, "east")]
+        [InlineData(2, "south")] [InlineData(3, "west")]
+        public void FrameSelectionKeepsTheSameClockButUsesTheDirection(int direction, string suffix)
+        {
+            for (int frame = 0; frame < 8; frame++)
+                Assert.Equal($"GeneFoundry/Buildings/GeneVatFrames/vat_{frame:00}_{suffix}",
+                    Graphic_GeneVat.FramePath(frame, new Rot4(direction)));
         }
 
         [Fact]
