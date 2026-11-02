@@ -101,7 +101,7 @@ namespace GeneFoundry.Recipes
             Thing vat = state.source.LiquidationVat;
             if (state.parts.Count == 0 && !PrepareCorpse(corpse, vat, state)) return;
             int stage = BiomassCalculations.LiquidationVisualStage((int)corpse.GetRotStage(), state.source.LiquidationProgress);
-            Quaternion rotation = vat.Graphic.QuatFromRot(vat.Rotation);
+            Quaternion rotation = Graphic_GeneVat.Orientation(vat.Rotation);
             Vector3 center = vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) + rotation * state.basinOffset;
             center.y += .01f;
             Matrix4x4 translation = Matrix4x4.TRS(center, rotation, Vector3.one);
@@ -186,7 +186,7 @@ namespace GeneFoundry.Recipes
             float basinHeight = size.y * BasinHeightFraction - 2f * BasinMargin;
             float bubbleHeight = Mathf.Min(basinWidth, basinHeight * 500f / 203f) * 203f / 500f;
             return vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) +
-                vat.Graphic.QuatFromRot(vat.Rotation) * new Vector3(size.x * BasinCenterX, .02f,
+                Graphic_GeneVat.Orientation(vat.Rotation) * new Vector3(size.x * BasinCenterX, .02f,
                     size.y * BasinCenterZ - (basinHeight - bubbleHeight) * .5f + .25f);
         }
         internal static void DrawMaterialBubbles(Thing vat, int startedAt)
@@ -195,8 +195,8 @@ namespace GeneFoundry.Recipes
             Vector2 basin = new Vector2(size.x * BasinWidthFraction - 2f * BasinMargin,
                 size.y * BasinHeightFraction - 2f * BasinMargin);
             Vector3 center = vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) +
-                vat.Graphic.QuatFromRot(vat.Rotation) * new Vector3(size.x * BasinCenterX, .01f, size.y * BasinCenterZ);
-            DrawBubbles(basin, .04f, startedAt, center, vat.Graphic.QuatFromRot(vat.Rotation));
+                Graphic_GeneVat.Orientation(vat.Rotation) * new Vector3(size.x * BasinCenterX, .01f, size.y * BasinCenterZ);
+            DrawBubbles(basin, .04f, startedAt, center, Graphic_GeneVat.Orientation(vat.Rotation));
         }
         private static void DrawBubbles(Vector2 basinSize, float top, int startedAt, Vector3 center, Quaternion rotation)
         {

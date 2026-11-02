@@ -42,7 +42,7 @@ namespace GeneFoundry.Components
                 foreach (var ingredient in ingredients)
                     if (ingredient.Active)
                         Graphic_GeneVat.DrawIngredient(ingredient.parent,
-                            MapComponent_CorpseLiquidationVisuals.MaterialContentsCenter(parent));
+                            MapComponent_CorpseLiquidationVisuals.MaterialContentsCenter(parent), parent.Rotation);
                 MapComponent_CorpseLiquidationVisuals.DrawMaterialBubbles(parent, startedAt);
             }
             else RestoreIngredients();
