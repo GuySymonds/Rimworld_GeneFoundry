@@ -1,7 +1,36 @@
-# Rimworld_GeneFoundry
+# GeneFoundry v1.0.0
 GeneFoundry — A RimWorld biotechnology mod that transforms organic matter into genetic resources for refining and fabricating custom genes.
 
 For RimWorld 1.6 with Biotech. The Gene Vat, Biomass Refinery and manual Gene Fabricator are implemented.
+
+## Installation, building and releases
+
+Requires **RimWorld 1.6 and Biotech**. Enable Core, Biotech, then GeneFoundry in the mod list. The public name is GeneFoundry; the established internal package ID remains `GBF.GeneticBiomassFabrication`.
+
+Build a complete, validated local upload package with one command (Windows PowerShell 5.1 or PowerShell 7 on Windows):
+
+```powershell
+pwsh -NoProfile -File scripts/Release.ps1
+```
+
+Pass `-RimWorldManagedDir 'C:\Path To\RimWorld\RimWorldWin64_Data\Managed'` for another installation, or set the same-named environment variable. The existing local S: drive installation remains the default. Builds use .NET Framework 4.7.2 reference assemblies; tests use the .NET 10 SDK.
+
+The output is **`dist/GeneFoundry`**, ready to copy into the game's local `Mods` directory. Packaging never installs or uploads the mod. Only its fixed staging directory is cleaned, and an existing Workshop publication ID is preserved. Detailed build, verification, publishing, updating and version-bumping instructions are in [docs/RELEASE.md](docs/RELEASE.md). The [Workshop description](docs/workshop-description.txt) uses Steam BBCode; [CHANGELOG.md](CHANGELOG.md) contains the initial release notes.
+
+```text
+Mod/                   Checked-in Workshop runtime content
+  About/               Metadata, preview and icon
+  Defs/                Production XML definitions
+  Languages/           Translations
+  Textures/            Runtime sprites and animation frames
+  LICENSE
+Source/                C# projects, tests and source artwork
+  Textures/            Source artwork; never included in a release
+scripts/               Deployment, artwork and release tooling
+dist/GeneFoundry/       Generated upload package, including Assemblies/GeneFoundry.dll
+```
+
+For a production build without installation side effects: `dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false`. Normal local builds retain the existing deployment hook; `scripts/deploy.ps1` reads assets from `Mod/`. Do not enable both an old development copy and the packaged mod simultaneously.
 
 ## Building costs and power
 
@@ -129,11 +158,11 @@ Hoppers must touch a side of the refinery and face it. Multiple hoppers combine 
 | Weighted skill | Preparation | Operator failure |
 |---|---:|---:|
 | 5 | 90 minutes | 30% |
-| 10 | 70 minutes | 20% |
-| 15 | 50 minutes | 10% |
+| 10 | 70 minutes | 5% |
+| 15 | 50 minutes | 2.5% |
 | 20 | 30 minutes | 0% |
 
-Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is `0.30 * (20 - skill) / 15`. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **36 hours**, **5% reduction per available gene processor**, **18-hour minimum** by default. Existing processor allocation gives active gene assemblers priority. Power loss pauses work and spoils the batch after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
+Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is piecewise linear: `0.30 - 0.05 * (skill - 5)` from skill 5 to 10, then `0.05 * (20 - skill) / 10` from 10 to 20. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **36 hours**, **5% reduction per available gene processor**, **18-hour minimum** by default. Existing processor allocation gives active gene assemblers priority. Power loss pauses work and spoils the batch after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
 
 ### Research progression
 
@@ -222,7 +251,7 @@ For example, one complexity-2 gene costs 20 biomass and 4,500 work. Three genes 
 
 Operator failure probability is `30% × (0.60 × clamp((16 − Intellectual)/6, 0, 1) + 0.25 × clamp((12 − Medicine)/6, 0, 1) + 0.15 × clamp((10 − Crafting)/6, 0, 1))`. Minimum-qualified operators have 30% risk; 16/12/10 or better gives zero risk. The unfinished item saves actual work and the sum of `work × operator risk`; final risk is that sum divided by work done, clamped to 0–30%. Final-tick work is capped to the remaining amount, so overshoot cannot inflate an operator's contribution. There is no cleanliness penalty and no XP during hauling, travel or waiting. Vanilla passion and learning modifiers apply to each skill's XP.
 
-Drafting, incapacity, higher-priority jobs, leaving the map and power loss stop active work while the machine retains its paid unfinished item. The pawn who begins actual manufacturing owns the unfinished pack; hauling alone does not claim it. Only that same pawn can resume it, but their paused work no longer locks the machine. The unfinished pack is a real spawned, selectable item, labelled with its intended genes and assigned pawn. Its bill also displays the assigned pawn. Another qualified pawn can reserve the idle workstation, physically set the pack aside, and start the next eligible bill. The owner later retrieves their original pack with its progress and payment intact. Right-click the bench with a qualified pawn enabled for Research and choose the standard Prioritize fabrication option. It starts eligible work immediately and sustains the native priority through bill preparation, hauling and fabrication. There are no per-bill colonist assignments or Assign/Unassign controls. Any qualified pawn can start an unstarted bill; a started pack remains locked to its creator. Existing saved per-bill assignments are ignored. If the owner dies or leaves permanently, cancel the job (or delete its active bill) and start a new entry. Discarding or destroying an unfinished pack keeps its bill and selected genes, clears its ownership and progress, and allows a fresh paid attempt. Explicitly deleting the bill still removes the entry. Existing unowned work from older saves is claimed by the first pawn who resumes it, without resetting progress. The owner reference and a separate ownership flag are saved, so an unavailable reference does not silently unlock the pack. Active work is placed on the workstation as an ordinary selectable, haulable item, drawn 0.06 of a tile left and 0.12 of a tile farther up the bench without changing its physical cell. Adjust `WorkSurfaceOffsetX` and `WorkSurfaceOffsetZ` near the top of `Source/GeneFoundry/GeneFoundry/Fabrication/FabricationState.cs`: negative X moves left, positive X right; positive Z moves up, negative Z down. These are map-tile units, so their apparent pixel distance varies with zoom. Rebuild and deploy the mod, then restart RimWorld after changing them. Native right-click availability and sustained priority are configured by `directOrderable` and `prioritizeSustains` in `Defs/WorkGiverDefs/GeneFabrication.xml`. Parked work may be hauled into storage and is retrieved through vanilla carrying and reservations. Selected genes, delivered materials, work, weighted risk, bill association and the completion result are serialized. A saved generation marker prevents cancelled jobs from acting on replacement orders. A developer-spawned unfinished item has no paid state and cannot produce a free pack.
+Drafting, incapacity, higher-priority jobs, leaving the map and power loss stop active work while the machine retains its paid unfinished item. The pawn who begins actual manufacturing owns the unfinished pack; hauling alone does not claim it. Only that same pawn can resume it, but their paused work no longer locks the machine. The unfinished pack is a real spawned, selectable item, labelled with its intended genes and assigned pawn. Its bill also displays the assigned pawn. Another qualified pawn can reserve the idle workstation, physically set the pack aside, and start the next eligible bill. The owner later retrieves their original pack with its progress and payment intact. Right-click the bench with a qualified pawn enabled for Research and choose the standard Prioritize fabrication option. It starts eligible work immediately and sustains the native priority through bill preparation, hauling and fabrication. There are no per-bill colonist assignments or Assign/Unassign controls. Any qualified pawn can start an unstarted bill; a started pack remains locked to its creator. Existing saved per-bill assignments are ignored. If the owner dies or leaves permanently, cancel the job (or delete its active bill) and start a new entry. Discarding or destroying an unfinished pack keeps its bill and selected genes, clears its ownership and progress, and allows a fresh paid attempt. Explicitly deleting the bill still removes the entry. Existing unowned work from older saves is claimed by the first pawn who resumes it, without resetting progress. The owner reference and a separate ownership flag are saved, so an unavailable reference does not silently unlock the pack. Active work is placed on the workstation as an ordinary selectable, haulable item, drawn 0.06 of a tile left and 0.12 of a tile farther up the bench without changing its physical cell. Adjust `WorkSurfaceOffsetX` and `WorkSurfaceOffsetZ` near the top of `Source/GeneFoundry/GeneFoundry/Fabrication/FabricationState.cs`: negative X moves left, positive X right; positive Z moves up, negative Z down. These are map-tile units, so their apparent pixel distance varies with zoom. Rebuild and deploy the mod, then restart RimWorld after changing them. Native right-click availability and sustained priority are configured by `directOrderable` and `prioritizeSustains` in `Mod/Defs/WorkGiverDefs/GeneFabrication.xml`. Parked work may be hauled into storage and is retrieved through vanilla carrying and reservations. Selected genes, delivered materials, work, weighted risk, bill association and the completion result are serialized. A saved generation marker prevents cancelled jobs from acting on replacement orders. A developer-spawned unfinished item has no paid state and cannot produce a free pack.
 
 Completion rolls failure once. Failure loses the paid materials and unfinished item, sends a notification and clears the order. Success calls vanilla `Genepack.Initialize` with exactly the selected genes on a vanilla genepack. The output stays in the machine's saved ThingOwner if placement is blocked, with periodic placement retries and no second completion or roll. It uses vanilla hauling, Gene Bank and Xenogerm Assembler data. Vanilla extraction and assembly are unchanged.
 
@@ -248,7 +277,7 @@ During actual corpse extraction, the corpse visually advances through fresh, rot
 
 Presentation measures the native render meshes with their laying orientation, node and life-stage offsets. Small corpses keep their natural scale; oversized corpses shrink proportionally using twice the basin width and height as their mesh fit allowance; the natural-size cap remains. This relaxed allowance compensates for sprite padding and can let large silhouettes extend beyond the basin. The pose and one fit scale are cached for the work session across all three rot appearances. Each appearance is centred on the same basin centre. Mesh bounds are conservative and include transparent texture padding; no biological body-size guesses or GPU texture readbacks are used. The corpse's map position is unchanged.
 
-Eight unchanged BubbleMass textures from `Source/Textures/BubbleMass` are copied to `Textures/GeneFoundry/Effects/BubbleMass` for the existing deployment mechanism. The overlay uses alpha blending, preserves the 500:203 aspect ratio and sits against the lower interior edge of the basin. It loops forward 00 through 07 at 6 game ticks per frame (48 ticks per cycle), above the corpse and below ordinary item/pawn layers. Each work session has its own tick origin. Pausing freezes playback. Hauling, stripping and part recovery do not show the overlay. Active meat and crop extraction also show the bubbles, using the same cached resources. Interruptions and power loss remove it; normal corpse drawing returns. Save/load rebuilds this transient presentation from the active job.
+Eight unchanged BubbleMass textures from `Source/Textures/BubbleMass` are copied to `Mod/Textures/GeneFoundry/Effects/BubbleMass` for the existing deployment mechanism. The overlay uses alpha blending, preserves the 500:203 aspect ratio and sits against the lower interior edge of the basin. It loops forward 00 through 07 at 6 game ticks per frame (48 ticks per cycle), above the corpse and below ordinary item/pawn layers. Each work session has its own tick origin. Pausing freezes playback. Hauling, stripping and part recovery do not show the overlay. Active meat and crop extraction also show the bubbles, using the same cached resources. Interruptions and power loss remove it; normal corpse drawing returns. Save/load rebuilds this transient presentation from the active job.
 
 The native Gene Vat graphic uses `BuildingOnTop`, above vanilla walls' `Building` layer, for both idle and animated materials. Its footprint, draw size, interaction cell and directional images are unchanged. The vial animation keeps its existing sequence and timing.
 

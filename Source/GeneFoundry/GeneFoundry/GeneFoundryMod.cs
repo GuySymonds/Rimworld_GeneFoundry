@@ -137,7 +137,7 @@ namespace GeneFoundry
                 $"Time reduction per gene processor: {Settings.processorReductionPercent}%",
                 Settings.processorReductionPercent, 0, 25, 0.75f,
                 "Each available processor removes this percentage of the unassisted duration. Reductions add together until the shortest allowed time is reached. 0% disables assistance. Range: 0–25% in 1% steps."));
-            listing.Label("Preparation: 90 minutes at weighted skill 5, falling linearly to 30 at 20 (Intellectual 60%, Crafting 25%, Medicine 15%). Operator failure falls linearly from 30% to 0%. Success converts 40 raw biomass and 1 neutroamine into 10 refined biomass.");
+            listing.Label("Preparation: 90 minutes at weighted skill 5, falling linearly to 30 at 20 (Intellectual 60%, Crafting 25%, Medicine 15%). Operator failure interpolates from 30% at skill 5 to 5% at 10, then 0% at 20. Success converts 40 raw biomass and 1 neutroamine into 10 refined biomass.");
             listing.Label("Active gene assemblers have priority. Each powered processor assists at most one refinery.");
             listing.GapLine();
             listing.Label("Refinement cleanliness and exposure");

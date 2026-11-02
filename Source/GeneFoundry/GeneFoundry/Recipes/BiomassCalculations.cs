@@ -53,8 +53,13 @@ namespace GeneFoundry.Recipes
         public static double RefinementSkill(int intellectual, int crafting, int medicine) =>
             Math.Max(5d, Math.Min(20d, 0.60d * intellectual + 0.25d * crafting + 0.15d * medicine));
 
-        public static float RefinementFailureChance(int intellectual, int crafting, int medicine) =>
-            (float)(0.30d * (20d - RefinementSkill(intellectual, crafting, medicine)) / 15d);
+        public static float RefinementFailureChance(int intellectual, int crafting, int medicine)
+        {
+            double skill = RefinementSkill(intellectual, crafting, medicine);
+            return (float)(skill <= 10d
+                ? 0.30d - (skill - 5d) * 0.05d
+                : 0.05d * (20d - skill) / 10d);
+        }
 
         public static int RefinementPreparationTicks(int intellectual, int crafting, int medicine) =>
             (int)Math.Round((90d - 4d * (RefinementSkill(intellectual, crafting, medicine) - 5d)) * 2500d / 60d);

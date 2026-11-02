@@ -48,15 +48,18 @@
   <ItemGroup>
     <Compile Include="../GeneFoundry/Fabrication/FabricationCalculations.cs" Link="Production/FabricationCalculations.cs" />
     <Compile Include="../GeneFoundry/Components/GeneVatAnimationTiming.cs" Link="Production/GeneVatAnimationTiming.cs" />
-    <Content Include="../../../Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../Textures/GeneVatFrames/vat_*.png" Link="Fixtures/SourceFrames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../../Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../Textures/BubbleMass/*.png" Link="Fixtures/SourceBubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
+    <Content Include="../../../Mod/About/*" Exclude="../../../Mod/About/PublishedFileId.txt" Link="Fixtures/About/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/LICENSE" Link="Fixtures/Mod-LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../LICENSE" Link="Fixtures/Repository-LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../GeneFoundry/Recipes/BiomassCalculations.cs" Link="Production/BiomassCalculations.cs" />
     <Compile Include="../GeneFoundry/Research/GeneResearchCalculations.cs" Link="Production/GeneResearchCalculations.cs" />
-    <Content Include="../../../Defs/**/*.xml" Link="Fixtures/Defs/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../../Languages/**/*.xml" Link="Fixtures/Languages/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Defs/**/*.xml" Link="Fixtures/Defs/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Languages/**/*.xml" Link="Fixtures/Languages/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../GeneFoundry/**/*.cs" Exclude="../GeneFoundry/bin/**;../GeneFoundry/obj/**" Link="Fixtures/Source/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../GeneFoundry/GeneFoundry.csproj" Link="Fixtures/GeneFoundry.csproj" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
