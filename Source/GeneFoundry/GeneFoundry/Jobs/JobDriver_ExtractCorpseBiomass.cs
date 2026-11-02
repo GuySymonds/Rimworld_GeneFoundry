@@ -18,7 +18,9 @@ namespace GeneFoundry.Jobs
         private bool corpsePositioned;
         private bool Enzymatic => job.bill?.recipe?.defName == "GF_ExtractBiomassCorpseEnzymatic";
         private Corpse Corpse => sourceCorpse ?? job.GetTarget(TargetIndex.B).Thing as Corpse;
-        public Corpse LiquidatingCorpse => HaveCurToil && CurToil.debugName == "GeneFoundryLiquidation" ? Corpse : null;
+        public Thing LiquidationVat => job.targetA.Thing;
+        public Corpse LiquidatingCorpse => ProcessingBiomass && pawn.Spawned && !pawn.Drafted &&
+            LiquidationVat is Building_WorkTable table && table.Spawned && table.UsableForBillsAfterFueling() ? Corpse : null;
         public float LiquidationProgress => BiomassCalculations.LiquidationVisualProgress(processingTicks, ticksLeftThisToil);
 
         public override string GetReport()

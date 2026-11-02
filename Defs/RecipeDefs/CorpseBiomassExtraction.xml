@@ -22,7 +22,7 @@
       <Medicine>3</Medicine>
       <Intellectual>2</Intellectual>
     </skillRequirements>
-    <workAmount>1000</workAmount>
+    <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <workSkill>Cooking</workSkill>
     <workSkillLearnFactor>0</workSkillLearnFactor>
@@ -81,7 +81,7 @@
       <Medicine>3</Medicine>
       <Intellectual>2</Intellectual>
     </skillRequirements>
-    <workAmount>1000</workAmount>
+    <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <workSkill>Cooking</workSkill>
     <workSkillLearnFactor>0</workSkillLearnFactor>

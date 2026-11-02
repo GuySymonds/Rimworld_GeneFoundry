@@ -46,7 +46,7 @@ Basic meat and plant extraction require Cooking 3. Enzymatic and corpse extracti
     <useHitPoints>true</useHitPoints>
 
     <!-- Placement -->
-    <altitudeLayer>Building</altitudeLayer>
+    <altitudeLayer>BuildingOnTop</altitudeLayer>
     <passability>PassThroughOnly</passability>
     <pathCost>50</pathCost>
     <fillPercent>0.5</fillPercent>
@@ -59,11 +59,11 @@ Basic meat and plant extraction require Cooking 3. Enzymatic and corpse extracti
 
     <!-- Available recipes -->
     <recipes>
+      <li>GF_ExtractBiomassPlant</li>
+      <li>GF_ExtractBiomassPlantEnzymatic</li>
       <li>GF_ExtractBiomassBasic</li>
       <li>GF_ExtractBiomassEnzymatic</li>
-      <li>GF_ExtractBiomassPlant</li>
       <li>GF_ExtractBiomassCorpse</li>
-      <li>GF_ExtractBiomassPlantEnzymatic</li>
       <li>GF_ExtractBiomassCorpseEnzymatic</li>
     </recipes>
 

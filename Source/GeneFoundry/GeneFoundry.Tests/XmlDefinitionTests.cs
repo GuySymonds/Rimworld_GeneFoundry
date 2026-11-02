@@ -107,11 +107,18 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
+        public void AllSixExtractionRecipesHaveHalvedWork()
+        {
+            foreach (var recipe in Def("GF_GeneVat").Element("recipes").Elements())
+                Assert.Equal("500", (string)Def(recipe.Value).Element("workAmount"));
+        }
+
+        [Fact]
         public void GeneVatRegistersAllExtractionBillsAndHasOneDedicatedWorkgiver()
         {
-            Assert.Equal(new[] { "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic",
-                "GF_ExtractBiomassPlant", "GF_ExtractBiomassCorpse",
-                "GF_ExtractBiomassPlantEnzymatic", "GF_ExtractBiomassCorpseEnzymatic" },
+            Assert.Equal(new[] { "GF_ExtractBiomassPlant", "GF_ExtractBiomassPlantEnzymatic",
+                "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic",
+                "GF_ExtractBiomassCorpse", "GF_ExtractBiomassCorpseEnzymatic" },
                 Def("GF_GeneVat").Element("recipes").Elements().Select(element => element.Value));
             var givers = Definitions().Where(def => def.Name == "WorkGiverDef" &&
                 def.Element("fixedBillGiverDefs")?.Elements().Any(element => element.Value == "GF_GeneVat") == true);
@@ -141,9 +148,9 @@ namespace GeneFoundry.Tests
         [Fact]
         public void ExtractionBillsUseWeightedSpeedAndDisableVanillaSingleSkillXp()
         {
-            foreach (string name in new[] { "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic",
-                "GF_ExtractBiomassPlant", "GF_ExtractBiomassCorpse",
-                "GF_ExtractBiomassPlantEnzymatic", "GF_ExtractBiomassCorpseEnzymatic" })
+            foreach (string name in new[] { "GF_ExtractBiomassPlant", "GF_ExtractBiomassPlantEnzymatic",
+                "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic",
+                "GF_ExtractBiomassCorpse", "GF_ExtractBiomassCorpseEnzymatic" })
             {
                 XElement recipe = Def(name);
                 Assert.Equal("GF_BiomassExtractionSpeed", (string)recipe.Element("workSpeedStat"));

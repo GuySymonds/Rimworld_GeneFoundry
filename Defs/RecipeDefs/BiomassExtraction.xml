@@ -16,7 +16,7 @@
       <Cooking>3</Cooking>
     </skillRequirements>
 
-    <workAmount>1000</workAmount>
+    <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>
@@ -71,7 +71,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
       <Intellectual>2</Intellectual>
     </skillRequirements>
 
-    <workAmount>1000</workAmount>
+    <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>
@@ -135,7 +135,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
       <Cooking>3</Cooking>
     </skillRequirements>
 
-    <workAmount>1000</workAmount>
+    <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>
@@ -180,7 +180,7 @@ The base yield is 38 raw biomass from 50 raw meat and 1 herbal medicine. Skills 
       <Medicine>3</Medicine>
       <Intellectual>2</Intellectual>
     </skillRequirements>
-    <workAmount>1000</workAmount>
+    <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>
     <efficiencyStat>GF_BiomassExtractionYield</efficiencyStat>
     <workSkill>Cooking</workSkill>

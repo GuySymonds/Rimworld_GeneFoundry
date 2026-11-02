@@ -17,6 +17,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(RimWorldManagedDir)' != ''">
+    <Compile Include="../GeneFoundry/Components/CompGeneVatAnimation.cs" Link="Production/CompGeneVatAnimation.cs" />
     <Compile Include="../GeneFoundry/Components/CompGeneVatRotStink.cs" Link="Production/CompGeneVatRotStink.cs" />
     <Reference Include="Assembly-CSharp">
       <HintPath>$(RimWorldManagedDir)/Assembly-CSharp.dll</HintPath>
@@ -42,6 +43,8 @@
     <Compile Include="../GeneFoundry/Components/GeneVatAnimationTiming.cs" Link="Production/GeneVatAnimationTiming.cs" />
     <Content Include="../../../Textures/GeneFoundry/Buildings/GeneVatFrames/*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../Textures/GeneVatFrames/*.png" Link="Fixtures/SourceFrames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../Textures/BubbleMass/*.png" Link="Fixtures/SourceBubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
     <Compile Include="../GeneFoundry/Recipes/BiomassCalculations.cs" Link="Production/BiomassCalculations.cs" />
     <Compile Include="../GeneFoundry/Research/GeneResearchCalculations.cs" Link="Production/GeneResearchCalculations.cs" />

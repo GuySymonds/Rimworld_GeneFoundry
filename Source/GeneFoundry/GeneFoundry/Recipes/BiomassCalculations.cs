@@ -10,7 +10,12 @@ namespace GeneFoundry.Recipes
 
         public static float LiquidationVisualProgress(int total, int remaining) => total <= 0 ? 0f :
             Math.Max(0f, Math.Min(1f, 1f - remaining / (float)total));
-        public static float LiquidationVisualScale(float progress) => 1f - .5f * Math.Max(0f, Math.Min(1f, progress));
+        public static float LiquidationVisualScale(float width, float height, float availableWidth, float availableHeight)
+        {
+            if (width <= 0f || height <= 0f || availableWidth <= 0f || availableHeight <= 0f) return 1f;
+            return Math.Min(1f, Math.Min(availableWidth / width, availableHeight / height));
+        }
+        public static int BubbleMassFrame(int elapsedTicks) => Math.Max(0, elapsedTicks) / 6 % 8;
         public static int LiquidationVisualStage(int actualStage, float progress) =>
             Math.Max(actualStage, progress >= 2f / 3f ? 2 : progress >= 1f / 3f ? 1 : 0);
         public static int EnzymaticCatalystCount(float material)
