@@ -52,6 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="Components\CompGeneVatAnimation.cs" />
+    <Compile Include="Components\GeneVatAnimationTiming.cs" />
+    <Compile Include="Recipes\Graphic_GeneVat.cs" />
     <Compile Include="Fabrication\FabricationCalculations.cs" />
     <Compile Include="Fabrication\FabricationState.cs" />
     <Compile Include="Fabrication\FabricationJobs.cs" />

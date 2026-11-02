@@ -7,8 +7,9 @@ using Verse.AI;
 
 namespace GeneFoundry.Jobs
 {
-    public class JobDriver_ExtractCorpseBiomass : JobDriver_DoBill, ICorpseLiquidationPresentation
+    public class JobDriver_ExtractCorpseBiomass : JobDriver_DoBill, ICorpseLiquidationPresentation, IGeneVatProcessing
     {
+        public bool ProcessingBiomass => HaveCurToil && CurToil.debugName == "GeneFoundryLiquidation";
         private int processingTicks;
         private int recoveryTicks;
         private Hediff recoveryPart;
@@ -135,6 +136,7 @@ namespace GeneFoundry.Jobs
             processing.WithProgressBar(TargetIndex.A,
                 () => 1f - ticksLeftThisToil / (float)System.Math.Max(1, processingTicks));
             processing.AddPreTickIntervalAction(delta => GeneVatSkills.Learn(pawn, delta));
+            processing.AddPreTickIntervalAction(delta => job.targetA.Thing.TryGetComp<CompGeneVatAnimation>()?.NotifyProcessing(pawn));
             processing.AddPreTickIntervalAction(delta =>
                 job.targetA.Thing.TryGetComp<CompGeneVatRotStink>()?.NotifyCorpseExtraction(pawn, delta));
             yield return processing;

@@ -17,12 +17,12 @@ Basic meat and plant extraction require Cooking 3. Enzymatic and corpse extracti
 
     <thingClass>Building_WorkTable</thingClass>
     <tickerType>Normal</tickerType>
-    <drawerType>MapMeshAndRealTime</drawerType>
+    <drawerType>RealtimeOnly</drawerType>
 
     <!-- GeneFoundry Gene Vat artwork -->
     <graphicData>
       <texPath>GeneFoundry/Buildings/GeneVat</texPath>
-      <graphicClass>Graphic_Multi</graphicClass>
+      <graphicClass>GeneFoundry.Recipes.Graphic_GeneVat</graphicClass>
       <shaderType>CutoutComplex</shaderType>
       <drawSize>(3,3.6)</drawSize>
       <drawRotated>false</drawRotated>
@@ -74,6 +74,7 @@ Basic meat and plant extraction require Cooking 3. Enzymatic and corpse extracti
 
     <!-- Electrical components -->
     <comps>
+      <li Class="GeneFoundry.Components.CompProperties_GeneVatAnimation" />
       <li Class="GeneFoundry.Components.CompProperties_GeneVatRotStink" />
       <li Class="CompProperties_Power">
         <compClass>CompPowerTrader</compClass>
