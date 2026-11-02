@@ -124,7 +124,8 @@ namespace GeneFoundry.Research
             ResearchProjectDef category = DefDatabase<ResearchProjectDef>.GetNamedSilentFail(ProjectName(gene.displayCategory));
             ResearchProjectDef archogenetics = DefDatabase<ResearchProjectDef>.GetNamedSilentFail("Archogenetics");
             return GeneResearchCalculations.IsUnlocked(fabrication?.IsFinished == true,
-                category?.IsFinished == true, gene.biostatArc, archogenetics?.IsFinished == true);
+                GeneResearchCalculations.IsCosmeticCategory(gene.displayCategory?.defName) || category?.IsFinished == true,
+                gene.biostatArc, archogenetics?.IsFinished == true);
         }
     }
 }

@@ -71,7 +71,7 @@ namespace GeneFoundry.Tests
                 Assert.False(GeneFabricationResearch.IsUnlocked(genes[0]));
                 progress[foundation] = 100; // Also represents a colony loaded with fabrication complete.
                 var automatic = GeneFabricationResearch.AutomaticProjectsToComplete(foundation, projects).ToList();
-                Assert.Equal(6, automatic.Count);
+                Assert.Empty(automatic); // Cosmetics have no generated projects.
                 Assert.All(automatic, project =>
                 {
                     Assert.Equal(new[] { foundation }, project.hiddenPrerequisites);

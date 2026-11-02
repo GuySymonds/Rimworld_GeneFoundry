@@ -36,8 +36,8 @@ namespace GeneFoundry.Recipes
         public static int WorkTicks(float meatAmount, float workSpeed, RotStage stage)
         {
             GeneFoundrySettings settings = GeneFoundryMod.Settings;
-            return BiomassCalculations.CorpseWorkTicks(meatAmount, workSpeed, DecayMultiplier(stage),
-                settings.corpseMinutesPer50Material, settings.corpseSetupMinutes, settings.corpseHandlingPercent);
+            return (BiomassCalculations.CorpseWorkTicks(meatAmount, workSpeed, DecayMultiplier(stage),
+                settings.corpseMinutesPer50Material, settings.corpseSetupMinutes, settings.corpseHandlingPercent) + 1) / 2;
         }
     }
 

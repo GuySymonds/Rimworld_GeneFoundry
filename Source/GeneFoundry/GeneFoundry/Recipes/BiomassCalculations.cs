@@ -5,6 +5,19 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
+        public static float CorpseRotStinkRisk(int cooking, int medicine, int intellectual) =>
+            ((cooking < 10 ? 1 : 0) + (medicine < 10 ? 1 : 0) + (intellectual < 10 ? 1 : 0)) * 0.05f;
+
+        public static float LiquidationVisualProgress(int total, int remaining) => total <= 0 ? 0f :
+            Math.Max(0f, Math.Min(1f, 1f - remaining / (float)total));
+        public static float LiquidationVisualScale(float width, float height, float availableWidth, float availableHeight)
+        {
+            if (width <= 0f || height <= 0f || availableWidth <= 0f || availableHeight <= 0f) return 1f;
+            return Math.Min(1f, Math.Min(availableWidth / width, availableHeight / height));
+        }
+        public static int BubbleMassFrame(int elapsedTicks) => Math.Max(0, elapsedTicks) / 6 % 8;
+        public static int LiquidationVisualStage(int actualStage, float progress) =>
+            Math.Max(actualStage, progress >= 2f / 3f ? 2 : progress >= 1f / 3f ? 1 : 0);
         public static int EnzymaticCatalystCount(float material)
         {
             return Math.Max(1, (int)Math.Ceiling(Math.Max(0f, material) / 50d));

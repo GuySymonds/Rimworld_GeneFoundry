@@ -5,6 +5,9 @@
 
     <defName>GF_UnfinishedGenePack</defName>
     <label>unfinished genepack</label>
+    <thingClass>GeneFoundry.Fabrication.UnfinishedGenePack</thingClass>
+    <!-- This custom one-off item must not enter vanilla unfinished-recipe casts. -->
+    <isUnfinishedThing>false</isUnfinishedThing>
 
     <description>A partially fabricated genepack containing incomplete genetic sequences. Additional work at a gene fabricator is required to complete its manufacture.</description>
 
@@ -18,6 +21,8 @@
 
     <!-- Each unfinished genepack is an individual item -->
     <stackLimit>1</stackLimit>
+    <selectable>true</selectable>
+    <drawerType>RealtimeOnly</drawerType>
 
     <!-- Not manufactured from variable stuff materials -->
     <stuffCategories Inherit="False" />
