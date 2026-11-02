@@ -5,11 +5,11 @@ using Verse;
 
 namespace GeneFoundry.Recipes
 {
-    // One shared sprite and its aligned transitions rotate together in every direction.
-    public class Graphic_GeneVat : Graphic_Single
+    // Native directional base artwork, with a shared animation rotated independently.
+    public class Graphic_GeneVat : Graphic_Multi
     {
         // Processing follows the building, independently of GraphicData.drawRotated.
-        public override bool ShouldDrawRotated => true;
+        public override bool ShouldDrawRotated => false;
         internal static Quaternion Orientation(Rot4 rotation)
         {
             double halfAngle = rotation.AsAngle * System.Math.PI / 360d;
@@ -52,7 +52,8 @@ namespace GeneFoundry.Recipes
             Quaternion rotation = Orientation(rot);
             if (extraRotation != 0f) rotation *= Quaternion.Euler(Vector3.up * extraRotation);
             Vector3 position = loc + DrawOffset(rot) + Vector3.up * .002f;
-            GenDraw.DrawMeshNowOrLater(MeshAt(rot), position, rotation, frames[frame], false);
+            // Frames are north-aligned; rotating an east/west mesh would swap dimensions twice.
+            GenDraw.DrawMeshNowOrLater(MeshAt(Rot4.North), position, rotation, frames[frame], false);
         }
 
         // Preserve every shader property on native corpse/item materials, without

@@ -83,7 +83,13 @@ foreach ($file in $definitions) {
         Require ($relative -notmatch '\.\.|\\') "Unsafe texture path: $relative"
         $path = Join-Path $package "Textures/$relative"
         $graphic = $texture.ParentNode.graphicClass
-        if ($graphic -in @('Graphic_Multi')) {
+        if ($graphic -eq 'GeneFoundry.Recipes.Graphic_GeneVat') {
+            # Native Graphic_Multi falls back to north for south and mirrors east for west.
+            foreach ($direction in @('north', 'east')) {
+                Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional vat texture: ${relative}_${direction}"
+            }
+        }
+        elseif ($graphic -eq 'Graphic_Multi') {
             foreach ($direction in @('north', 'east', 'south', 'west')) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional texture: ${relative}_${direction}"
             }

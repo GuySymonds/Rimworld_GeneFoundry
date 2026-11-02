@@ -78,7 +78,7 @@ namespace GeneFoundry.Tests
             Assert.Equal("GeneFoundry/Buildings/GeneVat", (string)vat.Element("graphicData").Element("texPath"));
             Assert.Equal("(3,3.6)", (string)vat.Element("graphicData").Element("drawSize"));
             Assert.Equal("true", (string)vat.Element("rotatable"));
-            Assert.Equal("true", (string)vat.Element("graphicData").Element("drawRotated"));
+            Assert.Equal("false", (string)vat.Element("graphicData").Element("drawRotated"));
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
             Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "Vat/Source.png")),
                 File.ReadAllBytes(Path.Combine(fixtures, "Vat/GeneVat.png")));

@@ -49,7 +49,7 @@ $stray = Join-Path $target 'Assemblies/GeneFoundry.pdb'
 Set-Content -LiteralPath $stray -Value 'debug symbols'
 Expect-Rejection 'debug symbols' { & $validator -PackagePath $target }
 Remove-Item -LiteralPath $stray
-$texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat.png'
+$texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat_north.png'
 $textureBackup = Join-Path $fixture 'texture-backup.png'
 Move-Item -LiteralPath $texture -Destination $textureBackup
 try { Expect-Rejection 'missing runtime texture' { & $validator -PackagePath $target } }

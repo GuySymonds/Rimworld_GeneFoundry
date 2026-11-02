@@ -6,7 +6,11 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 $source = Assert-PlainModDirectory (Join-Path $repo 'Source/Textures/GeneVatFrames')
 $target = Assert-PlainModDirectory (Join-Path $repo 'Mod/Textures/GeneFoundry/Buildings')
-$exports = @{ 'GeneVat_north.png' = 'GeneVat.png' }
+$exports = @{ 'GeneVat_north.png' = 'GeneVat_north.png'; 'GeneVat_east.png' = 'GeneVat_east.png' }
+foreach ($direction in @('south', 'west')) {
+    $name = "GeneVat_$direction.png"
+    if (Test-Path -LiteralPath (Join-Path $source $name)) { $exports[$name] = $name }
+}
 for ($frame = 0; $frame -lt 8; $frame++) {
     $name = 'vat_{0:00}.png' -f $frame
     $exports[$name] = "GeneVatFrames/$name"
@@ -21,9 +25,11 @@ foreach ($name in $exports.Keys) {
     New-Item -ItemType Directory -Path (Split-Path $destination -Parent) -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $source $name) -Destination $destination -Force
 }
-# One rotating sprite replaces the obsolete directional runtime exports.
-foreach ($direction in @('north', 'east', 'south', 'west')) {
-    $obsolete = Join-Path $target "GeneVat_$direction.png"
-    if (Test-Path -LiteralPath $obsolete) { Remove-Item -LiteralPath $obsolete -Force }
+# Remove stale exports, allowing Graphic_Multi's native south/west fallbacks.
+foreach ($name in @('GeneVat.png', 'GeneVat_south.png', 'GeneVat_west.png')) {
+    if (-not $exports.ContainsKey($name)) {
+        $obsolete = Join-Path $target $name
+        if (Test-Path -LiteralPath $obsolete) { Remove-Item -LiteralPath $obsolete -Force }
+    }
 }
-Write-Host 'Updated Gene Vat runtime sprite and eight animation PNGs from source exports.'
+Write-Host 'Updated directional Gene Vat artwork and eight shared animation PNGs.'

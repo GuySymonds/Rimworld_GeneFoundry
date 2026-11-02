@@ -22,12 +22,12 @@ namespace GeneFoundry.Tests
         [Fact]
         public void SharedGraphicAndAnimationUseEveryBuildingRotation()
         {
-            Assert.Equal(typeof(Graphic_Single), typeof(Graphic_GeneVat).BaseType);
+            Assert.Equal(typeof(Graphic_Multi), typeof(Graphic_GeneVat).BaseType);
             string source = System.IO.File.ReadAllText(System.IO.Path.Combine(System.AppContext.BaseDirectory,
                 "Fixtures/Source/Recipes/Graphic_GeneVat.cs"));
             Assert.DoesNotContain("rot != Rot4.North", source);
             Assert.Contains("Quaternion rotation = Orientation(rot)", source);
-            Assert.Contains("MeshAt(rot)", source);
+            Assert.Contains("MeshAt(Rot4.North)", source);
         }
 
         [Theory]
@@ -39,7 +39,7 @@ namespace GeneFoundry.Tests
             int direction, float expectedX, float expectedZ)
         {
             var graphic = new Graphic_GeneVat { data = new GraphicData { drawRotated = false } };
-            Assert.True(graphic.ShouldDrawRotated);
+            Assert.False(graphic.ShouldDrawRotated);
             var rotation = Graphic_GeneVat.Orientation(new Rot4(direction));
             // The basin's lower edge, animation forward axis and contents use this same transform.
             var lowerEdge = rotation * new UnityEngine.Vector3(0f, .02f, -1f);
