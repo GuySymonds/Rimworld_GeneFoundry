@@ -69,7 +69,7 @@ For later updates, retain the same publication ID and package ID, rebuild/valida
 
 ## Development deployment
 
-Normal local builds keep the previous automatic deployment behaviour. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/deploy.ps1` now reads runtime assets exclusively from `Mod/`, refreshes About/artwork and LICENSE as well as runtime folders, and preserves publication IDs. It can also be invoked explicitly:
+Normal local builds synchronize the explicit Gene Vat PNG exports into Mod/ and deploy after every Build/Rebuild, even when compilation is already up to date. Source XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/deploy.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
 
 ```powershell
 $env:GENEFOUNDRY_MOD_DIR = 'C:\Path To\RimWorld\Mods\GeneFoundry'

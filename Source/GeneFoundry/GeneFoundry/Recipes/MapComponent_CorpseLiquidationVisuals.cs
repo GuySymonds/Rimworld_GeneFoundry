@@ -16,7 +16,7 @@ namespace GeneFoundry.Recipes
     public class MapComponent_CorpseLiquidationVisuals : MapComponent
     {
         // Usable rectangle inside the basin's chamfered metal edges, measured
-        // on the unchanged 1086x1448 north image: (110,590)..(980,1240).
+        // on the 1086x1448 source image: (110,590)..(980,1240).
         internal const float BasinWidthFraction = 870f / 1086f;
         internal const float BasinHeightFraction = 650f / 1448f;
         internal const float BasinCenterX = 545f / 1086f - .5f;
@@ -101,13 +101,14 @@ namespace GeneFoundry.Recipes
             Thing vat = state.source.LiquidationVat;
             if (state.parts.Count == 0 && !PrepareCorpse(corpse, vat, state)) return;
             int stage = BiomassCalculations.LiquidationVisualStage((int)corpse.GetRotStage(), state.source.LiquidationProgress);
-            Vector3 center = vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) + state.basinOffset;
+            Quaternion rotation = vat.Graphic.QuatFromRot(vat.Rotation);
+            Vector3 center = vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) + rotation * state.basinOffset;
             center.y += .01f;
-            Matrix4x4 translation = Matrix4x4.Translate(center);
+            Matrix4x4 translation = Matrix4x4.TRS(center, rotation, Vector3.one);
             foreach (Part part in state.parts)
                 if (part.stage == stage)
                     GenDraw.DrawMeshNowOrLater(part.mesh, translation * part.matrix, Graphic_GeneVat.ContentsMaterial(part.material), false);
-            DrawBubbles(state.basinSize, state.top, state.startedAt, center);
+            DrawBubbles(state.basinSize, state.top, state.startedAt, center, rotation);
         }
         private bool PrepareCorpse(Corpse corpse, Thing vat, Presentation state)
         {
@@ -185,7 +186,7 @@ namespace GeneFoundry.Recipes
             float basinHeight = size.y * BasinHeightFraction - 2f * BasinMargin;
             float bubbleHeight = Mathf.Min(basinWidth, basinHeight * 500f / 203f) * 203f / 500f;
             return vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) +
-                new Vector3(size.x * BasinCenterX, .02f,
+                vat.Graphic.QuatFromRot(vat.Rotation) * new Vector3(size.x * BasinCenterX, .02f,
                     size.y * BasinCenterZ - (basinHeight - bubbleHeight) * .5f + .25f);
         }
         internal static void DrawMaterialBubbles(Thing vat, int startedAt)
@@ -194,10 +195,10 @@ namespace GeneFoundry.Recipes
             Vector2 basin = new Vector2(size.x * BasinWidthFraction - 2f * BasinMargin,
                 size.y * BasinHeightFraction - 2f * BasinMargin);
             Vector3 center = vat.DrawPos + vat.Graphic.DrawOffset(vat.Rotation) +
-                new Vector3(size.x * BasinCenterX, .01f, size.y * BasinCenterZ);
-            DrawBubbles(basin, .04f, startedAt, center);
+                vat.Graphic.QuatFromRot(vat.Rotation) * new Vector3(size.x * BasinCenterX, .01f, size.y * BasinCenterZ);
+            DrawBubbles(basin, .04f, startedAt, center, vat.Graphic.QuatFromRot(vat.Rotation));
         }
-        private static void DrawBubbles(Vector2 basinSize, float top, int startedAt, Vector3 center)
+        private static void DrawBubbles(Vector2 basinSize, float top, int startedAt, Vector3 center, Quaternion rotation)
         {
             if (!bubblesLoaded)
             {
@@ -222,11 +223,11 @@ namespace GeneFoundry.Recipes
             float width = Mathf.Min(basinSize.x, basinSize.y * 500f / 203f);
             // Anchor the overlay to the basin's lower interior edge.
             float height = width * 203f / 500f;
-            center.z -= (basinSize.y - height) * .5f;
+            center += rotation * new Vector3(0f, 0f, -(basinSize.y - height) * .5f);
             center.y += top + .01f;
             int frame = BiomassCalculations.BubbleMassFrame(Find.TickManager.TicksGame - startedAt);
             GenDraw.DrawMeshNowOrLater(bubbleMesh,
-                Matrix4x4.TRS(center, Quaternion.identity, new Vector3(width, 1f, height)),
+                Matrix4x4.TRS(center, rotation, new Vector3(width, 1f, height)),
                 bubbleMaterials[frame], false);
         }
         private static Graphic VisualGraphic(PawnRenderNode node, Pawn pawn, int stage)

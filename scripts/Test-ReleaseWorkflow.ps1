@@ -31,8 +31,14 @@ if (-not (Test-Path -LiteralPath $id)) { Set-Content -LiteralPath $id -Value '12
 $idBefore = [IO.File]::ReadAllBytes($id)
 $stale = Join-Path $target 'Defs/obsolete.xml'
 Set-Content -LiteralPath $stale -Value '<Defs />'
+$staleRoot = Join-Path $target 'old-local-file.txt'
+$staleAbout = Join-Path $target 'About/obsolete.png'
+Set-Content -LiteralPath $staleRoot -Value 'stale'
+Set-Content -LiteralPath $staleAbout -Value 'stale'
 Sync-GeneFoundryContent -Source $source -Destination $target -Dll $dll
-if (Test-Path -LiteralPath $stale) { throw 'Stale definitions survived deployment.' }
+foreach ($path in @($stale, $staleRoot, $staleAbout)) {
+    if (Test-Path -LiteralPath $path) { throw "Stale file survived deployment: $path" }
+}
 if ([Convert]::ToBase64String($idBefore) -ne [Convert]::ToBase64String([IO.File]::ReadAllBytes($id))) {
     throw 'Deployment modified the Workshop publication ID.'
 }
@@ -43,7 +49,7 @@ $stray = Join-Path $target 'Assemblies/GeneFoundry.pdb'
 Set-Content -LiteralPath $stray -Value 'debug symbols'
 Expect-Rejection 'debug symbols' { & $validator -PackagePath $target }
 Remove-Item -LiteralPath $stray
-$texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat_north.png'
+$texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat.png'
 $textureBackup = Join-Path $fixture 'texture-backup.png'
 Move-Item -LiteralPath $texture -Destination $textureBackup
 try { Expect-Rejection 'missing runtime texture' { & $validator -PackagePath $target } }

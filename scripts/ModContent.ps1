@@ -59,14 +59,22 @@ function Sync-GeneFoundryContent([string]$Source, [string]$Destination, [string]
         throw 'Source and destination Workshop publication IDs disagree. Resolve this before copying.'
     }
     New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
-    foreach ($folder in @('Assemblies', 'Defs', 'Textures', 'Patches', 'Languages')) {
-        $target = [IO.Path]::GetFullPath((Join-Path $targetRoot $folder))
-        if (-not $target.StartsWith($targetRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "Cleanup escaped mod directory: $target"
+    # Fresh deployment: remove every stale local file, except the Workshop identity.
+    foreach ($item in Get-ChildItem -LiteralPath $targetRoot -Force) {
+        $items = if ($item.Name -eq 'About' -and $item.PSIsContainer) {
+            @(Get-ChildItem -LiteralPath $item.FullName -Force | Where-Object { $_.Name -ne 'PublishedFileId.txt' })
+        } else { @($item) }
+        foreach ($stale in $items) {
+            if (-not $stale.FullName.StartsWith($targetRoot + [IO.Path]::DirectorySeparatorChar,
+                [StringComparison]::OrdinalIgnoreCase)) { throw 'Cleanup escaped mod directory.' }
+            Remove-Item -LiteralPath $stale.FullName -Recurse -Force
         }
-        if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force }
+    }
+    foreach ($folder in @('Defs', 'Textures', 'Patches', 'Languages')) {
         $from = Join-Path $sourceRoot $folder
-        if (Test-Path -LiteralPath $from) { Copy-Item -LiteralPath $from -Destination $target -Recurse -Force }
+        if (Test-Path -LiteralPath $from) {
+            Copy-Item -LiteralPath $from -Destination (Join-Path $targetRoot $folder) -Recurse -Force
+        }
     }
     $targetAbout = Join-Path $targetRoot 'About'
     New-Item -ItemType Directory -Path $targetAbout -Force | Out-Null

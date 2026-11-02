@@ -83,7 +83,7 @@ foreach ($file in $definitions) {
         Require ($relative -notmatch '\.\.|\\') "Unsafe texture path: $relative"
         $path = Join-Path $package "Textures/$relative"
         $graphic = $texture.ParentNode.graphicClass
-        if ($graphic -in @('Graphic_Multi', 'GeneFoundry.Recipes.Graphic_GeneVat')) {
+        if ($graphic -in @('Graphic_Multi')) {
             foreach ($direction in @('north', 'east', 'south', 'west')) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional texture: ${relative}_${direction}"
             }

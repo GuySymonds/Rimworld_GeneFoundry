@@ -5,9 +5,8 @@ using Verse;
 
 namespace GeneFoundry.Recipes
 {
-    // The original Multi graphic stays visible; the supplied aligned transparent
-    // transitions use its exact mesh, offsets and rotation above that base.
-    public class Graphic_GeneVat : Graphic_Multi
+    // One shared sprite and its aligned transitions rotate together in every direction.
+    public class Graphic_GeneVat : Graphic_Single
     {
         internal const int TransitionQueue = 3000;
         internal const int ContentsQueue = 3001;
@@ -39,7 +38,7 @@ namespace GeneFoundry.Recipes
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
             base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            if (rot != Rot4.North || frames == null || thing == null) return;
+            if (frames == null || thing == null) return;
             int frame = thing.TryGetComp<CompGeneVatAnimation>()?.FrameAt(Find.TickManager.TicksGame) ?? -1;
             if (frame < 0) return;
             Quaternion rotation = QuatFromRot(rot);

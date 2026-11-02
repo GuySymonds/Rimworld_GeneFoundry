@@ -72,7 +72,7 @@ try {
     $g.FillEllipse($shadow, 187, 257, 165, 24)
     $g.FillEllipse($shadow, 367, 253, 242, 28)
     $shadow.Dispose()
-    Sprite $g 'Buildings/GeneVat_north.png' 37 125 117 156
+    Sprite $g 'Buildings/GeneVat.png' 37 125 117 156
     Sprite $g 'Buildings/BiomassRefinery.png' 185 163 166 111
     Sprite $g 'Buildings/GeneFabrication_north.png' 369 176 240 96
     Text $g '01' 29 291 10 '#ACD85B' 'Bold'
@@ -101,7 +101,7 @@ try {
     $g.ScaleTransform(4, 4)
     $g.Clear([Drawing.ColorTranslator]::FromHtml('#18211F'))
     $g.InterpolationMode = 'HighQualityBicubic'
-    Sprite $g 'Buildings/GeneVat_north.png' 11 4 42 56
+    Sprite $g 'Buildings/GeneVat.png' 11 4 42 56
     $frame = [Drawing.Pen]::new([Drawing.ColorTranslator]::FromHtml('#ACD85B'), 1)
     $g.DrawRectangle($frame, 1, 1, 61, 61)
     $frame.Dispose()

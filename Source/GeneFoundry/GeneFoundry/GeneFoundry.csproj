@@ -100,7 +100,10 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent Condition=" '$(DeployMod)' == 'true' ">powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)..\..\..\scripts\Deploy.ps1" -Dll "$(TargetPath)"</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="SyncRuntimeArtwork" BeforeTargets="PrepareForBuild">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Sync-RuntimeArtwork.ps1&quot;" />
+  </Target>
+  <Target Name="DeployGeneFoundry" AfterTargets="Build" Condition=" '$(DeployMod)' == 'true' ">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Deploy.ps1&quot; -Dll &quot;$(TargetPath)&quot;" />
+  </Target>
 </Project>

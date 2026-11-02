@@ -20,6 +20,17 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
+        public void SharedGraphicAndAnimationUseEveryBuildingRotation()
+        {
+            Assert.Equal(typeof(Graphic_Single), typeof(Graphic_GeneVat).BaseType);
+            string source = System.IO.File.ReadAllText(System.IO.Path.Combine(System.AppContext.BaseDirectory,
+                "Fixtures/Source/Recipes/Graphic_GeneVat.cs"));
+            Assert.DoesNotContain("rot != Rot4.North", source);
+            Assert.Contains("Quaternion rotation = QuatFromRot(rot)", source);
+            Assert.Contains("MeshAt(rot)", source);
+        }
+
+        [Fact]
         public void DespawningVatRestoresIngredientGraphicsWithoutMovingOrConsumingThem()
         {
             var vat = new CompGeneVatAnimation { parent = new ThingWithComps() };

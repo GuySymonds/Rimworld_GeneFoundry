@@ -64,7 +64,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void VatUsesOneRealtimeGraphicWithExistingDimensionsAndDirections()
+        public void VatUsesOneRotatingRealtimeGraphicWithAlignedSourceExports()
         {
             var vat = XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Fixtures/Defs/ThingDefs/GeneVat.xml"))
                 .Descendants("ThingDef").Single(x => (string)x.Element("defName") == "GF_GeneVat");
@@ -77,6 +77,11 @@ namespace GeneFoundry.Tests
             Assert.Equal("GeneFoundry.Recipes.Graphic_GeneVat", (string)vat.Element("graphicData").Element("graphicClass"));
             Assert.Equal("GeneFoundry/Buildings/GeneVat", (string)vat.Element("graphicData").Element("texPath"));
             Assert.Equal("(3,3.6)", (string)vat.Element("graphicData").Element("drawSize"));
+            Assert.Equal("true", (string)vat.Element("rotatable"));
+            Assert.Equal("true", (string)vat.Element("graphicData").Element("drawRotated"));
+            string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
+            Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "Vat/Source.png")),
+                File.ReadAllBytes(Path.Combine(fixtures, "Vat/GeneVat.png")));
             Assert.Equal("(3,3)", (string)vat.Element("size"));
             Assert.Contains(vat.Element("comps").Elements(), x =>
                 (string)x.Attribute("Class") == "GeneFoundry.Components.CompProperties_GeneVatAnimation");

@@ -30,7 +30,7 @@ scripts/               Deployment, artwork and release tooling
 dist/GeneFoundry/       Generated upload package, including Assemblies/GeneFoundry.dll
 ```
 
-For a production build without installation side effects: `dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false`. Normal local builds retain the existing deployment hook; `scripts/deploy.ps1` reads assets from `Mod/`. Do not enable both an old development copy and the packaged mod simultaneously.
+For a production build without installation side effects: `dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false`. Every local build synchronizes the exported Gene Vat PNGs from `Source/Textures/GeneVatFrames` into `Mod/Textures`. Normal local builds run deployment after the build, even when compilation is already up to date; `scripts/deploy.ps1` reads assets from `Mod/`. Do not enable both an old development copy and the packaged mod simultaneously.
 
 ## Building costs and power
 
@@ -291,7 +291,7 @@ Each vat persists its own incident deadline and emission schedule. An incident l
 
 ### Gene Vat machine animation
 
-The north-facing vat uses the original idle sprite until a pawn reaches actual biomass extraction. Meat, plant and corpse extraction use eight unchanged runtime frames, held for 6 game ticks each, in the sequence 00–07–01 (14 displayed frames, 84 ticks). Pausing freezes the frame; game speed controls playback. Each vat starts its own visual cycle. Hauling and artificial-part recovery remain static. The native Multi graphic supplies geometry, offsets and other directions; realtime drawing adds only the transparent transition layer above the original north image. Explicit material queues order transitions, corpse/ingredients and foreground BubbleMass in that order. Missing animation assets log once and fall back to the static sprite. No animation state is saved.
+The rotatable vat uses a single idle sprite at every angle until a pawn reaches actual biomass extraction. Meat, plant and corpse extraction use eight aligned runtime frames, held for 6 game ticks each, in the sequence 00–07–01 (14 displayed frames, 84 ticks). Pausing freezes the frame; game speed controls playback. Each vat starts its own visual cycle. Hauling and artificial-part recovery remain static. The single graphic and transparent transition layer rotate together. Basin contents and bubbles use the same rotation. Explicit material queues order transitions, corpse/ingredients and foreground BubbleMass in that order. Missing animation assets log once and fall back to the static sprite. No animation state is saved.
 
 In-game checks still required: exercise all six extraction bills, check idle/hauling/part recovery, draft or interrupt the worker, cut power, finish a bill, and save/reload during work. Check two vats with different start times. Confirm alpha edges, alignment, dimensions, corpse placement/liquidation and selection/placement previews remain correct. Automated tests verify timing, sequence, definition wiring and byte-identical runtime assets; they do not verify Unity rendering.
 

@@ -21,12 +21,12 @@
       <graphicClass>GeneFoundry.Recipes.Graphic_GeneVat</graphicClass>
       <shaderType>CutoutComplex</shaderType>
       <drawSize>(3,3.6)</drawSize>
-      <drawRotated>false</drawRotated>
+      <drawRotated>true</drawRotated>
     </graphicData>
 
     <!-- Construction -->
     <size>(3,3)</size>
-    <rotatable>false</rotatable>
+    <rotatable>true</rotatable>
 
     <costList>
       <Steel>150</Steel>
