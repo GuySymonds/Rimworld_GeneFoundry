@@ -13,7 +13,7 @@ namespace GeneFoundry.Components
         public int processingTicks = 30000;
 
         public float idlePower = 100f;
-        public float activePower = 1500f;
+        public float activePower = 1000f;
 
         public CompProperties_BiomassRefiner()
         {

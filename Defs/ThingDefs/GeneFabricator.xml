@@ -35,6 +35,8 @@
     <costList>
       <Steel>250</Steel>
       <ComponentIndustrial>8</ComponentIndustrial>
+      <Plasteel>50</Plasteel>
+      <ComponentSpacer>2</ComponentSpacer>
     </costList>
 
     <statBases>

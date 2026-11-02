@@ -3,6 +3,19 @@ GeneFoundry — A RimWorld biotechnology mod that transforms organic matter into
 
 For RimWorld 1.6 with Biotech. The Gene Vat, Biomass Refinery and manual Gene Fabricator are implemented.
 
+## Building costs and power
+
+| Building | Construction materials | Power while switched on |
+|---|---|---:|
+| Gene Vat | 150 steel, 4 components | 250 W |
+| Raw biomass hopper | 30 steel | None |
+| Biomass Refinery | 200 steel, 6 components | 100 W idle / 1,000 W processing |
+| Gene Fabricator | 250 steel, 8 components, 50 plasteel, 2 advanced components | 500 W |
+
+The Fabricator is the late-game construction investment; its genepack ingredient costs and manufacturing rules are unchanged. Passive hoppers require no components. Vat and Fabricator power draw is constant while switched on, including idle time; the refinery switches between its existing idle and processing loads. Flick unused machines off to save power.
+
+An unassisted 36-hour refinery cycle uses 36 kWh and produces 10 refined biomass on success. This excludes idle draw, processor power and failed batches. At the default 18-hour minimum, the refinery itself uses 18 kWh; assisting processors draw their own power. Power-loss pausing and spoilage after two continuous hours are unchanged.
+
 ## Raw biomass extraction
 
 The Gene Vat supports these material extraction bills:
