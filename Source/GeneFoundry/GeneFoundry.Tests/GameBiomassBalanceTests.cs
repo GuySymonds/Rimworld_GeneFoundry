@@ -42,6 +42,84 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
+        [InlineData(37)] // Partway through filling frame 03.
+        [InlineData(157)] // Partway through processing frame 15, just before wrap.
+        public void PowerOutageFreezesVisualClockAcrossSaveAndResumesWithinFrame(int elapsed)
+        {
+            string path = Path.GetTempFileName();
+            bool profiling = DeepProfiler.enabled;
+            DeepProfiler.enabled = false;
+            try
+            {
+                var source = new CompBiomassRefiner();
+                Field("processing").SetValue(source, true);
+                Field("vatHasProcessed").SetValue(source, true);
+                Field("vatStartedAt").SetValue(source, 1000);
+                Field("batchProgress").SetValue(source, .25d);
+                int tick = 1000 + elapsed;
+                int frozen = source.VatFrameAt(tick);
+                for (int i = 0; i < 123; i++)
+                {
+                    source.TickVatAnimation(false);
+                    Assert.Equal(frozen, source.VatFrameAt(++tick));
+                }
+                Scribe.saver.InitSaving(path, "refinery");
+                source.PostExposeData();
+                Scribe.saver.FinalizeSaving();
+                var loaded = new CompBiomassRefiner();
+                Scribe.loader.InitLoading(path);
+                loaded.PostExposeData();
+                Scribe.loader.FinalizeLoading();
+                Assert.Equal(frozen, loaded.VatFrameAt(tick));
+                for (int i = 0; i < 20; i++)
+                {
+                    loaded.TickVatAnimation(false);
+                    Assert.Equal(frozen, loaded.VatFrameAt(++tick));
+                }
+                for (int i = 1; i <= 10; i++)
+                {
+                    loaded.TickVatAnimation(true);
+                    Assert.Equal(BiomassRefineryAnimation.FrameAt(true, true, elapsed + i), loaded.VatFrameAt(++tick));
+                }
+                Assert.Equal(.25d, Field("batchProgress").GetValue(loaded));
+            }
+            finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling; }
+        }
+
+        [Theory]
+        [InlineData(false, false, 0, 0)]
+        [InlineData(false, true, 0, 1)]
+        [InlineData(true, true, 40, 6)]
+        [InlineData(true, true, 240, 10)]
+        public void RefineryVisualStateSurvivesScribe(bool active, bool used, int elapsed, int expected)
+        {
+            string path = Path.GetTempFileName();
+            bool profiling = DeepProfiler.enabled;
+            DeepProfiler.enabled = false;
+            try
+            {
+                var source = new CompBiomassRefiner();
+                Field("processing").SetValue(source, active);
+                Field("vatHasProcessed").SetValue(source, used);
+                Field("vatStartedAt").SetValue(source, 1000);
+                Field("batchProgress").SetValue(source, .25d);
+                Scribe.saver.InitSaving(path, "refinery");
+                source.PostExposeData();
+                Scribe.saver.FinalizeSaving();
+                var loaded = new CompBiomassRefiner();
+                Scribe.loader.InitLoading(path);
+                loaded.PostExposeData();
+                Scribe.loader.FinalizeLoading();
+                Assert.Equal(expected, loaded.VatFrameAt(1000 + elapsed));
+                Assert.Equal(.25d, Field("batchProgress").GetValue(loaded));
+                // Every existing end path clears processing; a started chamber stays dirty.
+                Field("processing").SetValue(loaded, false);
+                Assert.Equal(used ? 1 : 0, loaded.VatFrameAt(1000 + elapsed));
+            }
+            finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling; }
+        }
+
+        [Theory]
         [InlineData(false)] [InlineData(true)]
         public void RealBatchScribePreservesCapturedRiskProgressAndCompletionRoll(bool rolled)
         {
@@ -55,6 +133,8 @@ namespace GeneFoundry.Tests
                 Field("processing").SetValue(source,true);
                 Field("completionRollMade").SetValue(source,rolled);
                 Field("powerOutageTicks").SetValue(source,4999);
+                Field("vatHasProcessed").SetValue(source,true);
+                Field("vatStartedAt").SetValue(source,12000);
                 Scribe.saver.InitSaving(path,"refinery"); source.PostExposeData(); Scribe.saver.FinalizeSaving();
                 var loaded=new CompBiomassRefiner();
                 Scribe.loader.InitLoading(path); loaded.PostExposeData(); Scribe.loader.FinalizeLoading();
@@ -63,6 +143,9 @@ namespace GeneFoundry.Tests
                 Assert.Equal(true,Field("processing").GetValue(loaded));
                 Assert.Equal(rolled,Field("completionRollMade").GetValue(loaded));
                 Assert.Equal(4999,Field("powerOutageTicks").GetValue(loaded));
+                Assert.Equal(true,Field("vatHasProcessed").GetValue(loaded));
+                Assert.Equal(12000,Field("vatStartedAt").GetValue(loaded));
+                Assert.Equal(1,loaded.VatFrameAt(12040)); // Completed output pending is dirty.
             }
             finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled=profiling; }
         }

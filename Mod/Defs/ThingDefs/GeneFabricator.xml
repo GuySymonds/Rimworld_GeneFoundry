@@ -24,7 +24,7 @@
 
     <!-- Building dimensions -->
     <size>(5,2)</size>
-    <rotatable>false</rotatable>
+    <rotatable>true</rotatable>
 
     <!-- Research -->
     <researchPrerequisites>

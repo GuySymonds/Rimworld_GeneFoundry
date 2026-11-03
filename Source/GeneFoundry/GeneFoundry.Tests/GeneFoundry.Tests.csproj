@@ -19,6 +19,7 @@
   <ItemGroup Condition="'$(RimWorldManagedDir)' != ''">
     <Compile Include="../GeneFoundry/GeneFoundryMod.cs" Link="Production/GeneFoundryMod.cs" />
     <Compile Include="../GeneFoundry/Components/CompBiomassRefiner.cs" Link="Production/CompBiomassRefiner.cs" />
+    <Compile Include="../GeneFoundry/Components/BiomassRefineryOverlay.cs" Link="Production/BiomassRefineryOverlay.cs" />
     <Compile Include="../GeneFoundry/Components/CompProperties_BiomassRefiner.cs" Link="Production/CompProperties_BiomassRefiner.cs" />
     <Compile Include="../GeneFoundry/Components/GeneProcessorAssistance.cs" Link="Production/GeneProcessorAssistance.cs" />
     <Compile Include="../GeneFoundry/Recipes/GeneVatSkills.cs" Link="Production/GeneVatSkills.cs" />
@@ -48,6 +49,8 @@
   <ItemGroup>
     <Compile Include="../GeneFoundry/Fabrication/FabricationCalculations.cs" Link="Production/FabricationCalculations.cs" />
     <Compile Include="../GeneFoundry/Components/GeneVatAnimationTiming.cs" Link="Production/GeneVatAnimationTiming.cs" />
+    <Compile Include="../GeneFoundry/Components/BiomassRefineryAnimation.cs" Link="Production/BiomassRefineryAnimation.cs" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/BioMassRefineryFramesAndOverlays/*.png" Link="Fixtures/Refinery/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVat_north.png" Link="Fixtures/Vat/GeneVat.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

@@ -22,6 +22,25 @@ namespace GeneFoundry.Components
         private bool completionRollMade;
 
         private bool processing;
+        private bool vatHasProcessed;
+        private int vatStartedAt = -1;
+
+        // Output placement can remain pending after the reaction has finished.
+        public int VatFrameAt(int tick) => BiomassRefineryAnimation.FrameAt(
+            processing && batchProgress < 1d, vatHasProcessed, tick - vatStartedAt);
+
+        internal void TickVatAnimation(bool powered)
+        {
+            // Move the origin with the game clock during outages, preserving even
+            // partial-frame progress. The existing saved timestamp is sufficient.
+            if (!powered) vatStartedAt++;
+        }
+
+        public override void PostDraw()
+        {
+            base.PostDraw();
+            BiomassRefineryOverlay.Draw(parent, VatFrameAt(Find.TickManager.TicksGame));
+        }
 
         private CompProperties_BiomassRefiner Props =>
             (CompProperties_BiomassRefiner)props;
@@ -49,6 +68,13 @@ namespace GeneFoundry.Components
         {
             base.PostSpawnSetup(respawningAfterLoad);
 
+            // An older active save has no visual timestamp: resume mixing, not filling.
+            if (processing && vatStartedAt < 0)
+            {
+                vatHasProcessed = true;
+                vatStartedAt = Find.TickManager.TicksGame - BiomassRefineryAnimation.FillingDuration;
+            }
+
             UpdatePowerConsumption();
         }
 
@@ -66,6 +92,8 @@ namespace GeneFoundry.Components
             }
             Scribe_Values.Look(ref powerOutageTicks, "gfPowerOutageTicks", 0);
             Scribe_Values.Look(ref processing, "gfProcessing", false);
+            Scribe_Values.Look(ref vatHasProcessed, "gfVatHasProcessed", false);
+            Scribe_Values.Look(ref vatStartedAt, "gfVatStartedAt", -1);
 
             Scribe_Values.Look(ref batchFailureChance, "gfBatchFailureChance", 0f);
             Scribe_Values.Look(ref batchOperatorRisk, "gfBatchOperatorRisk", 0f);
@@ -86,6 +114,7 @@ namespace GeneFoundry.Components
             // Handle an existing batch.
             if (processing)
             {
+                TickVatAnimation(Power.PowerOn);
                 // Processing cannot continue without electricity.
                 if (!Power.PowerOn)
                 {
@@ -171,6 +200,8 @@ namespace GeneFoundry.Components
 
             // Begin automated processing.
             processing = true;
+            vatHasProcessed = true;
+            vatStartedAt = Find.TickManager.TicksGame;
             batchProgress = 0f;
             powerOutageTicks = 0;
 
