@@ -1,5 +1,11 @@
 # Solution review — 4 November 2026
 
+## v1.0.0 release documentation — 4 November 2026
+
+Consolidated the former Unreleased notes and initial 1.0.0 draft into one dated first-public-release entry, replacing obsolete refinery quantities and timings with the current defaults. README, release guidance and Workshop listing now identify v1.0.0. About.xml and assembly versions already matched 1.0.0 and required no edits.
+
+Verified local link targets in README and the release guide, the new changelog heading anchors, and `git diff --check`. The portable test project compiled, but both the initial run and a no-build/no-restore retry aborted because VSTest could not connect to its test host within 90 seconds; no tests were reported as executed. No gameplay code or definitions changed. No installed-mod deployment, upload, publication or live RimWorld verification was performed.
+
 ## Fifteen-processor default — 4 November 2026
 
 Changed the constructor, missing-setting fallback, reset action and UI explanations to a 60-minute automated refinement minimum. The 360-minute base and 20-minute processor reduction are unchanged: 14 processors take 80 minutes, 15 take 60, and further processors provide no benefit. Saved explicit custom minima and legacy percentage conversion are preserved. Updated recipe/building/About descriptions, biomass guidance, first-pack maximum savings and Workshop notes.

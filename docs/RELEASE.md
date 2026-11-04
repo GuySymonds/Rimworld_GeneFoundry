@@ -1,5 +1,7 @@
 # GeneFoundry release and Workshop publishing
 
+Current release: **v1.0.0**, dated 4 November 2026. See the [release notes](../CHANGELOG.md#100--4-november-2026).
+
 ## Build and package
 
 Use Windows PowerShell 5.1 or PowerShell 7 on Windows, the .NET 10 SDK (tests), .NET Framework 4.7.2 targeting/reference assemblies, and an installed RimWorld 1.6 with Biotech. No game DLLs are redistributed. The committed legacy S: drive path remains a fallback for the original developer; other installations pass their Managed directory explicitly or set the `RimWorldManagedDir` environment variable.
