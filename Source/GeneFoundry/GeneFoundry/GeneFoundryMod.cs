@@ -7,7 +7,7 @@ namespace GeneFoundry
     public class GeneFoundrySettings : ModSettings
     {
         public int processingMinutes = 360;
-        public int minimumProcessingMinutes = 120;
+        public int minimumProcessingMinutes = 60;
         public float processorReductionMinutes = 20f;
         public float corpseMinutesPer50Material = 24f;
         public float corpseSetupMinutes = 2.4f;
@@ -59,7 +59,7 @@ namespace GeneFoundry
             // Older settings omitted durations equal to their 36h/18h defaults.
             // Preserve those when converting a saved percentage into a time reduction.
             Scribe_Values.Look(ref processingMinutes, "processingMinutes", legacyAssistance ? 2160 : 360);
-            Scribe_Values.Look(ref minimumProcessingMinutes, "minimumProcessingMinutes", legacyAssistance ? 1080 : 120);
+            Scribe_Values.Look(ref minimumProcessingMinutes, "minimumProcessingMinutes", legacyAssistance ? 1080 : 60);
             // Always write the new key, including its default, to distinguish future saves.
             Scribe_Values.Look(ref processorReductionMinutes, "processorReductionMinutes", 20f, true);
             if (legacyAssistance)
@@ -149,11 +149,11 @@ namespace GeneFoundry
                 "Automated processing time without processor assistance. Default: 360 minutes (6 hours). Range: 5 minutes to 72 hours, in 5-minute steps.");
             Settings.minimumProcessingMinutes = DurationSlider(listing,
                 "Processing: shortest allowed time", Settings.minimumProcessingMinutes, 5, Settings.processingMinutes, 5,
-                "Gene processors cannot reduce processing below this duration. Default: 120 minutes (2 hours). Cannot exceed the unassisted processing time.");
+                "Gene processors cannot reduce processing below this duration. Default: 60 minutes (1 hour). Cannot exceed the unassisted processing time.");
             Settings.processorReductionMinutes = listing.SliderLabeled(
                 $"Time reduction per gene processor: {Settings.processorReductionMinutes:0.##} min",
                 Settings.processorReductionMinutes, 0, Settings.processingMinutes, 0.75f,
-                "Each available processor removes a fixed number of in-game minutes. Default: 20 minutes. With 6-hour processing and a 2-hour minimum, 12 processors provide a benefit. Zero disables assistance. Saved percentage settings are converted to equivalent minutes.");
+                "Each available processor removes a fixed number of in-game minutes. Default: 20 minutes. With 6-hour processing and a 1-hour minimum, 15 processors provide a benefit. Zero disables assistance. Saved percentage settings are converted to equivalent minutes.");
             listing.Label("Preparation: 90 minutes at weighted skill 5, falling linearly to 30 at 20 (Intellectual 60%, Crafting 25%, Medicine 15%). Operator failure interpolates from 30% at skill 5 to 5% at 10, then 0% at 20. Success converts 45 raw biomass and 1 neutroamine into 10 refined biomass.");
             listing.Label("Active gene assemblers have priority. Each powered processor assists at most one refinery.");
             listing.GapLine();
@@ -178,7 +178,7 @@ namespace GeneFoundry
             if (listing.ButtonText("Restore refinement and environment defaults"))
             {
                 Settings.processingMinutes = 360;
-                Settings.minimumProcessingMinutes = 120;
+                Settings.minimumProcessingMinutes = 60;
                 Settings.processorReductionMinutes = 20f;
                 Settings.refinementCleanlinessEnabled = true;
                 Settings.refinementDirtyPenalty = 15;

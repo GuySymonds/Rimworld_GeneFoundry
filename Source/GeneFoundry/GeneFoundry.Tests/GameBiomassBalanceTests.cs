@@ -21,6 +21,7 @@ namespace GeneFoundry.Tests
         private static FieldInfo Field(string name) => typeof(CompBiomassRefiner).GetField(name, Private);
 
         [Theory]
+        [InlineData(360, 60, 20)]
         [InlineData(360, 120, 20)]
         [InlineData(2160, 1080, 108)]
         [InlineData(180, 90, 10)]
@@ -168,7 +169,8 @@ namespace GeneFoundry.Tests
         [Theory]
         [InlineData(0,360f)] [InlineData(1,340f)]
         [InlineData(11,140f)] [InlineData(12,120f)]
-        [InlineData(10,160f)] [InlineData(20,120f)]
+        [InlineData(10,160f)] [InlineData(14,80f)]
+        [InlineData(15,60f)] [InlineData(20,60f)]
         public void ActualRefineryUsesIndependentProcessorTiming(int processors,float minutes)
         {
             var settings = GeneFoundryMod.Settings;
@@ -178,7 +180,7 @@ namespace GeneFoundry.Tests
             {
                 var defaults = new GeneFoundrySettings();
                 Assert.Equal(360, defaults.processingMinutes);
-                Assert.Equal(120, defaults.minimumProcessingMinutes);
+                Assert.Equal(60, defaults.minimumProcessingMinutes);
                 Assert.Equal(20f, defaults.processorReductionMinutes);
                 settings.processingMinutes=defaults.processingMinutes; settings.minimumProcessingMinutes=defaults.minimumProcessingMinutes;
                 settings.processorReductionMinutes=defaults.processorReductionMinutes;

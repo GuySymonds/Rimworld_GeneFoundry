@@ -34,7 +34,7 @@ At default settings, using BASIC extraction, fresh undamaged corpses, reference 
 - Human corpse (140 recoverable meat): one yields 46 raw biomass; about 8 h 47 min to the first pack.
 - Elephant corpse (560 recoverable meat): one yields 184 raw biomass; about 10 h 2 min to the first pack, with enough raw biomass left for three more refinery batches.
 
-These sequential estimates include extraction, 90-minute refinery preparation, 6-hour automated refining with no processors and about 46 minutes of fabrication at minimum qualified skills (Intellectual 10, Medicine 6, Crafting 4). Every processor removes 20 refining minutes; 12 reach the 2-hour minimum, cutting four hours from these estimates. Estimates assume successful batches without wastage and exclude hauling, implant recovery and interruptions; better skills can shorten work and reduce failure. Enzymatic extraction can reduce food requirements to 250 meat or plant food + 5 herbal medicine for the same 45 raw biomass.
+These sequential estimates include extraction, 90-minute refinery preparation, 6-hour automated refining with no processors and about 46 minutes of fabrication at minimum qualified skills (Intellectual 10, Medicine 6, Crafting 4). Every processor removes 20 refining minutes; 15 reach the 1-hour minimum, cutting five hours from these estimates. Estimates assume successful batches without wastage and exclude hauling, implant recovery and interruptions; better skills can shorten work and reduce failure. Enzymatic extraction can reduce food requirements to 250 meat or plant food + 5 herbal medicine for the same 45 raw biomass.
 
 Requires RimWorld 1.6 and Biotech. No Harmony dependency. Other game versions and mod combinations are not declared supported.</description>
 </ModMetaData>
