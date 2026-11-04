@@ -29,8 +29,8 @@
     <baseCost>1500</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>GF_GeneFoundry</tab>
-    <researchViewX>4</researchViewX>
-    <researchViewY>2</researchViewY>
+    <researchViewX>0</researchViewX>
+    <researchViewY>0</researchViewY>
     <prerequisites>
       <li>Xenogermination</li>
     </prerequisites>

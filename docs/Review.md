@@ -1,5 +1,9 @@
 # Solution review — 4 November 2026
 
+## Research layout follow-up — 4 November 2026
+
+Moved Gene fabrication to the left of Enzymatic extraction on the same row. Verified 347 portable tests passed; deployed to `Mods/GeneFoundry_dev` and verified the installed research XML hash matches the source. Displayed placement still needs live RimWorld verification.
+
 ## Research persistence, research tree, gene picker and corpse eligibility — 4 November 2026
 
 Completed Gene fabrication/category project IDs are saved independently of research points and restored after loading. Unfinished projects retain their points against current costs, and new categories remain unresearched. Legacy saves cannot identify formerly completed projects already made partial before completion records existed. Extraction/refinement unlocks now belong to Gene fabrication; Enzymatic extraction follows separately, and generated categories show their foundation prerequisite. The picker starts collapsed, has Show all / Hide all, and moves detailed skill/risk/recovery text into a footer tooltip. Corpse recipes resolve an organic race definition allow list for ingredients and bill choices, preserving herbal catalysts and the shared runtime eligibility rule.
