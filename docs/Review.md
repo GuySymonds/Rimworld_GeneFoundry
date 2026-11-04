@@ -1,5 +1,11 @@
 # Solution review — 4 November 2026
 
+## Development deployment verification — 4 November 2026
+
+Debug builds now deploy to `Mods/GeneFoundry_dev`; Release builds deploy to `Mods/GeneFoundry`. Missing or empty targets are supported, while nonempty targets require matching package metadata. The local installation was renamed from `GeneticBiomassFabrication` to `GeneFoundry` and the user deployment variable updated. The naming audit found only intentional legacy package-ID references; that compatibility identity remains unchanged.
+
+Verified after this change: 349 portable tests passed; release staging and package validation passed (183 runtime files, 20 definition files); release workflow regressions passed, including new missing/empty deployment, configuration isolation and invalid-target cases; an actual Debug build deployed successfully to `GeneFoundry_dev` with zero warnings/errors. Release target selection was exercised in a disposable fixture. No live RimWorld or Workshop verification was performed. See [release instructions](RELEASE.md#development-deployment) for configuration and [Testing](Testing.md#runtime-acceptance) for live acceptance.
+
 Reviewed the extraction, medical recovery, refinement, processor allocation, fabrication/bill ownership, research, settings, animation, XML definitions, tests, packaging/deployment scripts, documentation and tracked folder/file conventions. GitHub reported no open issues and no workflow runs for `main` at review time. This is a code and managed-API review; it does not certify live-colony behavior or every third-party mod combination.
 
 ## Resolved refinery findings
