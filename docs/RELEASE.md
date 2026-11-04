@@ -16,7 +16,7 @@ With the original local path or the environment variable, the one-command form i
 pwsh -NoProfile -File scripts/Release.ps1
 ```
 
-This builds Release with `DeployMod=false` and the post-build event disabled, stages `dist/GeneFoundry`, and validates the result. It never copies into the game or Steam directories. Only that fixed staging directory is cleaned. Linked/reparse-point paths are rejected. `About/PublishedFileId.txt` is retained in place; source and destination IDs must agree when both exist. Packaging fails on missing assets, stray development files, inconsistent versions, missing DLC metadata, invalid artwork or unresolved local texture paths. Validation is also available separately:
+This builds Release with `DeployMod=false` and the post-build event disabled, stages `dist/GeneFoundry`, and validates the result. It never copies into the game or Steam directories. Only that fixed staging directory is cleaned. Linked/reparse-point paths are rejected. `About/PublishedFileId.txt` is retained in place; source and destination IDs must agree when both exist. Packaging fails on missing assets, stray development files, inconsistent versions, missing DLC metadata, invalid artwork or unresolved local texture paths. Only staged `Textures/**/*.png` files are automatically resized to 50% width and height using Windows System.Drawing high-quality bicubic resampling and 32-bit RGBA PNG output. Odd dimensions round half up (5 becomes 3), with a one-pixel minimum; integer rounding can slightly change the aspect ratio of odd-sized canvases. The entire canvas, including transparent padding, is scaled without cropping or rotation. `Mod/Textures`, `Source/Textures`, About artwork and existing installations remain unchanged. Debug and normal development deployments retain full-resolution assets. Resizing requires Windows; no external imaging tools are needed. Rerun the same release command to regenerate from fresh originals rather than scaling an already optimised package. Validation checks half-size PNG dimensions, RGBA format, animation canvases and the exact file allowlist; non-texture files still require identical source hashes. Validation is also available separately:
 
 ```powershell
 pwsh -NoProfile -File scripts/Test-ReleasePackage.ps1
@@ -32,7 +32,7 @@ Run the [automated test commands](Testing.md#automated-commands), then build and
 pwsh -NoProfile -File scripts/Test-ReleaseWorkflow.ps1
 ```
 
-The regression script checks publication-ID preservation, stale-file removal, target safety and negative package validation using a uniquely named temporary directory that it removes afterward. It never deploys to the game.
+The regression script checks publication-ID preservation, stale-file removal, target safety and negative package validation using a uniquely named disposable directory under `dist/` that it removes afterward. It never deploys to the game.
 
 Hosted automation and badge scope are documented in [Pipelines.md](Pipelines.md). Complete the [runtime acceptance checks](Testing.md#runtime-acceptance) using the actual package before publishing, and review [open release work and dated evidence](Review.md).
 

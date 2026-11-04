@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Halve runtime texture dimensions only in generated Steam release packages, preserving full-resolution development assets and deployments.
+
 - Rebalance extraction around dry mass (meat 25%, plants 24%, whole corpses 2.2× meat dry mass), with 60% basic and 75% enzymatic recovery. Refine 45 raw biomass plus 1 neutroamine into 10 refined biomass; automated defaults are now 6 hours, reduced by 20 minutes per processor to a 2-hour minimum with 12 processors. Preserve saved duration settings, convert saved percentage assistance to equivalent minutes, and keep existing preparation/extraction timings.
 - Allow eight rows per research category column and label the research tab “Gene Foundry”.
 

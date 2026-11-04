@@ -3,8 +3,9 @@
 param()
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'ModContent.ps1')
+. (Join-Path $PSScriptRoot 'Resize-ReleaseTextures.ps1')
 $repo = Split-Path $PSScriptRoot -Parent
-$tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+$tempRoot = Assert-PlainModDirectory (Join-Path $repo 'dist')
 $fixture = Assert-PlainModDirectory (Join-Path $tempRoot ('GeneFoundry-ReleaseWorkflow-' + [Guid]::NewGuid().ToString('N')))
 $target = Join-Path $fixture 'GeneFoundry'
 $dll = Join-Path $repo 'dist/GeneFoundry/Assemblies/GeneFoundry.dll'
@@ -16,7 +17,54 @@ $sentinel = Join-Path $fixture 'outside-mod.txt'
 Set-Content -LiteralPath $sentinel -Value 'Do not change'
 $source = Join-Path $repo 'Mod'
 Sync-GeneFoundryContent -Source $source -Destination $target -Dll $dll
+Resize-ReleaseTextures -PackagePath $target
 & $validator -PackagePath $target
+
+# Recopy originals before each optimisation: repeated packaging must be byte-identical.
+function Get-TextureHashes([string]$Root) {
+    return @(Get-ChildItem -LiteralPath (Join-Path $Root 'Textures') -Recurse -File -Filter '*.png' |
+        Sort-Object FullName | ForEach-Object { (Get-FileHash -LiteralPath $_.FullName).Hash }) -join ','
+}
+$sourceHashes = Get-TextureHashes $source
+$firstHashes = Get-TextureHashes $target
+Sync-GeneFoundryContent -Source $source -Destination $target -Dll $dll
+Resize-ReleaseTextures -PackagePath $target
+if ((Get-TextureHashes $target) -ne $firstHashes -or (Get-TextureHashes $source) -ne $sourceHashes) {
+    throw 'Texture optimisation is not repeatable or modified source textures.'
+}
+Write-Host 'PASS: repeatable texture bytes and unchanged source textures.'
+
+# Odd dimensions, single-pixel axes and alpha values.
+$imageFixture = Join-Path $fixture 'Images'
+$imageTextures = Join-Path $imageFixture 'Textures'
+New-Item -ItemType Directory -Path $imageTextures -Force | Out-Null
+foreach ($alpha in @(0, 128, 255)) {
+    $image = [Drawing.Bitmap]::new(5, 3, [Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    $graphics = [Drawing.Graphics]::FromImage($image)
+    try {
+        $graphics.Clear([Drawing.Color]::FromArgb($alpha, 80, 120, 160))
+        $image.Save((Join-Path $imageTextures "$alpha.png"), [Drawing.Imaging.ImageFormat]::Png)
+    }
+    finally { $graphics.Dispose(); $image.Dispose() }
+}
+$tiny = [Drawing.Bitmap]::new(1, 1)
+try { $tiny.Save((Join-Path $imageTextures 'tiny.png'), [Drawing.Imaging.ImageFormat]::Png) }
+finally { $tiny.Dispose() }
+Resize-ReleaseTextures -PackagePath $imageFixture
+foreach ($alpha in @(0, 128, 255)) {
+    $image = [Drawing.Bitmap]::FromFile((Join-Path $imageTextures "$alpha.png"))
+    try {
+        if ($image.Width -ne 3 -or $image.Height -ne 2) { throw 'Incorrect odd-dimension rounding.' }
+        foreach ($x in 0..2) { foreach ($y in 0..1) {
+            if ($image.GetPixel($x, $y).A -ne $alpha) { throw 'Alpha was not preserved.' }
+        } }
+    }
+    finally { $image.Dispose() }
+}
+$image = [Drawing.Image]::FromFile((Join-Path $imageTextures 'tiny.png'))
+try { if ($image.Width -ne 1 -or $image.Height -ne 1) { throw 'Invalid minimum dimensions.' } }
+finally { $image.Dispose() }
+Write-Host 'PASS: odd dimensions, minimum dimensions and transparent/partial/opaque alpha.'
 
 function Expect-Rejection([string]$Name, [scriptblock]$Action, [string]$ExpectedMessage) {
     $rejected = $false
@@ -42,6 +90,7 @@ $transparentIcon = [Drawing.Bitmap]::new(64, 64)
 try { $transparentIcon.Save((Join-Path $artSource 'About/ModIcon.png'), [Drawing.Imaging.ImageFormat]::Png) }
 finally { $transparentIcon.Dispose() }
 Sync-GeneFoundryContent -Source $artSource -Destination $artTarget -Dll $dll
+Resize-ReleaseTextures -PackagePath $artTarget
 & $artValidator -PackagePath $artTarget
 Write-Host 'PASS: accepts transparent mod icon.'
 $transparentPreview = [Drawing.Bitmap]::new(640, 360)
@@ -63,6 +112,7 @@ $staleAbout = Join-Path $target 'About/obsolete.png'
 Set-Content -LiteralPath $staleRoot -Value 'stale'
 Set-Content -LiteralPath $staleAbout -Value 'stale'
 Sync-GeneFoundryContent -Source $source -Destination $target -Dll $dll
+Resize-ReleaseTextures -PackagePath $target
 foreach ($path in @($stale, $staleRoot, $staleAbout)) {
     if (Test-Path -LiteralPath $path) { throw "Stale file survived deployment: $path" }
 }
@@ -79,6 +129,7 @@ try {
     $devTarget = $env:GENEFOUNDRY_MOD_DIR + '_dev'
     $deploy = Join-Path $PSScriptRoot 'Deploy-Mod.ps1'
     & $deploy -Dll $dll -Configuration Debug
+    if ((Get-TextureHashes $devTarget) -ne $sourceHashes) { throw 'Debug deployment changed texture content.' }
     if (-not (Test-Path -LiteralPath (Join-Path $devTarget 'Assemblies/GeneFoundry.dll')) -or
         (Test-Path -LiteralPath $env:GENEFOUNDRY_MOD_DIR)) { throw 'Debug deployment targeted the release folder.' }
     New-Item -ItemType Directory -Path $env:GENEFOUNDRY_MOD_DIR -Force | Out-Null
@@ -107,6 +158,14 @@ Expect-Rejection 'debug symbols' { & $validator -PackagePath $target }
 Remove-Item -LiteralPath $stray
 $texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat_north.png'
 $textureBackup = Join-Path $fixture 'texture-backup.png'
+Copy-Item -LiteralPath $texture -Destination $textureBackup
+try {
+    Copy-Item -LiteralPath (Join-Path $source 'Textures/GeneFoundry/Buildings/GeneVat_north.png') -Destination $texture -Force
+    Expect-Rejection 'full-resolution release texture' { & $validator -PackagePath $target } 'Wrong release texture dimensions'
+    [IO.File]::WriteAllText($texture, 'invalid PNG')
+    Expect-Rejection 'corrupt release texture' { & $validator -PackagePath $target }
+}
+finally { Move-Item -LiteralPath $textureBackup -Destination $texture -Force }
 Move-Item -LiteralPath $texture -Destination $textureBackup
 try { Expect-Rejection 'missing runtime texture' { & $validator -PackagePath $target } }
 finally { Move-Item -LiteralPath $textureBackup -Destination $texture }

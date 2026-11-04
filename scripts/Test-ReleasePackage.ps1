@@ -9,6 +9,18 @@ $package = Assert-PlainModDirectory $PackagePath
 function Require([bool]$Condition, [string]$Message) {
     if (-not $Condition) { throw "Invalid release package: $Message" }
 }
+function Assert-SameCanvas([string]$Frame, [string]$Base) {
+    $frameImage = $baseImage = $null
+    try {
+        $frameImage = [Drawing.Image]::FromFile((Join-Path $package $Frame))
+        $baseImage = [Drawing.Image]::FromFile((Join-Path $package $Base))
+        Require ($frameImage.Size -eq $baseImage.Size) "Frame canvas differs from base: $Frame"
+    }
+    finally {
+        if ($frameImage) { $frameImage.Dispose() }
+        if ($baseImage) { $baseImage.Dispose() }
+    }
+}
 foreach ($file in @('About/About.xml', 'About/Preview.png', 'Assemblies/GeneFoundry.dll', 'LICENSE')) {
     $path = Join-Path $package $file
     Require (Test-Path -LiteralPath $path -PathType Leaf) "Missing $file"
@@ -60,7 +72,21 @@ foreach ($file in Get-ChildItem -LiteralPath $source -Recurse -File) {
     $expected[$relative] = $true
     $target = Join-Path $package $relative
     Require (Test-Path -LiteralPath $target -PathType Leaf) "Missing runtime file: $relative"
-    Require ((Get-FileHash -LiteralPath $target).Hash -eq (Get-FileHash -LiteralPath $file.FullName).Hash) "Stale/changed runtime file: $relative"
+    if ($relative.StartsWith('Textures/')) {
+        $original = [Drawing.Image]::FromFile($file.FullName)
+        $image = $null
+        try {
+            $image = [Drawing.Image]::FromFile($target)
+            Require ($image.RawFormat.Guid -eq [Drawing.Imaging.ImageFormat]::Png.Guid) "Not PNG: $relative"
+            Require ($image.Width -eq [Math]::Ceiling($original.Width / 2.0) -and
+                $image.Height -eq [Math]::Ceiling($original.Height / 2.0)) "Wrong release texture dimensions: $relative"
+            Require ($image.PixelFormat -eq [Drawing.Imaging.PixelFormat]::Format32bppArgb) "Expected RGBA texture: $relative"
+        }
+        finally { if ($image) { $image.Dispose() }; $original.Dispose() }
+    }
+    else {
+        Require ((Get-FileHash -LiteralPath $target).Hash -eq (Get-FileHash -LiteralPath $file.FullName).Hash) "Stale/changed runtime file: $relative"
+    }
 }
 $expected['Assemblies/GeneFoundry.dll'] = $true
 foreach ($file in Get-ChildItem -LiteralPath $package -Recurse -File -Force) {
@@ -129,15 +155,18 @@ foreach ($direction in @('north', 'east', 'south', 'west')) {
     foreach ($name in $fabricatorFiles) {
         $relative = "Textures/GeneFoundry/Buildings/GeneFabricatorFrames/$name.png"
         Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing fabricator frame: $relative"
+        Assert-SameCanvas $relative "Textures/GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabricationDefault_$direction.png"
     }
     foreach ($frame in 0..7) {
         $relative = 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/prep{0:00}_{1}.png' -f $frame, $direction
         Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery preparation frame: $relative"
+        Assert-SameCanvas $relative "Textures/GeneFoundry/Buildings/BiomassRefinery_$direction.png"
     }
 }
 $refineryNames = @('CleanVat', 'DirtyVat') + @(0..7 | ForEach-Object { 'VatFilling{0:00}' -f $_ }) + @(0..15 | ForEach-Object { 'VatProcess{0:00}' -f $_ })
 foreach ($name in $refineryNames) {
     $relative = "Textures/GeneFoundry/Buildings/BiomassRefineryFrames/$name.png"
     Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery overlay: $relative"
+    Assert-SameCanvas $relative 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/CleanVat.png'
 }
 Write-Host "Validated GeneFoundry v${version}: $($expected.Count) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."
