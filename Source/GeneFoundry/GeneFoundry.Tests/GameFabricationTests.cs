@@ -353,6 +353,18 @@ namespace GeneFoundry.Tests
             Assert.Equal(0, bench.outputs);
             Assert.Equal(1, bench.failures);
         }
+        [Fact] public void GenePriceOrderUsesDescendingBiomassThenNameWithStableTies()
+        {
+            var cheap = new GeneDef { defName = "Cheap", label = "Alpha", biostatCpx = 0 };
+            var first = new GeneDef { defName = "First", label = "Alpha", biostatCpx = 2 };
+            var second = new GeneDef { defName = "Second", label = "beta", biostatCpx = 2 };
+            var tie = new GeneDef { defName = "Third", label = "beta", biostatCpx = 2 };
+            var expensive = new GeneDef { defName = "Expensive", label = "Zulu", biostatCpx = 4 };
+            Assert.Equal(new[] { expensive, first, second, tie, cheap },
+                FabricationGeneCatalog.ByCost(new[] { tie, cheap, second, expensive, first }));
+            Assert.Equal(51, Building_GeneFabricator.Biomass(new[] {
+                new GeneDef { biostatCpx = -5 }, new GeneDef { biostatCpx = 2 }, new GeneDef { biostatCpx = 3 } }));
+        }
         [Fact] public void CostsSumPositiveStatsIndependentlyIncludingModdedArchites()
         {
             var genes = new[] { new GeneDef { biostatCpx = -5, biostatArc = -2 },
@@ -398,12 +410,12 @@ namespace GeneFoundry.Tests
                 var delivered = new Material { def = biomass, stackCount = 30 };
                 var capsules = new Material { def = capsule, stackCount = 3 };
                 bench.GetDirectlyHeldThings().TryAdd(delivered, false); bench.GetDirectlyHeldThings().TryAdd(capsules, false);
-                Assert.Equal(23, bench.Required(biomass)); Assert.Equal(3, bench.Required(capsule));
+                Assert.Equal(24, bench.Required(biomass)); Assert.Equal(3, bench.Required(capsule));
                 Assert.True(bench.CommitDeliveredMaterials());
-                Assert.Equal(23, delivered.splitCount); Assert.Equal(7, delivered.stackCount); Assert.False(delivered.destroyed);
+                Assert.Equal(24, delivered.splitCount); Assert.Equal(6, delivered.stackCount); Assert.False(delivered.destroyed);
                 Assert.Equal(3, capsules.splitCount); Assert.True(capsules.destroyed);
                 Assert.Equal(6000, bench.Unfinished.totalWork); // Work receives no discount.
-                Assert.True(bench.CommitDeliveredMaterials()); Assert.Equal(23, delivered.splitCount);
+                Assert.True(bench.CommitDeliveredMaterials()); Assert.Equal(24, delivered.splitCount);
             }
             finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
         }

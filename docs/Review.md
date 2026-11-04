@@ -1,5 +1,11 @@
 # Solution review — 4 November 2026
 
+## Ranked gene pricing follow-up — 4 November 2026
+
+Replaced the pack-wide discount with per-gene biomass charges: base cost descending, then name, at 100%, 90%, 80%, 70%, 60%, and 50% for every later gene. Fractional charges are summed before rounding up once. The picker, availability checks, material commitment and unpaid legacy cancellation fallback use the same pricing function; paid cancellation receipts remain authoritative. Selected cards and each library category use cost/name order. Archite capsules and work are unchanged.
+
+Verified 354 portable and 475 managed tests passed, including unequal-cost distributions, ranked minimums, combined rounding, deterministic ordering and exactly-once material commitment. Debug build passed with zero warnings/errors and deployed to `Mods/GeneFoundry_dev`; installed DLL hash matched. No live RimWorld check was performed; see [fabrication acceptance](Testing.md#fabrication).
+
 ## Adaptive gene picker follow-up — 4 November 2026
 
 Selected genes now use only the rows needed (a compact empty state, growing to 38% before scrolling); larger 110 × 90 gene cards share column/row calculations with the library. Read-only details can use the full gene area. Verified 347 portable and 467 managed tests passed; Debug build passed with zero warnings/errors, deployed to `Mods/GeneFoundry_dev`, and installed DLL hash matched the build. Live layout acceptance remains under [fabrication checks](Testing.md#fabrication).

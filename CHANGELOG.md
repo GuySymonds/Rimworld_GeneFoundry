@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Price selected genes individually by descending biomass cost: 100%, 90%, 80%, 70%, 60%, then 50% for each remaining gene. Sort by cost then name and round the combined total up once.
+
 - Use an organic race corpse allow list for both extraction recipes, excluding unknown modded robots while retaining enzymatic herbal catalysts.
 
 - Preserve completed Gene fabrication/category research across cost increases; leave unfinished progress and new categories subject to current costs.

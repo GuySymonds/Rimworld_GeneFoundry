@@ -9,12 +9,20 @@ namespace GeneFoundry.Fabrication
 {
     public static class FabricationGeneCatalog
     {
+        public static List<GeneDef> ByCost(IEnumerable<GeneDef> genes) => genes
+            .OrderByDescending(gene => FabricationCalculations.GeneBiomass(gene.biostatCpx))
+            .ThenBy(gene => gene.label ?? gene.defName, System.StringComparer.OrdinalIgnoreCase)
+            .ThenBy(gene => gene.defName, System.StringComparer.Ordinal).ToList();
+
         // Include all loaded definitions, including generated, non-random and zero-complexity
         // cosmetic genes. Extraction eligibility is unrelated to manufacturing permission.
         public static List<GeneDef> Available(IEnumerable<GeneDef> genes) => genes
             .Where(GeneFabricationResearch.IsUnlocked).Distinct()
             .OrderByDescending(g => g.displayCategory?.displayPriorityInXenotype ?? 0)
-            .ThenBy(g => g.displayCategory?.defName).ThenBy(g => g.label).ToList();
+            .ThenBy(g => g.displayCategory?.defName)
+            .ThenByDescending(g => FabricationCalculations.GeneBiomass(g.biostatCpx))
+            .ThenBy(g => g.label ?? g.defName, System.StringComparer.OrdinalIgnoreCase)
+            .ThenBy(g => g.defName, System.StringComparer.Ordinal).ToList();
     }
 
     // The same base, search widget, gene cards and bottom controls used by the vanilla
@@ -40,7 +48,7 @@ namespace GeneFoundry.Fabrication
             this.bench = bench;
             this.editingBill = editingBill;
             this.addBill = addBill;
-            selected = (editingBill?.genes ?? (addBill ? new List<GeneDef>() : bench.Selected)).Where(g => g != null).ToList();
+            selected = FabricationGeneCatalog.ByCost((editingBill?.genes ?? (addBill ? new List<GeneDef>() : bench.Selected)).Where(g => g != null));
             available = FabricationGeneCatalog.Available(DefDatabase<GeneDef>.AllDefsListForReading);
             collapsed.UnionWith(available.Select(gene => gene.displayCategory));
             forcePause = true;
@@ -63,11 +71,12 @@ namespace GeneFoundry.Fabrication
             float work = FabricationCalculations.Work(selected.Count, complexity);
             Widgets.Label(new Rect(0, y, rect.width, 76),
                 $"Selected: {selected.Count} genes; complexity: {complexity}\n" +
-                $"Materials: {FabricationCalculations.Biomass(selected.Count, complexity)} refined biomass ({FabricationCalculations.BiomassDiscountPercent(selected.Count)}% discount) + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
+                $"Materials: {Building_GeneFabricator.Biomass(selected)} refined biomass + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
                 $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills");
             Rect details = new Rect(rect.width - 180, y + 76, 180, 24);
             Widgets.Label(details, "Skills, risk and recovery");
             TooltipHandler.TipRegion(details,
+                "Biomass by gene, most expensive first: 100%, 90%, 80%, 70%, 60%, then 50% each. Total rounded up.\n" +
                 "Minimum: Intellectual 10, Medicine 6, Crafting 4. Weights: 60% / 25% / 15%.\n" +
                 "Base failure: 30% at minimum; 0% at 16 / 12 / 10. Dirt, outdoors and dim light add risk.\n" +
                 "Cancellation recovers 75% of committed ingredients, rounded down.");
@@ -154,6 +163,9 @@ namespace GeneFoundry.Fabrication
 
         protected override void OnGenesChanged()
         {
+            var ordered = FabricationGeneCatalog.ByCost(selected);
+            selected.Clear();
+            selected.AddRange(ordered);
             gcx = Building_GeneFabricator.Complexity(selected);
             arc = Building_GeneFabricator.Archites(selected);
         }

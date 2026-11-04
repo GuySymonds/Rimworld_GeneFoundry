@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GeneFoundry.Fabrication
 {
@@ -11,14 +13,14 @@ namespace GeneFoundry.Fabrication
         public const float IntellectualWeight = 0.60f, MedicineWeight = 0.25f, CraftingWeight = 0.15f;
         public const float XpPerTick = 0.1f;
         public static int CancellationRecovery(int paid) => (int)(Math.Max(0L, paid) * 75 / 100);
-        public const int DiscountPerAdditionalGene = 10, MaximumDiscount = 50;
-        public static int BiomassDiscountPercent(int genes) =>
-            (int)Math.Min(MaximumDiscount, Math.Max(0L, (long)genes - 1) * DiscountPerAdditionalGene);
-        public static int Biomass(int genes, int complexity)
+        public static long GeneBiomass(int complexity) =>
+            BiomassPerGene + Math.Max(0, complexity) * (long)BiomassPerComplexity;
+        public static int Biomass(IEnumerable<int> complexities)
         {
-            long baseCost = Math.Max(0, genes) * (long)BiomassPerGene + Math.Max(0, complexity) * (long)BiomassPerComplexity;
-            // Integer ceiling avoids floating point rounding granting or charging an extra unit.
-            return checked((int)((baseCost * (100 - BiomassDiscountPercent(genes)) + 99) / 100));
+            // Price expensive genes first, discount each rank, then round the combined cost once.
+            decimal total = complexities.Select(GeneBiomass).OrderByDescending(cost => cost)
+                .Select((cost, rank) => (decimal)cost * (100 - Math.Min(rank, 5) * 10) / 100m).Sum();
+            return checked((int)Math.Ceiling(total));
         }
         public static float Work(int genes, int complexity) =>
             Math.Max(0, genes) * (float)WorkPerGene + Math.Max(0, complexity) * (float)WorkPerComplexity;
