@@ -33,9 +33,11 @@ Core calculations are in `Recipes/BiomassCalculations.cs`; live room and lightin
 sampling is in `Recipes/ProcessingEnvironment.cs`. Machine inspection shows current
 conditions; refinery inspection shows the captured conditions for its active batch.
 
-Runtime checks: compare clean/dirty rooms, outside and a missing roof; switch lights
-through 0%, 15%, 30% and full light at the interaction cell. Check all extraction
-types, clean/change lights during fabrication, and save/reload each process. Refinery
-risk should remain fixed after batch start; fabrication should retain earlier risk;
-extraction should use completion conditions. Automated tests do not simulate lighting
-or room classification in a running colony.
+
+## Refinery examples
+
+Indoors, `clamp(-cleanliness / 2, 0, 1) * 0.15` gives +7.5 percentage points at cleanliness −1 and +15 at −2 or worse with default settings. A level-20 operator still has these environment risks, or 10% outdoors in adequate light. The final chance is `clamp(operatorFailure + environmentFailure, 0, 1)`; a cleaner or brighter room after batch start does not rewrite a refinery's captured risk.
+
+## Verification
+
+See [processing environment runtime checks](Testing.md#processing-environment).

@@ -26,19 +26,25 @@ pwsh -NoProfile -File scripts/Test-ReleasePackage.ps1
 
 ## Automated verification
 
-Hosted checks and badge meanings are documented in [Pipelines.md](Pipelines.md). Review outstanding code findings and acceptance work in [Review.md](Review.md) before cutting a release.
+Run the [automated test commands](Testing.md#automated-commands), then build and validate the package as described above. After packaging, run the release safety regressions:
 
 ```powershell
-dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false
-dotnet test Source/GeneFoundry/GeneFoundry.Tests/GeneFoundry.Tests.csproj
-dotnet test Source/GeneFoundry/GeneFoundry.Tests/GeneFoundry.Tests.csproj '-p:RimWorldManagedDir=C:\Path To\RimWorld\RimWorldWin64_Data\Managed'
-pwsh -NoProfile -File scripts/Release.ps1 -RimWorldManagedDir 'C:\Path To\RimWorld\RimWorldWin64_Data\Managed'
 pwsh -NoProfile -File scripts/Test-ReleaseWorkflow.ps1
 ```
 
-The workflow regression script uses only a uniquely named temporary directory, removed automatically afterward to check publication-ID preservation, stale-file removal, target safety and negative package validation. It never deploys to the game.
+The regression script checks publication-ID preservation, stale-file removal, target safety and negative package validation using a uniquely named temporary directory that it removes afterward. It never deploys to the game.
 
-The integration suite exercises installed managed game APIs without starting Unity. It does not replace loading the final packaged mod in-game. The developer previously tested the implementation in-game; every release still needs a smoke test of its actual package.
+Hosted automation and badge scope are documented in [Pipelines.md](Pipelines.md). Complete the [runtime acceptance checks](Testing.md#runtime-acceptance) using the actual package before publishing, and review [open release work and dated evidence](Review.md).
+
+## Build without deployment
+
+For a standalone production build, without packaging or installation:
+
+```powershell
+dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false
+```
+
+Pass `-p:RimWorldManagedDir=...` when the environment variable/local fallback does not identify your game installation. Normal builds enable the deployment target; retain `DeployMod=false` during review and CI.
 
 ## Version updates
 
@@ -46,7 +52,7 @@ Keep version management explicit:
 
 1. Update `AssemblyVersion` and `AssemblyFileVersion` in `Source/GeneFoundry/GeneFoundry/Properties/AssemblyInfo.cs` to `major.minor.patch.0`, and `AssemblyInformationalVersion` to `major.minor.patch`.
 2. Set `Mod/About/About.xml`'s `modVersion` to the same `major.minor.patch`.
-3. Update the README version, CHANGELOG and Workshop change notes. Keep `supportedVersions` at `1.6` unless another game version has actually been tested.
+3. Update CHANGELOG and Workshop change notes. Keep `supportedVersions` at `1.6` unless another game version has actually been tested.
 4. Run the tests and packaging command. The validator compares the compiled assembly/file/informational versions with About.xml. Startup logging derives its version from the assembly; there is no separate log version to update.
 
 Do not change the established `GBF.GeneticBiomassFabrication` package ID when updating the display name or release version. This identity came from the existing local mod metadata.
@@ -60,13 +66,9 @@ Do not change the established `GBF.GeneticBiomassFabrication` package ID when up
 
 ## Human release checklist
 
-- [ ] During refinery preparation, cut power, suspend/delete its bill and draft the worker; confirm work/XP stops and no batch inputs are consumed. Save/reload active preparation and repeat. Block completed refinery output, save/reload, leave power off for over two hours and clear space while unpowered: exactly 10 refined biomass must appear once, without another failure roll. Confirm an incomplete reaction still spoils at two hours without power.
-
-- [ ] Verify raw biomass rots in warm storage, slows in refrigeration, stops in freezing and is preserved in passive hoppers without resetting prior age. Move aged stacks in/out, split/merge them, destroy a hopper and save/reload. Confirm refined biomass remains shelf-stable.
-
 - [ ] Approve the preview, icon, description and release notes.
 - [ ] Copy `dist/GeneFoundry` to a local `RimWorld/Mods/GeneFoundry` folder. Disable any older development copy with the same package ID and any Workshop copy; do not activate duplicates.
-- [ ] Load with Core, Biotech and GeneFoundry only. Check for startup/definition errors and confirm version 1.0.0, research unlocks, menus and textures. Exercise an extraction bill, refinery/hopper cycle, and genepack fabrication; save/reload active work. Check refinery risk around weighted skills 5, 10 and 20. Confirm power pausing, output placement and animations. A disposable save and temporary fast timings are suitable; reset settings afterward.
+- [ ] Load the actual package with Core, Biotech and GeneFoundry only. Confirm the intended version and no startup/definition errors, then complete [gameplay and artwork runtime acceptance](Testing.md#runtime-acceptance).
 - [ ] With Steam running and the owning account signed in, enable Development mode, open the vanilla Mods menu, select the local mod and use its Advanced/Upload to Steam control. Review the upload dialog, title, description, preview and change notes. Follow any Steam Workshop legal-agreement prompt. Do not use a subscribed copy as the upload source.
 - [ ] Check the Workshop item's supported game version and Biotech requirement, verify the uploaded preview/listing, and choose the intended visibility. Upload privately first if desired; make it public only after approval.
 - [ ] Preserve the resulting local `About/PublishedFileId.txt`: copy it to `Mod/About/PublishedFileId.txt` (Git-ignored) and keep a private backup. It identifies the existing Workshop item and must accompany future updates.
