@@ -2,6 +2,7 @@
 param([string]$RimWorldManagedDir = $env:RimWorldManagedDir)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'ModContent.ps1')
+. (Join-Path $PSScriptRoot 'Resize-ReleaseTextures.ps1')
 $repo = Split-Path $PSScriptRoot -Parent
 $source = Join-Path $repo 'Mod'
 $dist = Assert-PlainModDirectory (Join-Path $repo 'dist')
@@ -35,5 +36,6 @@ if (Test-Path -LiteralPath $package) {
     }
 }
 Sync-GeneFoundryContent -Source $source -Destination $package -Dll $dll
+Resize-ReleaseTextures -PackagePath $package
 & (Join-Path $PSScriptRoot 'Test-ReleasePackage.ps1') -PackagePath $package
 Write-Host "Workshop-ready package: $package"

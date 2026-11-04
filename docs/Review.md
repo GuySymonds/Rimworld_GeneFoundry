@@ -1,4 +1,10 @@
 # Solution review — 4 November 2026
+## Release texture optimisation — 4 November 2026
+
+Ran `scripts/Release.ps1` twice with deployment disabled: both builds and package validation passed (183 runtime files, 20 definition files). All 157 runtime texture PNGs were reduced from 54,073,463 to 22,264,757 bytes (58.82% smaller), with byte-identical texture hashes across regenerations. Hash snapshots confirmed `Mod/` and `Source/Textures/` stayed unchanged. No release image-processing failures occurred. The first workflow attempt encountered a sandbox temporary-directory imaging access error; disposable workflow fixtures now live under `dist/`, and the complete rerun passed.
+
+`scripts/Test-ReleaseWorkflow.ps1` passed, including source preservation, repeatable PNG bytes, odd/minimum dimensions, transparent/partial/opaque alpha fixtures, full-resolution Debug deployment hashes, corrupt/full-size/missing texture rejection and existing deployment/metadata/allowlist safety checks. Package validation checked half-size RGBA PNGs and matching vat, Fabricator, refinery preparation and refinery overlay canvases. `git diff --check` passed. No live RimWorld visual quality or animation alignment verification, installed-mod deployment, upload or publication was performed. Use the [release workflow](RELEASE.md#build-and-package) and [artwork acceptance](Testing.md#artwork) for regeneration and live checks.
+
 ## Biomass balance dev deployment — 4 November 2026
 
 At the explicit user request, created `codex/dry-mass-biomass-balance` from current main and built Debug with deployment enabled. Build succeeded with zero warnings/errors and deployed to `Mods/GeneFoundry_dev`, preserving the Workshop ID. Verified installed DLL, About metadata/description, material recipe, refinery definition and research definition hashes against the local build/source. No live RimWorld verification was performed. Existing saved refinement settings remain preserved; reset refinement/environment defaults when testing the new 360/120-minute, 20-minutes-per-processor defaults.
