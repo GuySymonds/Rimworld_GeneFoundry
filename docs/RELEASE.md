@@ -59,7 +59,7 @@ Do not change the established `GBF.GeneticBiomassFabrication` package ID when up
 
 ## Artwork and listing
 
-- Review `Mod/About/Preview.png` (640 x 360, opaque PNG, under 1 MB) and `Mod/About/ModIcon.png` (64 x 64).
+- Review `Mod/About/Preview.png` (640 x 360, opaque PNG, under 1 MB) and `Mod/About/ModIcon.png` (64 x 64 PNG, under 1 MB; transparency allowed).
 - Paste `docs/workshop-description.txt` into the Workshop description editor. It uses Steam BBCode, not GitHub Markdown.
 - Initial release notes are in `CHANGELOG.md`.
 - To regenerate only the Workshop artwork from existing sprites: `pwsh -NoProfile -File scripts/New-WorkshopArtwork.ps1`. This uses built-in Windows System.Drawing and does not modify runtime sprites. Regeneration is not required to build a release.

@@ -1,5 +1,11 @@
 # Solution review — 4 November 2026
 
+## Mod icon transparency validation — 4 November 2026
+
+Limited opacity sampling to Preview.png; ModIcon.png may use transparency. Artwork dimensions, PNG format, file-size limits and runtime file hashes remain unchanged. The release guide now explicitly permits icon transparency; the documentation search found no other icon opacity restriction.
+
+Verified the full release workflow regression script passed, including new persistent cases accepting a transparent 64×64 icon and rejecting a transparent preview for the expected opacity error. Disposable full-validator checks also accepted original artwork and rejected wrong dimensions, non-PNG data and 1,000,000-byte files for both images. The initial sandboxed workflow run could not move a temporary texture; the unrestricted rerun passed. No game build, deployment or live RimWorld verification was performed for this tooling-only change.
+
 ## Ranked gene pricing follow-up — 4 November 2026
 
 Replaced the pack-wide discount with per-gene biomass charges: base cost descending, then name, at 100%, 90%, 80%, 70%, 60%, and 50% for every later gene. Fractional charges are summed before rounding up once. The picker, availability checks, material commitment and unpaid legacy cancellation fallback use the same pricing function; paid cancellation receipts remain authoritative. Selected cards and each library category use cost/name order. Archite capsules and work are unchanged.
