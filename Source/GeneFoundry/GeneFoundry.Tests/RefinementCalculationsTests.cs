@@ -5,6 +5,7 @@ namespace GeneFoundry.Tests
     public class RefinementCalculationsTests
     {
         [Theory]
+        [InlineData(360, 60, 20f, 15)]
         [InlineData(360, 120, 20f, 12)]
         [InlineData(360, 120, 0f, 0)]
         [InlineData(360, 360, 20f, 0)]

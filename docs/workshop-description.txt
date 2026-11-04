@@ -15,7 +15,7 @@ Extraction recovers 60% of dry mass, or 75% with enzymes: meat is 25% dry mass, 
 Multi-gene fabrication prices genes individually by biomass cost, most expensive first: 100%, 90%, 80%, 70%, 60%, then 50% for each remaining gene. Archite capsule costs and work are unchanged.
 A dedicated GeneFoundry research tab starts after Xenogenetics. Gene fabrication unlocks basic extraction and refinement, with Enzymatic extraction as a separate follow-on project. Category research is generated from loaded genes; completed projects stay complete when mods or costs change, while new categories still need research; archite genes retain the Archogenetics gate. Cosmetic genes are available through the fabrication foundation without separate category research. Corpse extraction uses an organic race allow list rather than a list of known robot categories. Loaded genes are subject to the mod's manufacturing and research checks; universal compatibility with other mods is not claimed.
 
-Refinery preparation takes 90 minutes at weighted skill 5 and 30 minutes at 20, with linear progression. Operator failure falls from 30% at 5 to 5% at 10, then 0% at 20. Dirt or outdoor/unroofed exposure adds risk, with dim light adding a further penalty. Automated processing defaults to 6 in-game hours, reduced by 20 minutes per available processor to a 2-hour minimum with 12 processors. Useful extraction, timing, processor and cleanliness settings are available in Mod Settings.
+Refinery preparation takes 90 minutes at weighted skill 5 and 30 minutes at 20, with linear progression. Operator failure falls from 30% at 5 to 5% at 10, then 0% at 20. Dirt or outdoor/unroofed exposure adds risk, with dim light adding a further penalty. Automated processing defaults to 6 in-game hours, reduced by 20 minutes per available processor to a 1-hour minimum with 15 processors. Useful extraction, timing, processor and cleanliness settings are available in Mod Settings.
 
 [h2]Requirements[/h2]
 [list]
@@ -29,5 +29,14 @@ Other game versions are not declared supported. GeneFoundry is the public name o
 [url=https://github.com/GuySymonds/Rimworld_GeneFoundry]GitHub repository and full documentation[/url]
 [url=https://github.com/GuySymonds/Rimworld_GeneFoundry/issues]Report a bug[/url]
 Please include your RimWorld version, GeneFoundry version, active mod list, relevant Player.log errors, and steps to reproduce. Remove personal information before sharing logs or saves.
+
+[h2]Development & Credits[/h2]
+[b]Created and maintained by:[/b] Guy Symonds
+[b]AI development collaboration:[/b] ChatGPT by OpenAI
+[b]Additional AI development assistance:[/b] OpenAI Codex and GitHub Copilot
+
+GeneFoundry was developed through a collaborative process combining human creativity, engineering judgement and gameplay testing with AI-assisted design, programming and artwork. Guy Symonds retains creative direction and responsibility for the finished project.
+
+This is an independent community project and is not affiliated with, sponsored by or endorsed by OpenAI, GitHub or Ludeon Studios.
 
 Created by Guy Symonds. Source and artwork distributed under the repository's MIT license.

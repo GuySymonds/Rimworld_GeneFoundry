@@ -31,6 +31,22 @@ Copy the packaged `GeneFoundry` folder into RimWorld's local `Mods` directory, t
 | CI checks and what the badges mean | [Pipelines](docs/Pipelines.md) |
 | Review findings, verification evidence and remaining release work | [Solution review](docs/Review.md) |
 
+## Development & AI Collaboration
+
+GeneFoundry was created and is maintained by Guy Symonds, working collaboratively with ChatGPT by OpenAI, with additional development assistance from OpenAI Codex and GitHub Copilot.
+
+The development process combines:
+
+- Human-led gameplay design, creative direction, balancing and engineering decisions.
+- Collaborative design discussions, technical problem-solving and implementation guidance using ChatGPT.
+- AI-assisted programming, debugging and refactoring using Codex and GitHub Copilot.
+- AI-assisted visual asset creation and animation design under human direction.
+- Human-led testing, validation and final approval of changes.
+
+The project demonstrates how a human developer can collaborate with AI tools to build a functioning RimWorld mod. Guy Symonds retains creative direction and responsibility for the finished project.
+
+GeneFoundry is an independent community project and is not affiliated with, sponsored by or endorsed by OpenAI, GitHub or Ludeon Studios.
+
 ## Contributing
 
 Read [AGENTS.md](AGENTS.md) for shared contributor rules, repository structure and naming conventions. Codex uses that file; [Copilot's instructions](.github/copilot-instructions.md) point to the same guidance.

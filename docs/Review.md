@@ -1,4 +1,11 @@
 # Solution review — 4 November 2026
+
+## Fifteen-processor default — 4 November 2026
+
+Changed the constructor, missing-setting fallback, reset action and UI explanations to a 60-minute automated refinement minimum. The 360-minute base and 20-minute processor reduction are unchanged: 14 processors take 80 minutes, 15 take 60, and further processors provide no benefit. Saved explicit custom minima and legacy percentage conversion are preserved. Updated recipe/building/About descriptions, biomass guidance, first-pack maximum savings and Workshop notes.
+
+Verified 370 portable and 505 managed tests passed, including the new allocation limit and saved old/custom minimum round-trips. Release and Debug builds passed with zero warnings/errors; package validation and release workflow safety regressions passed. Debug deployed to `Mods/GeneFoundry_dev`, with installed DLL, About.xml and refinery recipe/building hashes verified. Saved user settings were read back as 360/60/20 and were not rewritten. No live RimWorld verification was performed; see [refinery acceptance](Testing.md#refinery).
+
 ## Release texture optimisation — 4 November 2026
 
 Ran `scripts/Release.ps1` twice with deployment disabled: both builds and package validation passed (183 runtime files, 20 definition files). All 157 runtime texture PNGs were reduced from 54,073,463 to 22,264,757 bytes (58.82% smaller), with byte-identical texture hashes across regenerations. Hash snapshots confirmed `Mod/` and `Source/Textures/` stayed unchanged. No release image-processing failures occurred. The first workflow attempt encountered a sandbox temporary-directory imaging access error; disposable workflow fixtures now live under `dist/`, and the complete rerun passed.
