@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Deploy Debug builds to `GeneFoundry_dev` and Release builds to `GeneFoundry`; allow first deployment into missing or empty folders while retaining existing-installation safety checks.
+
 - Upgrade CodeQL to v4, document incomplete C# dependency resolution, and align main-branch protection with squash merging and required portable/CodeQL checks.
 
 - Share contributor guidance between Codex and Copilot; replace the long README with links to focused gameplay, artwork, testing and release documents.
