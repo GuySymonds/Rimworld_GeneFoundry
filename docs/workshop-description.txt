@@ -30,4 +30,13 @@ Other game versions are not declared supported. GeneFoundry is the public name o
 [url=https://github.com/GuySymonds/Rimworld_GeneFoundry/issues]Report a bug[/url]
 Please include your RimWorld version, GeneFoundry version, active mod list, relevant Player.log errors, and steps to reproduce. Remove personal information before sharing logs or saves.
 
+[h2]Development & Credits[/h2]
+[b]Created and maintained by:[/b] Guy Symonds
+[b]AI development collaboration:[/b] ChatGPT by OpenAI
+[b]Additional AI development assistance:[/b] OpenAI Codex and GitHub Copilot
+
+GeneFoundry was developed through a collaborative process combining human creativity, engineering judgement and gameplay testing with AI-assisted design, programming and artwork. Guy Symonds retains creative direction and responsibility for the finished project.
+
+This is an independent community project and is not affiliated with, sponsored by or endorsed by OpenAI, GitHub or Ludeon Studios.
+
 Created by Guy Symonds. Source and artwork distributed under the repository's MIT license.
