@@ -26,6 +26,8 @@ pwsh -NoProfile -File scripts/Test-ReleasePackage.ps1
 
 ## Automated verification
 
+Hosted checks and badge meanings are documented in [Pipelines.md](Pipelines.md). Review outstanding code findings and acceptance work in [Review.md](Review.md) before cutting a release.
+
 ```powershell
 dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false
 dotnet test Source/GeneFoundry/GeneFoundry.Tests/GeneFoundry.Tests.csproj
@@ -58,6 +60,10 @@ Do not change the established `GBF.GeneticBiomassFabrication` package ID when up
 
 ## Human release checklist
 
+- [ ] During refinery preparation, cut power, suspend/delete its bill and draft the worker; confirm work/XP stops and no batch inputs are consumed. Save/reload active preparation and repeat. Block completed refinery output, save/reload, leave power off for over two hours and clear space while unpowered: exactly 10 refined biomass must appear once, without another failure roll. Confirm an incomplete reaction still spoils at two hours without power.
+
+- [ ] Verify raw biomass rots in warm storage, slows in refrigeration, stops in freezing and is preserved in passive hoppers without resetting prior age. Move aged stacks in/out, split/merge them, destroy a hopper and save/reload. Confirm refined biomass remains shelf-stable.
+
 - [ ] Approve the preview, icon, description and release notes.
 - [ ] Copy `dist/GeneFoundry` to a local `RimWorld/Mods/GeneFoundry` folder. Disable any older development copy with the same package ID and any Workshop copy; do not activate duplicates.
 - [ ] Load with Core, Biotech and GeneFoundry only. Check for startup/definition errors and confirm version 1.0.0, research unlocks, menus and textures. Exercise an extraction bill, refinery/hopper cycle, and genepack fabrication; save/reload active work. Check refinery risk around weighted skills 5, 10 and 20. Confirm power pausing, output placement and animations. A disposable save and temporary fast timings are suitable; reset settings afterward.
@@ -69,11 +75,11 @@ For later updates, retain the same publication ID and package ID, rebuild/valida
 
 ## Development deployment
 
-Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/deploy.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
+Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/Deploy-Mod.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
 
 ```powershell
 $env:GENEFOUNDRY_MOD_DIR = 'C:\Path To\RimWorld\Mods\GeneFoundry'
-pwsh -NoProfile -File scripts/deploy.ps1 -Dll ./dist/GeneFoundry/Assemblies/GeneFoundry.dll
+pwsh -NoProfile -File scripts/Deploy-Mod.ps1 -Dll ./dist/GeneFoundry/Assemblies/GeneFoundry.dll
 ```
 
 Use `-p:DeployMod=false` for standalone builds. The release script always disables deployment regardless of environment settings. Close RimWorld before replacing a DLL.

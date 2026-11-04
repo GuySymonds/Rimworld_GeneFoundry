@@ -5,7 +5,7 @@ namespace GeneFoundry.Components
 {
     internal static class BiomassRefineryOverlay
     {
-        private const string TextureRoot = "GeneFoundry/Buildings/BioMassRefineryFramesAndOverlays/";
+        private const string TextureRoot = "GeneFoundry/Buildings/BiomassRefineryFrames/";
 
         // EDIT THESE FOUR QUADS. Coordinates are (map X, map Z), in tiles relative
         // to parent.DrawPos. +X is right; +Z is up the map. Order: TL, TR, BL, BR.

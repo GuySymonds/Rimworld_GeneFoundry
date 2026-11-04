@@ -3,7 +3,7 @@
   <ThingDef ParentName="ResourceBase">
     <defName>GF_RawBiomass</defName>
     <label>raw biomass</label>
-    <description>Unrefined biological material extracted from organic matter. Requires purification before use in genetic fabrication.</description>
+    <description>Unrefined biological material extracted from organic matter. Rots after 6 days at normal temperature; refrigerate or freeze for longer storage. Biomass hoppers preserve stored biomass without resetting existing spoilage. Requires purification before use in genetic fabrication.</description>
 
     <graphicData>
         <texPath>GeneFoundry/RawBiomass</texPath>
@@ -12,6 +12,13 @@
 
     <stackLimit>75</stackLimit>
     <useHitPoints>true</useHitPoints>
+    <tickerType>Rare</tickerType>
+    <comps>
+      <li Class="GeneFoundry.Components.CompProperties_RawBiomassRottable">
+        <daysToRotStart>6</daysToRotStart>
+        <rotDestroys>true</rotDestroys>
+      </li>
+    </comps>
 
     <statBases>
         <MarketValue>1</MarketValue>

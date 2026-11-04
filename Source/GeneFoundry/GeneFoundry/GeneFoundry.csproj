@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="Components\CompRawBiomassRottable.cs" />
     <Compile Include="Components\CompGeneVatAnimation.cs" />
     <Compile Include="Components\GeneVatAnimationTiming.cs" />
     <Compile Include="Recipes\Graphic_GeneVat.cs" />
@@ -105,6 +106,6 @@
     </PreBuildEvent>
   </PropertyGroup>
   <Target Name="DeployGeneFoundry" AfterTargets="Build" Condition=" '$(DeployMod)' == 'true' ">
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Deploy.ps1&quot; -Dll &quot;$(TargetPath)&quot;" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Deploy-Mod.ps1&quot; -Dll &quot;$(TargetPath)&quot;" />
   </Target>
 </Project>

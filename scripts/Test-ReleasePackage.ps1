@@ -89,7 +89,7 @@ foreach ($file in $definitions) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional vat texture: ${relative}_${direction}"
             }
         }
-        elseif ($graphic -eq 'Graphic_Multi') {
+        elseif ($graphic -in @('Graphic_Multi', 'GeneFoundry.Fabrication.Graphic_GeneFabricator')) {
             foreach ($direction in @('north', 'east', 'south', 'west')) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional texture: ${relative}_${direction}"
             }
@@ -121,5 +121,21 @@ for ($frame = 0; $frame -lt 8; $frame++) {
     }
     $bubble = 'Textures/GeneFoundry/Effects/BubbleMass/{0:00}.png' -f $frame
     Require (Test-Path -LiteralPath (Join-Path $package $bubble)) "Missing animation frame: $bubble"
+}
+foreach ($direction in @('north', 'east', 'south', 'west')) {
+    $fabricatorFiles = @("GeneFabricationDefault_$direction") + @(0..7 | ForEach-Object { "GeneFabrication_Frame${_}_$direction" })
+    foreach ($name in $fabricatorFiles) {
+        $relative = "Textures/GeneFoundry/Buildings/GeneFabricatorFrames/$name.png"
+        Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing fabricator frame: $relative"
+    }
+    foreach ($frame in 0..7) {
+        $relative = 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/prep{0:00}_{1}.png' -f $frame, $direction
+        Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery preparation frame: $relative"
+    }
+}
+$refineryNames = @('CleanVat', 'DirtyVat') + @(0..7 | ForEach-Object { 'VatFilling{0:00}' -f $_ }) + @(0..15 | ForEach-Object { 'VatProcess{0:00}' -f $_ })
+foreach ($name in $refineryNames) {
+    $relative = "Textures/GeneFoundry/Buildings/BiomassRefineryFrames/$name.png"
+    Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery overlay: $relative"
 }
 Write-Host "Validated GeneFoundry v${version}: $($expected.Count) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."

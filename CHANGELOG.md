@@ -1,5 +1,16 @@
 # Release notes
 
+## Unreleased
+
+- Interrupt refinery preparation and stop XP when power/workstation usability, bill eligibility or worker drafting prevents work, without consuming batch inputs.
+- Preserve completed refinery output through outages and save/load while placement is blocked. Retry without power or rerolling; use idle power and release processor assistance. Incomplete reactions retain two-hour outage spoilage.
+- Add managed refinery lifecycle regressions for interrupted preparation after loading, stopped XP, completion/output retries, long outages and exact active-reaction spoilage timing.
+
+- Raw biomass now spoils after six days at normal temperature, using vanilla refrigeration/freezing rules. Sealed biomass hoppers pause spoilage without power, retain prior rot progress and protect against environmental deterioration. Refined biomass remains shelf-stable and damageable.
+- Add portable GitHub Actions checks and accurately scoped status/compatibility/license badges.
+- Repair the managed game-test source list, document repository conventions in AGENTS.md and standardize refinery asset/deployment script names.
+- Fix package validation for the custom directional Fabricator graphic and validate code-referenced refinery/Fabricator animation assets.
+
 ## 1.0.0
 
 First public release for RimWorld 1.6 with Biotech.

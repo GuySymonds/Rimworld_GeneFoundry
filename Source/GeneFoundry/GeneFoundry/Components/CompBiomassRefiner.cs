@@ -69,7 +69,7 @@ namespace GeneFoundry.Components
             parent.TryGetComp<CompPowerTrader>();
 
         public bool AcceptsProcessorAssistance =>
-            processing && parent.Spawned && Power != null && Power.PowerOn;
+            processing && batchProgress < 1d && parent.Spawned && Power != null && Power.PowerOn;
 
         private int AssistingProcessors => parent.Spawned
             ? parent.Map.GetComponent<GeneProcessorAssistance>().ProcessorCount(parent)
@@ -129,8 +129,18 @@ namespace GeneFoundry.Components
         {
             base.CompTick();
 
-            if (!parent.Spawned || Power == null)
+            if (!parent.Spawned)
                 return;
+
+            // A completed reaction is shelf-stable output, even without electricity.
+            // Use the existing saved progress/roll receipt so older pending saves work too.
+            if (processing && batchProgress >= 1d)
+            {
+                CompleteBatch();
+                return;
+            }
+
+            if (Power == null) return;
 
             // Handle an existing batch.
             if (processing)
@@ -177,12 +187,7 @@ namespace GeneFoundry.Components
             UpdatePowerConsumption();
 
             // Notify the player.
-            Messages.Message(
-                "GeneFoundry: Biomass refinery batch lost after two hours without power.",
-                parent,
-                MessageTypeDefOf.NegativeEvent,
-                true
-            );
+            NotifyBatchLost("GeneFoundry: Biomass refinery batch lost after two hours without power.");
         }
 
         public bool CanStartBatch()
@@ -210,6 +215,7 @@ namespace GeneFoundry.Components
 
             // Capture the operator's skills once for this batch.
             // The developer command starts a batch with zero operator risk.
+            // Exposure and lighting penalties still apply.
             batchOperatorRisk = operatorPawn == null
                 ? 0f
                 : CalculateFailureChance(operatorPawn);
@@ -323,16 +329,29 @@ namespace GeneFoundry.Components
                     powerOutageTicks = 0;
                     UpdatePowerConsumption();
 
-                    Messages.Message(
-                        "GeneFoundry: Biomass refinement failed. The batch was lost.",
-                        parent,
-                        MessageTypeDefOf.NegativeEvent,
-                        true);
+                    NotifyBatchLost("GeneFoundry: Biomass refinement failed. The batch was lost.");
 
                     return;
                 }
             }
 
+            // The successful outcome is already saved. Waiting for space needs neither
+            // reaction power nor processors, and cannot accumulate outage spoilage.
+            powerOutageTicks = 0;
+            UpdatePowerConsumption();
+
+            if (!TryPlaceOutput()) return;
+
+            processing = false;
+            batchProgress = 0f;
+            UpdatePowerConsumption();
+        }
+
+        protected virtual void NotifyBatchLost(string message) =>
+            Messages.Message(message, parent, MessageTypeDefOf.NegativeEvent, true);
+
+        protected virtual bool TryPlaceOutput()
+        {
             // Fixed recovery requires no yield roll, including output-placement retries.
             Thing output = ThingMaker.MakeThing(Props.outputDef);
             output.stackCount = Props.outputCount;
@@ -348,15 +367,10 @@ namespace GeneFoundry.Components
             if (!placed)
             {
                 output.Destroy(DestroyMode.Vanish);
-                return;
+                return false;
             }
 
-            processing = false;
-
-            batchProgress = 0f;
-            powerOutageTicks = 0;
-
-            UpdatePowerConsumption();
+            return true;
         }
 
         private void UpdatePowerConsumption()
@@ -364,7 +378,7 @@ namespace GeneFoundry.Components
             if (Power == null)
                 return;
 
-            float watts = processing
+            float watts = processing && batchProgress < 1d
                 ? Props.activePower
                 : Props.idlePower;
 
@@ -426,6 +440,9 @@ namespace GeneFoundry.Components
 
         public override string CompInspectStringExtra()
         {
+            if (processing && batchProgress >= 1d && completionRollMade)
+                return $"Status: Output waiting for space\nStored output: {Props.outputCount} refined biomass\nNo power required; output will not spoil.";
+
             string roomInfoCaptured = batchExposed ? "Outdoor/unroofed" : !batchCleanlinessEnabled
                 ? "Room cleanliness influence disabled" : $"Captured room cleanliness: {batchRoomCleanliness:0.##}";
             string environmentInfo = $"{roomInfoCaptured}; captured light: {batchLightLevel:P0}\n" +

@@ -28,6 +28,11 @@ namespace GeneFoundry.Jobs
                .Thing
                ?.TryGetComp<CompBiomassRefiner>();
 
+        internal bool CanContinuePreparation => pawn != null && !pawn.Drafted &&
+            job.bill != null && !job.bill.DeletedOrDereferenced && job.bill.ShouldDoNow() &&
+            job.targetA.Thing is Building_WorkTable table && table.Spawned &&
+            table.UsableForBillsAfterFueling() && Refinery != null;
+
         public override bool TryMakePreToilReservations(
             bool errorOnFailed)
         {
@@ -53,6 +58,7 @@ namespace GeneFoundry.Jobs
         {
             this.FailOnDestroyedOrNull(RefineryIndex);
             this.FailOnBurningImmobile(RefineryIndex);
+            this.FailOn(() => !CanContinuePreparation);
 
             // Collect Neutroamine.
             yield return Toils_Goto.GotoThing(
@@ -82,6 +88,8 @@ namespace GeneFoundry.Jobs
 
             preparation.AddPreTickIntervalAction(delta =>
             {
+                // Also guard learning if usability changes before this callback runs.
+                if (!CanContinuePreparation) return;
                 float experience = PreparationXpPerTick * delta;
                 pawn.skills.Learn(SkillDefOf.Intellectual, experience * 0.60f);
                 pawn.skills.Learn(SkillDefOf.Crafting, experience * 0.25f);
@@ -100,10 +108,7 @@ namespace GeneFoundry.Jobs
                 if (catalyst == null ||
                     catalyst.def.defName != "Neutroamine" ||
                     catalyst.stackCount < 1 ||
-                    Refinery == null ||
-                    job.bill == null ||
-                    job.bill.DeletedOrDereferenced ||
-                    !job.bill.ShouldDoNow())
+                    !CanContinuePreparation)
                 {
                     EndJobWith(JobCondition.Incompletable);
                     return;

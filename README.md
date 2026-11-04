@@ -1,4 +1,11 @@
 # GeneFoundry v1.0.0
+
+[![Portable checks](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml/badge.svg?branch=main&event=push)](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml)
+[![RimWorld 1.6](https://img.shields.io/badge/RimWorld-1.6-blue)](Mod/About/About.xml)
+[![Requires Biotech](https://img.shields.io/badge/DLC-Biotech_required-blue)](Mod/About/About.xml)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+The workflow badge covers portable tests and script syntax only. Game API, production build, package and in-game checks are separate; see [pipeline scope](docs/Pipelines.md) and the [review and outstanding tasks](docs/Review.md).
 GeneFoundry — A RimWorld biotechnology mod that transforms organic matter into genetic resources for refining and fabricating custom genes.
 
 For RimWorld 1.6 with Biotech. The Gene Vat, Biomass Refinery and manual Gene Fabricator are implemented.
@@ -30,7 +37,7 @@ scripts/               Deployment, artwork and release tooling
 dist/GeneFoundry/       Generated upload package, including Assemblies/GeneFoundry.dll
 ```
 
-For a production build without installation side effects: `dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false`. `Source/Textures/` is your working artwork directory. Export final PNGs manually into `Mod/Textures/`; builds never modify them. Normal local builds run deployment after the build, even when compilation is already up to date; `scripts/deploy.ps1` reads assets from `Mod/`. Do not enable both an old development copy and the packaged mod simultaneously.
+For a production build without installation side effects: `dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false`. `Source/Textures/` is your working artwork directory. Export final PNGs manually into `Mod/Textures/`; builds never modify them. Normal local builds run deployment after the build, even when compilation is already up to date; `scripts/Deploy-Mod.ps1` reads assets from `Mod/`. Do not enable both an old development copy and the packaged mod simultaneously.
 
 ## Building costs and power
 
@@ -46,6 +53,12 @@ The Fabricator is the late-game construction investment; its genepack ingredient
 An unassisted 36-hour refinery cycle uses 36 kWh and produces 10 refined biomass on success. This excludes idle draw, processor power and failed batches. At the default 18-hour minimum, the refinery itself uses 18 kWh; assisting processors draw their own power. Power-loss pausing and spoilage after two continuous hours are unchanged.
 
 ## Raw biomass extraction
+
+### Storage and degradation
+
+Raw biomass spoils after six days at normal temperature using vanilla rot rules. Refrigeration slows rot and freezing stops it. A biomass hopper provides sealed, refrigerated storage: spoilage pauses while biomass occupies its cell, without power or room cooling. This works even when disconnected from a refinery. Removing biomass resumes its existing rot progress; the hopper never makes old biomass fresh. Hoppers also protect stored contents from environmental deterioration. Outside protected storage, raw biomass retains its exposure deterioration rate of 1 and 75 hit points.
+
+Refined biomass does not rot and has zero environmental deterioration. It can still suffer damage, fire or destruction. Ingredients in an incomplete refinery reaction follow the separate two-hour continuous-power-outage spoilage rule, rather than the loose biomass rot timer. Successful completed batches awaiting output space do not spoil. Existing raw stacks begin using the new rot component when loaded; no historical spoilage can be reconstructed.
 
 The Gene Vat supports these material extraction bills:
 
@@ -164,6 +177,10 @@ Hoppers must touch a side of the refinery and face it. Multiple hoppers combine 
 
 Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is piecewise linear: `0.30 - 0.05 * (skill - 5)` from skill 5 to 10, then `0.05 * (20 - skill) / 10` from 10 to 20. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **36 hours**, **5% reduction per available gene processor**, **18-hour minimum** by default. Existing processor allocation gives active gene assemblers priority. Power loss pauses work and spoils the batch after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
 
+Preparation interrupts when the workstation becomes unusable (including power loss), the bill is suspended/deleted or no longer eligible, or the worker is drafted. No further preparation XP is awarded and no batch ingredients are consumed on interruption. Current-job save/load retains preparation duration and remaining work; it rechecks usability and bill state when toils resume. A cancelled job starts a fresh preparation when scheduled again.
+
+A successful completed batch awaiting output space is shelf-stable, remains saved and blocks new batches until its output is placed. It retries placement even without electricity, uses the refinery's 100 W idle load when powered, and needs no processor assistance. Inspection shows **Output waiting for space**. Outages cannot spoil completed output or cause another failure roll; exactly 10 refined biomass is placed once space becomes available.
+
 ### Research progression
 
 All GeneFoundry production is gated behind vanilla **Xenogenetics** (internal definition `Xenogermination`). Projects appear in their own **GeneFoundry** research tab:
@@ -214,7 +231,9 @@ Environmental failure is additive at every operator level. Indoors, `clamp(-clea
 
 Manual verification: compare all input types, qualification levels, clean/dirty/outdoor rooms, hopper orientation, interrupted preparation, power spoilage, processor assistance, save/load during work and blocked-output retries. No in-game validation is claimed by the unit suite.
 
-The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and starts a zero-risk batch.
+Managed refinery lifecycle regressions exercise real job failure/learning callbacks and Scribe round-trips: preparation duration/remaining ticks survive loading, then power loss, bill suspension/deletion, drafting and workstation despawn stop eligibility and XP without starting a batch. Completed-output checks cover the first success transition, long outages, save/load, no reroll, idle power/no assistance and exactly-once placement. Incomplete reactions still spoil at precisely 5,000 outage ticks. Headless fixtures replace output placement and player notifications; live-colony scheduling and Unity rendering remain manual checks.
+
+The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and operator/dirt risk; exposure and dim-light penalties still apply.
 
 ### Final in-game regression checks
 
@@ -222,7 +241,7 @@ Use a disposable save and short processing settings:
 
 1. Run two refineries near shared processors; confirm no processor assists both and excess capacity can assist the second refinery.
 2. Start, interrupt and cancel an assembler job. Verify it retains priority during operator breaks and releases processors when its job ends.
-3. Save/reload during preparation, assisted processing and a power outage. Check progress, learning, risk and outage time continue correctly.
+3. Save/reload during preparation, assisted processing and a power outage. Check progress, learning, risk and outage time continue correctly. Cut power, suspend/delete a bill or draft its worker during preparation: preparation and XP must stop without charging ingredients. Block completed output, save/reload and cut power for more than two hours; clear space while still unpowered and confirm exactly 10 refined biomass appears once. Confirm an incomplete reaction still spoils after two hours without power.
 4. Check Do X times and Do until X after both successful and failed batches.
 5. Load an existing colony with a refinery built before processor support, and confirm nearby processors can assist it.
 
@@ -269,7 +288,7 @@ Runtime acceptance still requires RimWorld. Use a disposable colony to check:
 6. Complete with minimum-skilled and expert workers; check failure notifications and exact selected gene contents on success. Haul the result into a Gene Bank and use it in the vanilla Xenogerm Assembler. Obstruct output placement and save/reload before clearing space; confirm exactly one output appears.
 7. Load an older colony with a built Fabricator; check idle and already-running Fabricators migrate correctly, get an empty Bills tab when no bills were saved, and existing vats, refineries and research still work. Developer-spawn an unfinished item and inspect/haul it without errors or free production.
 
-No in-game runtime verification is claimed by the automated suite. Build with `/p:PostBuildEvent=` to skip the repository's deployment script when verification should not modify the installed mod.
+No in-game runtime verification is claimed by the automated suite. Build with `-p:DeployMod=false` to skip the repository's deployment target when verification should not modify the installed mod.
 
 ### Corpse liquidation visuals
 

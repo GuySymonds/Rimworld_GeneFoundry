@@ -114,7 +114,7 @@ namespace GeneFoundry.Research
             ResearchProjectDef.GenerateNonOverlappingCoordinates();
         }
 
-        // Shared gate for the forthcoming fabricator's selection UI and production jobs.
+        // Shared gate for the fabricator's selection UI and production jobs.
         // Never modifies vanilla gene availability, extraction or gene assembly.
         public static bool IsUnlocked(GeneDef gene)
         {

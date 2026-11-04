@@ -10,7 +10,11 @@ the current frame and partial-frame progress. Restoring power resumes from there
 The adjusted start tick is saved, so save/load during an outage retains that position.
 The existing spoilage timer continues; spoilage displays the dirty vat.
 Completion (including blocked output placement) and failed batches also display dirty.
+Completed output waiting for space is shelf-stable: it retries placement without power,
+does not accumulate outage spoilage, uses idle power and receives no processor assistance.
 Preparation interruptions and deleting/suspending preparation bills do not start filling.
+The job now stops eligibility and XP as soon as its workstation or bill becomes unusable;
+drafting the worker also interrupts it. Preparation save/load retains duration and remaining ticks.
 There is currently no separate active-batch cancellation action; any end path clearing
 the existing processing flag automatically leaves a used vat dirty.
 
@@ -51,8 +55,8 @@ playback. Each building has its own start tick; redraws/inspection do not reset 
 Rebuild and restart RimWorld after changing code settings or corner coordinates.
 
 Textures are loaded from
-`Mod/Textures/GeneFoundry/Buildings/BioMassRefineryFramesAndOverlays/`.
-All 26 supplied PNGs share one RGBA canvas. Missing assets log once per texture
+`Mod/Textures/GeneFoundry/Buildings/BiomassRefineryFrames/`.
+The 26 vat-overlay PNGs share one RGBA canvas. The same folder also contains 32 directional preparation frames (`prep00_north.png` through `prep07_west.png`), drawn only during active manual preparation. Missing assets log once per texture
 and omit that overlay frame, retaining the underlying chassis.
 
 Old active saves without a timestamp resume at the mixing phase. Old idle saves

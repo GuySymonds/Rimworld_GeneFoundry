@@ -11,7 +11,7 @@
 
     <description>Stores raw biomass for an adjacent biomass refinery. Build beside any side of a completed refinery and rotate the hopper so its mechanical outlet faces the refinery. Diagonal connections are not supported, and the operator's interaction cell must remain clear.
 
-Colonists haul raw biomass here according to its storage settings. The refinery combines biomass from all correctly connected hoppers and consumes 40 when a batch starts. Extra hoppers increase storage capacity but do not increase processing speed.</description>
+Colonists haul raw biomass here according to its storage settings. Sealed, refrigerated storage pauses biomass spoilage without requiring power or cooling the room. Existing spoilage is retained when biomass is removed. The refinery combines biomass from all correctly connected hoppers and consumes 40 when a batch starts. Extra hoppers increase storage capacity but do not increase processing speed.</description>
 
     <thingClass>Building_Storage</thingClass>
 
@@ -55,6 +55,7 @@ Colonists haul raw biomass here according to its storage settings. The refinery 
 
     <!-- Storage configuration -->
     <building>
+      <preventDeteriorationOnTop>true</preventDeteriorationOnTop>
 
       <blueprintClass>Blueprint_Storage</blueprintClass>
 
