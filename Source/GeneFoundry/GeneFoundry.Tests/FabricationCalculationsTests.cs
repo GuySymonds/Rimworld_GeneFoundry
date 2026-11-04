@@ -5,33 +5,30 @@ namespace GeneFoundry.Tests
     public class FabricationCalculationsTests
     {
         [Theory]
-        [InlineData(1,0,10,2500)] [InlineData(1,2,20,4500)] [InlineData(3,5,44,12500)]
-        public void Costs(int genes,int complexity,int biomass,float work)
-        { Assert.Equal(biomass,FabricationCalculations.Biomass(genes,complexity)); Assert.Equal(work,FabricationCalculations.Work(genes,complexity)); }
+        [InlineData(1,0,2500)] [InlineData(1,2,4500)] [InlineData(3,5,12500)]
+        public void WorkIsUnaffectedByBiomassDiscounts(int genes,int complexity,float work) =>
+            Assert.Equal(work,FabricationCalculations.Work(genes,complexity));
+
         [Theory]
-        [InlineData(1,0,10)]
-        [InlineData(2,0,18)]
-        [InlineData(2,1,23)]
-        [InlineData(3,0,24)]
-        [InlineData(4,0,28)]
-        [InlineData(5,0,30)]
-        [InlineData(6,0,30)]
-        [InlineData(7,0,35)]
-        [InlineData(10,1,53)]
-        public void BiomassDiscountRoundsUpAndCapsAtFiftyPercent(int genes,int complexity,int cost)
-        {
-            Assert.Equal(cost,FabricationCalculations.Biomass(genes,complexity));
-            Assert.Equal(System.Math.Min(50,(genes-1)*10),FabricationCalculations.BiomassDiscountPercent(genes));
-            Assert.Equal(genes*2500f+complexity*1000f,FabricationCalculations.Work(genes,complexity));
-        }
-        [Fact] public void EmptyPackHasNoDiscountAndSingleGeneCostsAreUnchanged()
-        {
-            Assert.Equal(0,FabricationCalculations.Biomass(0,0));
-            Assert.Equal(0,FabricationCalculations.BiomassDiscountPercent(0));
-            Assert.Equal(0,FabricationCalculations.BiomassDiscountPercent(-1));
-            Assert.Equal(50,FabricationCalculations.BiomassDiscountPercent(int.MaxValue));
-            Assert.Equal(60,FabricationCalculations.Biomass(1,10));
-        }
+        [InlineData(new int[] { }, 0)]
+        [InlineData(new[] { 0 }, 10)]
+        [InlineData(new[] { 2 }, 20)]
+        [InlineData(new[] { -5 }, 10)]
+        [InlineData(new[] { 0, 0 }, 19)]
+        [InlineData(new[] { 0, 1 }, 24)]
+        [InlineData(new[] { 0, 0, 0 }, 27)]
+        [InlineData(new[] { 0, 0, 0, 0 }, 34)]
+        [InlineData(new[] { 0, 0, 0, 0, 0 }, 40)]
+        [InlineData(new[] { 0, 0, 0, 0, 0, 0 }, 45)]
+        [InlineData(new[] { 0, 0, 0, 0, 0, 0, 0 }, 50)]
+        [InlineData(new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 60)]
+        [InlineData(new[] { 5, 0, 0 }, 52)]
+        [InlineData(new[] { 3, 2, 0 }, 51)]
+        [InlineData(new[] { 0, 3, 2 }, 51)]
+        [InlineData(new[] { 1, 1 }, 29)]
+        [InlineData(new[] { 4, 3, 2, 1 }, 79)]
+        public void BiomassPricesIndividualGenesByDescendingCostAndRoundsTotalOnce(int[] complexities,int expected) =>
+            Assert.Equal(expected,FabricationCalculations.Biomass(complexities));
         [Theory]
         [InlineData(10,6,4,true)] [InlineData(9,20,20,false)] [InlineData(20,5,20,false)] [InlineData(20,20,3,false)]
         public void Qualifications(int i,int m,int c,bool expected) => Assert.Equal(expected,FabricationCalculations.Qualified(i,m,c));

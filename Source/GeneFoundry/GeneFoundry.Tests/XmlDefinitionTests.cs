@@ -231,6 +231,7 @@ namespace GeneFoundry.Tests
         public void CorpseBillsExcludeMachinesAllowDecayAndAvoidFalseFixedYield(string name)
         {
             XElement recipe = Def(name);
+            Assert.Equal("GeneFoundry.Recipes.RecipeDef_BiomassCorpse", (string)recipe.Attribute("Class"));
             Assert.Null(recipe.Element("products"));
             Assert.Contains("variable yield", (string)recipe.Element("label"));
             Assert.Equal("GeneFoundry.Recipes.RecipeWorkerCounter_CorpseBiomass",
@@ -240,9 +241,9 @@ namespace GeneFoundry.Tests
             foreach (XElement filter in new[] { recipe.Element("ingredients").Element("li").Element("filter"),
                 recipe.Element("fixedIngredientFilter") })
             {
-                Assert.Contains("CorpsesMechanoid", filter.Element("disallowedCategories").Elements().Select(element => element.Value));
-                XElement drone = filter.Element("disallowedCategories").Elements().Single(element => element.Value == "CorpsesDrone");
-                Assert.Equal("Ludeon.RimWorld.Odyssey", (string)drone.Attribute("MayRequire"));
+                Assert.Null(filter.Element("disallowedCategories"));
+                Assert.Equal(new[] { "CorpsesHumanlike", "CorpsesAnimal" },
+                    filter.Element("categories").Elements().Select(element => element.Value));
             }
             Assert.Contains("AllowRotten", recipe.Element("defaultIngredientFilter")
                 .Element("specialFiltersToAllow").Elements().Select(element => element.Value));

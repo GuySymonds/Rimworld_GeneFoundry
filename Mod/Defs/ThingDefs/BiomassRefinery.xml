@@ -5,7 +5,7 @@
 
     <defName>GF_BiomassRefinery</defName>
     <researchPrerequisites>
-      <li>GF_BiomassRefinement</li>
+      <li>GF_GeneFabrication</li>
     </researchPrerequisites>
     <label>biomass refinery</label>
 

@@ -5,7 +5,7 @@
 
     <defName>GF_GeneVat</defName>
     <researchPrerequisites>
-      <li>GF_BiomassExtraction</li>
+      <li>GF_GeneFabrication</li>
     </researchPrerequisites>
     <label>gene vat</label>
 

@@ -69,7 +69,7 @@ namespace GeneFoundry.Fabrication
         }
         internal int DiscardBiomass => paidBiomass >= 0 ? paidBiomass : committed && genes != null &&
             genes.Count > 0 && genes.All(g => g != null)
-                ? FabricationCalculations.Biomass(genes.Count, Building_GeneFabricator.Complexity(genes)) : 0;
+                ? Building_GeneFabricator.Biomass(genes) : 0;
         internal int DiscardCapsules => paidCapsules >= 0 ? paidCapsules : committed && genes != null &&
             genes.All(g => g != null) ? Building_GeneFabricator.Archites(genes) : 0;
         internal bool CanRecoverOnDiscard => !cancellationHandled && (DiscardBiomass > 0 || DiscardCapsules > 0);
@@ -195,15 +195,16 @@ namespace GeneFoundry.Fabrication
             this.TryGetComp<CompBreakdownable>()?.BrokenDown != true;
         public bool CanWork => Spawned && Pending && Powered && (activeBill == null || (!activeBill.DeletedOrDereferenced && activeBill.ShouldDoNow())) && selected.All(GeneFabricationResearch.IsUnlocked) &&
             (Unfinished == null || (Unfinished.Valid && selected.SequenceEqual(Unfinished.genes) && (AtWorkSurface(Unfinished) || contents.Contains(Unfinished))));
+        public static int Biomass(IEnumerable<GeneDef> genes) => FabricationCalculations.Biomass(genes.Select(g => g.biostatCpx));
         public static int Complexity(IEnumerable<GeneDef> genes) => genes.Sum(g => Math.Max(0, g.biostatCpx));
         public static int Archites(IEnumerable<GeneDef> genes) => genes.Sum(g => Math.Max(0, g.biostatArc));
         public static ThingDef BiomassDef => DefDatabase<ThingDef>.GetNamed("GF_RefinedBiomass");
         public static ThingDef CapsuleDef => DefDatabase<ThingDef>.GetNamed("ArchiteCapsule");
-        public int Required(ThingDef def) => def == BiomassDef ? FabricationCalculations.Biomass(selected.Count, Complexity(selected)) : def == CapsuleDef ? Archites(selected) : 0;
+        public int Required(ThingDef def) => def == BiomassDef ? Biomass(selected) : def == CapsuleDef ? Archites(selected) : 0;
         public int Missing(ThingDef def) => Unfinished != null ? 0 : Math.Max(0, Required(def) - contents.Where(t => t.def == def).Sum(t => t.stackCount));
         public bool HasAvailable(List<GeneDef> genes, Pawn pawn = null)
         {
-            int biomass = FabricationCalculations.Biomass(genes.Count, Complexity(genes));
+            int biomass = Biomass(genes);
             int capsules = Archites(genes);
             return Available(BiomassDef, pawn) >= biomass && Available(CapsuleDef, pawn) >= capsules;
         }

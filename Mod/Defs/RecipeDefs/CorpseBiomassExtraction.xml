@@ -9,9 +9,9 @@
     <saveKey>gfAllowUnsafeBiomassCorpses</saveKey>
     <workerClass>GeneFoundry.Recipes.SpecialThingFilterWorker_UnsafeBiomassCorpse</workerClass>
   </SpecialThingFilterDef>
-  <RecipeDef>
+  <RecipeDef Class="GeneFoundry.Recipes.RecipeDef_BiomassCorpse">
     <defName>GF_ExtractBiomassCorpse</defName>
-    <researchPrerequisite>GF_BiomassExtraction</researchPrerequisite>
+    <researchPrerequisite>GF_GeneFabrication</researchPrerequisite>
     <label>extract raw biomass from corpse (variable yield)</label>
     <workerCounterClass>GeneFoundry.Recipes.RecipeWorkerCounter_CorpseBiomass</workerCounterClass>
     <uiIconThing>GF_RawBiomass</uiIconThing>
@@ -32,24 +32,18 @@
       <li>
         <filter>
           <categories>
-            <li>Corpses</li>
+            <li>CorpsesHumanlike</li>
+            <li>CorpsesAnimal</li>
           </categories>
-          <disallowedCategories>
-            <li>CorpsesMechanoid</li>
-            <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
-          </disallowedCategories>
         </filter>
         <count>1</count>
       </li>
     </ingredients>
     <fixedIngredientFilter>
       <categories>
-        <li>Corpses</li>
+        <li>CorpsesHumanlike</li>
+        <li>CorpsesAnimal</li>
       </categories>
-      <disallowedCategories>
-        <li>CorpsesMechanoid</li>
-        <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
-      </disallowedCategories>
       <specialFiltersToDisallow>
         <li>GF_AllowUnsafeBiomassCorpses</li>
       </specialFiltersToDisallow>
@@ -68,7 +62,7 @@
     </forceHiddenSpecialFilters>
     <!-- Variable output uses the custom counter, not a misleading fixed product quantity. -->
   </RecipeDef>
-  <RecipeDef>
+  <RecipeDef Class="GeneFoundry.Recipes.RecipeDef_BiomassCorpse">
     <defName>GF_ExtractBiomassCorpseEnzymatic</defName>
     <researchPrerequisite>GF_EnzymaticExtraction</researchPrerequisite>
     <label>extract raw biomass from corpse (enzymatic, variable yield)</label>
@@ -91,12 +85,9 @@
       <li>
         <filter>
           <categories>
-            <li>Corpses</li>
+            <li>CorpsesHumanlike</li>
+            <li>CorpsesAnimal</li>
           </categories>
-          <disallowedCategories>
-            <li>CorpsesMechanoid</li>
-            <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
-          </disallowedCategories>
         </filter>
         <count>1</count>
       </li>
@@ -111,15 +102,12 @@
     </ingredients>
     <fixedIngredientFilter>
       <categories>
-        <li>Corpses</li>
+        <li>CorpsesHumanlike</li>
+        <li>CorpsesAnimal</li>
       </categories>
       <thingDefs>
         <li>MedicineHerbal</li>
       </thingDefs>
-      <disallowedCategories>
-        <li>CorpsesMechanoid</li>
-        <li MayRequire="Ludeon.RimWorld.Odyssey">CorpsesDrone</li>
-      </disallowedCategories>
       <specialFiltersToDisallow>
         <li>GF_AllowUnsafeBiomassCorpses</li>
       </specialFiltersToDisallow>

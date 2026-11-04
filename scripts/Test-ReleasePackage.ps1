@@ -41,9 +41,11 @@ foreach ($art in @(@('Preview.png', 640, 360), @('ModIcon.png', 64, 64))) {
         Require ($bitmap.Width -eq $art[1] -and $bitmap.Height -eq $art[2]) "Wrong dimensions: $($art[0])"
         Require ($bitmap.RawFormat.Guid -eq [Drawing.Imaging.ImageFormat]::Png.Guid) "Not PNG: $($art[0])"
         Require ((Get-Item -LiteralPath $path).Length -lt 1000000) "Artwork exceeds 1 MB: $($art[0])"
-        # Composed artwork has an opaque background; reject accidentally transparent exports.
-        foreach ($point in @(@(0, 0), @(10, 10), @(32, 32))) {
-            Require ($bitmap.GetPixel($point[0], $point[1]).A -eq 255) "Unexpected transparency: $($art[0])"
+        # The preview has an opaque background; mod icons may use transparency.
+        if ($art[0] -eq 'Preview.png') {
+            foreach ($point in @(@(0, 0), @(10, 10), @(32, 32))) {
+                Require ($bitmap.GetPixel($point[0], $point[1]).A -eq 255) "Unexpected transparency: $($art[0])"
+            }
         }
     }
     finally { $bitmap.Dispose() }

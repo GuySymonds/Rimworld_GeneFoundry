@@ -18,12 +18,41 @@ $source = Join-Path $repo 'Mod'
 Sync-GeneFoundryContent -Source $source -Destination $target -Dll $dll
 & $validator -PackagePath $target
 
-function Expect-Rejection([string]$Name, [scriptblock]$Action) {
+function Expect-Rejection([string]$Name, [scriptblock]$Action, [string]$ExpectedMessage) {
     $rejected = $false
-    try { & $Action } catch { $rejected = $true }
+    try { & $Action } catch {
+        if ($ExpectedMessage -and $_.Exception.Message -notlike "*$ExpectedMessage*") { throw }
+        $rejected = $true
+    }
     if (-not $rejected) { throw "Expected rejection: $Name" }
     Write-Host "PASS: rejects $Name"
 }
+
+# Isolate both source and package so artwork mutations still pass runtime hash checks.
+$artRoot = Join-Path $fixture 'Artwork'
+$artScripts = Join-Path $artRoot 'scripts'
+New-Item -ItemType Directory -Path $artScripts -Force | Out-Null
+Copy-Item -LiteralPath $validator, (Join-Path $PSScriptRoot 'ModContent.ps1') -Destination $artScripts
+Copy-Item -LiteralPath $source -Destination (Join-Path $artRoot 'Mod') -Recurse
+Copy-Item -LiteralPath (Join-Path $repo 'LICENSE') -Destination (Join-Path $artRoot 'LICENSE')
+$artSource = Join-Path $artRoot 'Mod'
+$artTarget = Join-Path $artRoot 'Package'
+$artValidator = Join-Path $artScripts 'Test-ReleasePackage.ps1'
+$transparentIcon = [Drawing.Bitmap]::new(64, 64)
+try { $transparentIcon.Save((Join-Path $artSource 'About/ModIcon.png'), [Drawing.Imaging.ImageFormat]::Png) }
+finally { $transparentIcon.Dispose() }
+Sync-GeneFoundryContent -Source $artSource -Destination $artTarget -Dll $dll
+& $artValidator -PackagePath $artTarget
+Write-Host 'PASS: accepts transparent mod icon.'
+$transparentPreview = [Drawing.Bitmap]::new(640, 360)
+try {
+    foreach ($root in @($artSource, $artTarget)) {
+        $transparentPreview.Save((Join-Path $root 'About/Preview.png'), [Drawing.Imaging.ImageFormat]::Png)
+    }
+}
+finally { $transparentPreview.Dispose() }
+Expect-Rejection 'transparent preview' { & $artValidator -PackagePath $artTarget } 'Unexpected transparency: Preview.png'
+
 $id = Join-Path $target 'About/PublishedFileId.txt'
 if (-not (Test-Path -LiteralPath $id)) { Set-Content -LiteralPath $id -Value '123456789' }
 $idBefore = [IO.File]::ReadAllBytes($id)
