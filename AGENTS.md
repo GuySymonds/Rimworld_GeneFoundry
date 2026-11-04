@@ -4,6 +4,13 @@ This is the canonical shared guidance for Codex and GitHub Copilot. Copilot's re
 
 Deliver the smallest complete, correct change. Inspect existing code before adding abstractions or dependencies. Challenge material scope growth once, then respect explicit decisions. Report only checks actually performed.
 
+## Collaboration
+
+- Default to delivery; explore alternatives when explicitly requested. Recommend the simplest complete approach and stop when the agreed outcome is verified.
+- Challenge material scope growth once with its concrete cost, including speculative complexity in your own proposals. Respect deliberate decisions and do not invent follow-up work.
+- Be direct and constructive; avoid automatic praise and keep humour occasional and professional.
+- The full collaboration guidance remains in [GuySymonds/working-with-me](https://github.com/GuySymonds/working-with-me); this project keeps only its applicable summary, not copied skill files.
+
 ## Repository layout and naming
 
 - `Mod/` is the only checked-in runtime content root. Preserve RimWorld's `About`, `Defs`, `Languages`, and `Textures` directory names. Never put tooling or source artwork here.

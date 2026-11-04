@@ -2,7 +2,9 @@
 
 `portable-checks.yml` runs on pushes, pull requests and manual dispatch on a Windows hosted runner. It installs .NET 10, runs portable calculation/XML/asset tests and parses every PowerShell script. Test results are retained for 14 days. It has read-only repository permissions and never deploys or publishes.
 
-The README's **Portable checks** badge tracks push runs on `main`. It reports this workflow's status, not the status of an unmerged branch. It may show no status until the workflow is pushed and runs. Configure branch protection to require **Portable tests and script syntax** after its first run; that repository setting is not supplied by a YAML file.
+The README's **Portable checks** badge tracks push runs on `main`. It reports this workflow's status, not the status of an unmerged branch. It may show no status until the workflow is pushed and runs. Protect `main` by requiring pull requests and the **Portable tests and script syntax** status check, requiring the branch to be up to date before merging, and disallowing force pushes and branch deletion. These repository settings are not supplied by a YAML file; configure the status check after its first run.
+
+`codeql.yml` runs CodeQL static analysis for C# and workflow files on pushes and pull requests to `main` and weekly. Its **CodeQL** badge tracks `main` push runs and certifies only that analysis ran, not that the mod is secure or builds. Add the **Require code scanning results** rule for CodeQL to the `main` ruleset after its first run. **Require code quality results** is a repository setting (enable GitHub Code Quality first). No coverage is collected yet, so there is no coverage badge or **Restrict code coverage** rule; add them only once coverage is measured and uploaded, and make that upload's status check required.
 
 The other badges identify the declared RimWorld 1.6 target, required Biotech DLC and MIT license. They are metadata, not test results. Do not add a release/download badge until there is a corresponding published artifact. Do not claim coverage percentages without collecting and publishing measured coverage.
 
