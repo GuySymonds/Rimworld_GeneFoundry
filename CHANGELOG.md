@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Upgrade CodeQL to v4, document incomplete C# dependency resolution, and align main-branch protection with squash merging and required portable/CodeQL checks.
+
 - Share contributor guidance between Codex and Copilot; replace the long README with links to focused gameplay, artwork, testing and release documents.
 
 - Interrupt refinery preparation and stop XP when power/workstation usability, bill eligibility or worker drafting prevents work, without consuming batch inputs.
