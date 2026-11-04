@@ -77,9 +77,9 @@ namespace GeneFoundry.Research
                     baseCost = cost,
                     techLevel = TechLevel.Industrial,
                     tab = tab,
-                    // Vanilla enforces and lists these in project details without drawing edges.
-                    prerequisites = new List<ResearchProjectDef>(),
-                    hiddenPrerequisites = prerequisites,
+                    // Draw the foundation link for every category; retain the additional archite gate.
+                    prerequisites = new List<ResearchProjectDef> { fabrication },
+                    hiddenPrerequisites = prerequisites.Where(project => project != fabrication).ToList(),
                     researchViewX = 6f + 1.5f * (index % 4),
                     researchViewY = index / 4f,
                     modContentPack = fabrication.modContentPack,

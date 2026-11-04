@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Use an organic race corpse allow list for both extraction recipes, excluding unknown modded robots while retaining enzymatic herbal catalysts.
+
+- Preserve completed Gene fabrication/category research across cost increases; leave unfinished progress and new categories subject to current costs.
+- Combine biomass extraction and refinement unlocks into Gene fabrication after Xenogenetics; keep Enzymatic extraction separate and show category links to the foundation.
+- Start the gene picker with collapsed categories, add Show all / Hide all, and simplify its footer with hover details.
+
 - Upgrade CodeQL to v4, document incomplete C# dependency resolution, and align main-branch protection with squash merging and required portable/CodeQL checks.
 
 - Share contributor guidance between Codex and Copilot; replace the long README with links to focused gameplay, artwork, testing and release documents.

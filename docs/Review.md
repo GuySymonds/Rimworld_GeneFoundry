@@ -1,5 +1,11 @@
 # Solution review — 4 November 2026
 
+## Research persistence, research tree, gene picker and corpse eligibility — 4 November 2026
+
+Completed Gene fabrication/category project IDs are saved independently of research points and restored after loading. Unfinished projects retain their points against current costs, and new categories remain unresearched. Legacy saves cannot identify formerly completed projects already made partial before completion records existed. Extraction/refinement unlocks now belong to Gene fabrication; Enzymatic extraction follows separately, and generated categories show their foundation prerequisite. The picker starts collapsed, has Show all / Hide all, and moves detailed skill/risk/recovery text into a footer tooltip. Corpse recipes resolve an organic race definition allow list for ingredients and bill choices, preserving herbal catalysts and the shared runtime eligibility rule.
+
+Verified: 347 portable tests and 467 managed tests passed; Release build completed with zero warnings/errors, deployment disabled; staged package validation passed (183 runtime files, 20 definition files); release workflow safety regressions passed during this change. Managed research persistence exercises Scribe with vanilla completion side effects replaced; corpse filter tests exercise actual ThingFilters with headless definitions. Debug build deployed to `Mods/GeneFoundry_dev` using the separate configuration-aware deployment branch tooling; installed and built DLL SHA-256 hashes match. No live RimWorld verification was performed. Follow [research acceptance](Testing.md#research), [fabrication acceptance](Testing.md#fabrication) and [corpse acceptance](Testing.md#biomass-storage-and-extraction) for the displayed tree, picker layout, real modded definitions and existing bill behavior.
+
 Reviewed the extraction, medical recovery, refinement, processor allocation, fabrication/bill ownership, research, settings, animation, XML definitions, tests, packaging/deployment scripts, documentation and tracked folder/file conventions. GitHub reported no open issues and no workflow runs for `main` at review time. This is a code and managed-API review; it does not certify live-colony behavior or every third-party mod combination.
 
 ## Resolved refinery findings

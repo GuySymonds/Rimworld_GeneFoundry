@@ -5,7 +5,7 @@
 
     <defName>GF_BiomassHopper</defName>
     <researchPrerequisites>
-      <li>GF_BiomassRefinement</li>
+      <li>GF_GeneFabrication</li>
     </researchPrerequisites>
     <label>raw biomass hopper</label>
 

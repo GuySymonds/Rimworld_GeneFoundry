@@ -14,6 +14,79 @@ namespace GeneFoundry.Tests
     [Collection("GeneFoundry.Tests.GameGeneResearchTests")]
     public class GameGeneResearchTests
     {
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SavedCompletionSurvivesHigherCostsWithoutCompletingPartialOrNewProjects(bool saveCompletionRecord)
+        {
+            Game previousGame = Current.Game;
+            var previousDefs = DefDatabase<ResearchProjectDef>.AllDefsListForReading.ToList();
+            bool profiling = DeepProfiler.enabled;
+            string path = System.IO.Path.GetTempFileName();
+            DeepProfiler.enabled = false;
+            try
+            {
+                var game = (Game)RuntimeHelpers.GetUninitializedObject(typeof(Game));
+                game.researchManager = new ResearchManager();
+                Current.Game = game;
+                DefDatabase<ResearchProjectDef>.Clear();
+                foundation.baseCost = 1000;
+                var complete = new GeneCategoryResearchProjectDef { defName = "GF_GeneCategory_Complete", baseCost = 1000 };
+                var partial = new GeneCategoryResearchProjectDef { defName = "GF_GeneCategory_Partial", baseCost = 1000 };
+                DefDatabase<ResearchProjectDef>.Add(new ResearchProjectDef[] { foundation, complete, partial });
+                var progress = (Dictionary<ResearchProjectDef, float>)typeof(ResearchManager)
+                    .GetField("progress", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(game.researchManager);
+                progress[foundation] = 1000;
+                progress[complete] = 1000;
+                progress[partial] = 500;
+                var source = new HeadlessResearchComponent(game);
+                Scribe.saver.InitSaving(path, "research");
+                if (saveCompletionRecord) source.ExposeData();
+                Scribe.saver.FinalizeSaving();
+
+                foundation.baseCost = 2000;
+                complete.baseCost = 1450;
+                partial.baseCost = 2200;
+                var added = new GeneCategoryResearchProjectDef { defName = "GF_GeneCategory_New", baseCost = 1000 };
+                DefDatabase<ResearchProjectDef>.Add(added);
+                Assert.False(complete.IsFinished);
+                var loaded = new HeadlessResearchComponent(game);
+                Scribe.loader.InitLoading(path);
+                loaded.ExposeData();
+                Scribe.loader.FinalizeLoading();
+                loaded.LoadedGame();
+                loaded.LoadedGame(); // Restoration is idempotent.
+                Assert.Equal(saveCompletionRecord, foundation.IsFinished);
+                Assert.Equal(saveCompletionRecord, complete.IsFinished);
+                Assert.False(partial.IsFinished);
+                Assert.Equal(500f, game.researchManager.GetProgress(partial));
+                Assert.False(added.IsFinished);
+                Assert.Equal(0f, game.researchManager.GetProgress(added));
+            }
+            finally
+            {
+                Scribe.ForceStop();
+                System.IO.File.Delete(path);
+                DeepProfiler.enabled = profiling;
+                DefDatabase<ResearchProjectDef>.Clear();
+                DefDatabase<ResearchProjectDef>.Add(previousDefs);
+                Current.Game = previousGame;
+            }
+        }
+        private class HeadlessResearchComponent : GeneFoundry.Components.GameComponent_GeneResearch
+        {
+            public HeadlessResearchComponent(Game game) : base(game) { }
+            protected override void RestoreCompletion(ResearchProjectDef project)
+            {
+                // FinishProject also touches DLC discovery, letters and Unity; replace those
+                // effects while exercising real Scribe state, project selection and progress.
+                var progress = (Dictionary<ResearchProjectDef, float>)typeof(ResearchManager)
+                    .GetField("progress", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(Find.ResearchManager);
+                progress[project] = project.Cost;
+            }
+        }
+
         private class HeadlessCategoryProject : GeneCategoryResearchProjectDef
         {
             // The vanilla PostLoad hook discovers installed DLC through the running game.
@@ -40,8 +113,8 @@ namespace GeneFoundry.Tests
             GeneDef archite = Gene("Archite", category, 3, 2);
             var project = Assert.Single(Build(normal, archite));
             Assert.Equal(1000f, project.baseCost);
-            Assert.Empty(project.prerequisites);
-            Assert.Equal(new[] { foundation }, project.hiddenPrerequisites);
+            Assert.Equal(new[] { foundation }, project.prerequisites);
+            Assert.Empty(project.hiddenPrerequisites);
             Assert.Equal("modded category", project.label);
             Assert.Same(tab, project.tab);
             Assert.Equal(new[] { archite, normal }, project.genes);
@@ -54,8 +127,8 @@ namespace GeneFoundry.Tests
         {
             var category = new GeneCategoryDef { defName = "AnyCategory" };
             var project = Assert.Single(Build(Gene("A", category, 0, 1), Gene("B", category, 0, 2)));
-            Assert.Empty(project.prerequisites);
-            Assert.Equal(new[] { foundation, archogenetics }, project.hiddenPrerequisites);
+            Assert.Equal(new[] { foundation }, project.prerequisites);
+            Assert.Equal(new[] { archogenetics }, project.hiddenPrerequisites);
             Assert.Equal(1000f, project.baseCost);
         }
 
@@ -92,8 +165,8 @@ namespace GeneFoundry.Tests
             {
                 Assert.InRange(project.researchViewX, 6f, 10.5f);
                 Assert.True(project.researchViewY >= 0f);
-                Assert.Empty(project.prerequisites);
-                Assert.Contains(foundation, project.hiddenPrerequisites);
+                Assert.Equal(new[] { foundation }, project.prerequisites);
+                Assert.Contains(foundation, project.prerequisites);
             });
         }
 

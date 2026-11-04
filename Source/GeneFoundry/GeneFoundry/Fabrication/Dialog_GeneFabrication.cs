@@ -41,6 +41,7 @@ namespace GeneFoundry.Fabrication
             this.addBill = addBill;
             selected = (editingBill?.genes ?? (addBill ? new List<GeneDef>() : bench.Selected)).Where(g => g != null).ToList();
             available = FabricationGeneCatalog.Available(DefDatabase<GeneDef>.AllDefsListForReading);
+            collapsed.UnionWith(available.Select(gene => gene.displayCategory));
             forcePause = true;
             absorbInputAroundWindow = true;
             closeOnAccept = false;
@@ -55,14 +56,17 @@ namespace GeneFoundry.Fabrication
             Text.Font = GameFont.Small;
             DrawSearchRect(rect);
             // Reserve a fixed footer; the two gene sections scroll independently.
-            DrawGenes(new Rect(0, 42, rect.width, Mathf.Max(100, rect.height - 252)));
-            float y = rect.height - 202;
+            DrawGenes(new Rect(0, 42, rect.width, Mathf.Max(100, rect.height - 200)));
+            float y = rect.height - 150;
             int complexity = Building_GeneFabricator.Complexity(selected);
             float work = FabricationCalculations.Work(selected.Count, complexity);
-            Widgets.Label(new Rect(0, y, rect.width, 150),
+            Widgets.Label(new Rect(0, y, rect.width, 76),
                 $"Selected: {selected.Count} genes; complexity: {complexity}\n" +
                 $"Materials: {FabricationCalculations.Biomass(selected.Count, complexity)} refined biomass ({FabricationCalculations.BiomassDiscountPercent(selected.Count)}% discount) + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
-                $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills ({work:0} work)\n" +
+                $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills");
+            Rect details = new Rect(rect.width - 180, y + 76, 180, 24);
+            Widgets.Label(details, "Skills, risk and recovery");
+            TooltipHandler.TipRegion(details,
                 "Minimum: Intellectual 10, Medicine 6, Crafting 4. Weights: 60% / 25% / 15%.\n" +
                 "Base failure: 30% at minimum; 0% at 16 / 12 / 10. Dirt, outdoors and dim light add risk.\n" +
                 "Cancellation recovers 75% of committed ingredients, rounded down.");
@@ -78,7 +82,14 @@ namespace GeneFoundry.Fabrication
             DrawSection(new Rect(rect.x, rect.y + 26, rect.width, selectedHeight), selected.ToList(), ref selectedScroll, false);
             if (ReadOnly) return;
             float libraryY = rect.y + selectedHeight + 36;
-            Widgets.Label(new Rect(rect.x, libraryY, rect.width, 25), "Genes".Translate());
+            Widgets.Label(new Rect(rect.x, libraryY, rect.width - 120, 25), "Genes".Translate());
+            bool allShown = collapsed.Count == 0;
+            if (Widgets.ButtonText(new Rect(rect.xMax - 110, libraryY, 110, 24), allShown ? "Hide all" : "Show all"))
+            {
+                if (allShown) collapsed.UnionWith(available.Select(gene => gene.displayCategory));
+                else collapsed.Clear();
+                scrollPosition = Vector2.zero;
+            }
             DrawSection(new Rect(rect.x, libraryY + 26, rect.width, rect.yMax - libraryY - 26),
                 available.Where(g => !selected.Contains(g) && (!quickSearchWidget.filter.Active || matchingGenes.Contains(g))).ToList(),
                 ref scrollPosition, true);

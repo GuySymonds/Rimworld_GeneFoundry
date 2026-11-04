@@ -17,7 +17,7 @@ namespace GeneFoundry.Tests
             .SelectMany(path => XDocument.Load(path).Root.Elements()).ToList();
 
         [Fact]
-        public void FourFoundationProjectsUseTheirOwnVisibleResearchTabAndDistinctPositions()
+        public void TwoFoundationProjectsUseTheirOwnVisibleResearchTabAndDistinctPositions()
         {
             var defs = Definitions();
             XElement tab = Assert.Single(defs, def => def.Name == "ResearchTabDef");
@@ -25,7 +25,7 @@ namespace GeneFoundry.Tests
             Assert.Equal("GeneFoundry", (string)tab.Element("label"));
             Assert.Equal("true", (string)tab.Element("visibleByDefault"));
             var projects = defs.Where(def => def.Name == "ResearchProjectDef").ToList();
-            Assert.Equal(4, projects.Count);
+            Assert.Equal(2, projects.Count);
             Assert.All(projects, project =>
             {
                 Assert.Equal("GF_GeneFoundry", (string)project.Element("tab"));
@@ -34,16 +34,14 @@ namespace GeneFoundry.Tests
                 Assert.True(float.Parse(project.Element("researchViewX").Value, CultureInfo.InvariantCulture) >= 0);
                 Assert.True(float.Parse(project.Element("researchViewY").Value, CultureInfo.InvariantCulture) >= 0);
             });
-            Assert.Equal(4, projects.Select(project => (
+            Assert.Equal(2, projects.Select(project => (
                 (string)project.Element("researchViewX"), (string)project.Element("researchViewY"))).Distinct().Count());
         }
 
         [Theory]
-        [InlineData("GF_BiomassExtraction", "Xenogermination", 500)]
-        [InlineData("GF_EnzymaticExtraction", "GF_BiomassExtraction", 750)]
-        [InlineData("GF_BiomassRefinement", "GF_BiomassExtraction", 1000)]
-        [InlineData("GF_GeneFabrication", "GF_BiomassRefinement", 1500)]
-        public void ResearchBranchesFromExtractionAndAlwaysRequiresVanillaXenogenetics(
+        [InlineData("GF_EnzymaticExtraction", "GF_GeneFabrication", 750)]
+        [InlineData("GF_GeneFabrication", "Xenogermination", 1500)]
+        public void ResearchBranchesFromFabricationAndAlwaysRequiresVanillaXenogenetics(
             string name, string prerequisite, int cost)
         {
             var projects = Definitions().Where(def => def.Name == "ResearchProjectDef")
@@ -63,9 +61,9 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData("GF_GeneVat", "GF_BiomassExtraction")]
-        [InlineData("GF_BiomassRefinery", "GF_BiomassRefinement")]
-        [InlineData("GF_BiomassHopper", "GF_BiomassRefinement")]
+        [InlineData("GF_GeneVat", "GF_GeneFabrication")]
+        [InlineData("GF_BiomassRefinery", "GF_GeneFabrication")]
+        [InlineData("GF_BiomassHopper", "GF_GeneFabrication")]
         public void ProductionBuildingsRequireTheirResearch(string name, string research)
         {
             XElement building = Definitions().Single(def => (string)def.Element("defName") == name);
@@ -82,8 +80,7 @@ namespace GeneFoundry.Tests
             {
                 string name = recipe.Element("defName").Value;
                 string expected = name.Contains("Enzymatic") ? "GF_EnzymaticExtraction" :
-                    name == "GF_StartBiomassRefinement" ? "GF_BiomassRefinement" :
-                    name == "GF_FabricateSelectedGenes" ? "GF_GeneFabrication" : "GF_BiomassExtraction";
+                    "GF_GeneFabrication";
                 Assert.Equal(expected, (string)recipe.Element("researchPrerequisite"));
                 Assert.Equal("ResearchProjectDef", Definitions().Single(def =>
                     (string)def.Element("defName") == expected).Name.LocalName);

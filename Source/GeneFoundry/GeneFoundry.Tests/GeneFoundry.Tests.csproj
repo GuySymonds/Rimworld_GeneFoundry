@@ -48,6 +48,8 @@
     <Compile Include="../GeneFoundry/Fabrication/FabricationHandlingJob.cs" Link="Production/FabricationHandlingJob.cs" />
     <Compile Include="../GeneFoundry/WorkGivers/WorkGiver_FabricateGenePack.cs" Link="Production/WorkGiver_FabricateGenePack.cs" />
     <Compile Include="../GeneFoundry/Jobs/GeneVatIngredientPlacement.cs" Link="Production/GeneVatIngredientPlacement.cs" />
+    <Compile Include="../GeneFoundry/Recipes/CorpseBiomassUtility.cs" Link="Production/CorpseBiomassUtility.cs" />
+    <Compile Include="../GeneFoundry/Components/GameComponent_GeneResearch.cs" Link="Production/GameComponent_GeneResearch.cs" />
     <Compile Include="../GeneFoundry/Research/GeneFabricationResearch.cs" Link="Production/GeneFabricationResearch.cs" />
   </ItemGroup>
   <ItemGroup>

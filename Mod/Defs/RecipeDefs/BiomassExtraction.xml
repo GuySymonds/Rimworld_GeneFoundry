@@ -5,7 +5,7 @@
   <RecipeDef>
 
     <defName>GF_ExtractBiomassBasic</defName>
-    <researchPrerequisite>GF_BiomassExtraction</researchPrerequisite>
+    <researchPrerequisite>GF_GeneFabrication</researchPrerequisite>
     <label>extract raw biomass from meat</label>
 
     <description>50 raw meat yields up to 20 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
@@ -124,7 +124,7 @@
   <RecipeDef>
 
     <defName>GF_ExtractBiomassPlant</defName>
-    <researchPrerequisite>GF_BiomassExtraction</researchPrerequisite>
+    <researchPrerequisite>GF_GeneFabrication</researchPrerequisite>
     <label>extract raw biomass from plants</label>
     <description>50 raw plant food yields up to 8 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
     <jobString>Extracting raw biomass from plants.</jobString>
