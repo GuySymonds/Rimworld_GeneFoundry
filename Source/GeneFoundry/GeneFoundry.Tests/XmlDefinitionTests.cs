@@ -107,17 +107,36 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData("GF_ExtractBiomassBasic", 20)]
-        [InlineData("GF_ExtractBiomassEnzymatic", 25)]
-        [InlineData("GF_ExtractBiomassPlant", 8)]
-        [InlineData("GF_ExtractBiomassPlantEnzymatic", 10)]
+        [InlineData("GF_ExtractBiomassBasic", 7)]
+        [InlineData("GF_ExtractBiomassEnzymatic", 9)]
+        [InlineData("GF_ExtractBiomassPlant", 7)]
+        [InlineData("GF_ExtractBiomassPlantEnzymatic", 9)]
         public void MaterialConversionsUseFullRecoveryQuantities(string name, int count)
         {
             var recipe = Def(name);
             Assert.Equal(count, (int)recipe.Element("products").Element("GF_RawBiomass"));
             Assert.Equal(50, (int)recipe.Element("ingredients").Element("li").Element("count"));
+            Assert.Equal(name.EndsWith("Enzymatic") ? 2 : 1, recipe.Element("ingredients").Elements().Count());
             if(name.EndsWith("Enzymatic"))
+            {
                 Assert.Equal(1, (int)recipe.Element("ingredients").Elements().Last().Element("count"));
+                Assert.Equal("MedicineHerbal", (string)recipe.Element("ingredients").Elements().Last()
+                    .Element("filter").Element("thingDefs").Element("li"));
+            }
+        }
+
+        [Theory]
+        [InlineData("GF_ExtractBiomassPlant")]
+        [InlineData("GF_ExtractBiomassPlantEnzymatic")]
+        public void RawPlantFoodUsesOneCategoryWithoutCropOrWoodSpecificInputs(string name)
+        {
+            XElement recipe = Def(name);
+            XElement food = recipe.Element("ingredients").Element("li").Element("filter");
+            Assert.Equal("PlantFoodRaw", Assert.Single(food.Element("categories").Elements()).Value);
+            Assert.Null(food.Element("thingDefs"));
+            Assert.Equal("PlantFoodRaw", Assert.Single(recipe.Element("fixedIngredientFilter")
+                .Element("categories").Elements()).Value);
+            Assert.DoesNotContain(recipe.Descendants("li"), element => element.Value == "WoodLog");
         }
 
         [Fact]
@@ -125,8 +144,9 @@ namespace GeneFoundry.Tests
         {
             var comp = Def("GF_BiomassRefinery").Element("comps").Elements().Single(e =>
                 (string)e.Attribute("Class") == "GeneFoundry.Components.CompProperties_BiomassRefiner");
-            Assert.Equal(40, (int)comp.Element("inputCount"));
+            Assert.Equal(45, (int)comp.Element("inputCount"));
             Assert.Equal(10, (int)comp.Element("outputCount"));
+            Assert.Equal(2500, (int)comp.Element("processingTicks")); // Legacy elapsed-tick migration denominator.
             var recipe = Def("GF_StartBiomassRefinement");
             Assert.Equal(10, (int)recipe.Element("products").Element("GF_RefinedBiomass"));
             Assert.Equal(1, (int)Assert.Single(recipe.Element("ingredients").Elements()).Element("count"));
@@ -259,7 +279,7 @@ namespace GeneFoundry.Tests
             Assert.Equal("PlantFoodRaw", (string)ingredients[0].Element("filter").Element("categories").Element("li"));
             Assert.Equal("1", (string)ingredients[1].Element("count"));
             Assert.Equal("MedicineHerbal", (string)ingredients[1].Element("filter").Element("thingDefs").Element("li"));
-            Assert.Equal("10", (string)recipe.Element("products").Element("GF_RawBiomass"));
+            Assert.Equal("9", (string)recipe.Element("products").Element("GF_RawBiomass"));
         }
 
         [Fact]

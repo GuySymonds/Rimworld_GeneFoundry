@@ -2,7 +2,7 @@
 <Defs>
   <ResearchTabDef>
     <defName>GF_GeneFoundry</defName>
-    <label>GeneFoundry</label>
+    <label>Gene Foundry</label>
     <generalTitle>GeneFoundry research</generalTitle>
     <generalDescription>After researching xenogenetics, gene fabrication unlocks biomass extraction, refinement and gene manufacturing. Enzymatic extraction improves recovery. Gene category projects follow gene fabrication; archite genes also require vanilla archogenetics.</generalDescription>
     <visibleByDefault>true</visibleByDefault>

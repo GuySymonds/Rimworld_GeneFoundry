@@ -5,6 +5,15 @@ namespace GeneFoundry.Tests
     public class RefinementCalculationsTests
     {
         [Theory]
+        [InlineData(360, 120, 20f, 12)]
+        [InlineData(360, 120, 0f, 0)]
+        [InlineData(360, 360, 20f, 0)]
+        [InlineData(360, 120, 25f, 10)]
+        [InlineData(2160, 1080, 108f, 10)]
+        public void ProcessorAllocationStopsOnlyWhenNoFurtherTimeCanBeSaved(int duration, int minimum, float reduction, int expected) =>
+            Assert.Equal(expected, BiomassCalculations.RefinementUsefulProcessors(duration, minimum, reduction));
+
+        [Theory]
         [InlineData(5,90,0.30f)] [InlineData(10,70,0.05f)]
         [InlineData(15,50,0.025f)] [InlineData(20,30,0f)]
         [InlineData(0,90,0.30f)] [InlineData(30,30,0f)]

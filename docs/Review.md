@@ -1,4 +1,16 @@
 # Solution review — 4 November 2026
+## Biomass balance dev deployment — 4 November 2026
+
+At the explicit user request, created `codex/dry-mass-biomass-balance` from current main and built Debug with deployment enabled. Build succeeded with zero warnings/errors and deployed to `Mods/GeneFoundry_dev`, preserving the Workshop ID. Verified installed DLL, About metadata/description, material recipe, refinery definition and research definition hashes against the local build/source. No live RimWorld verification was performed. Existing saved refinement settings remain preserved; reset refinement/environment defaults when testing the new 360/120-minute, 20-minutes-per-processor defaults.
+
+## Dry-mass biomass balance and processor timing — 4 November 2026
+
+Implemented meat/plant dry-mass yields (25%/24%, with 60% basic or 75% enzymatic recovery) and decimal whole-corpse yields using recoverable meat × 25% × 2.2 before efficiency/decay. Fixed 50-food batches yield 7 basic or 9 enzymatic biomass. The refinery consumes 45 raw biomass plus 1 neutroamine for exactly 10 refined biomass on success. Following the subsequent balance correction, automated defaults are 360 minutes, reduced by 20 minutes per processor to a 120-minute minimum at 12 processors. Saved duration settings remain; saved percentage assistance converts to equivalent minutes. The legacy XML 2,500-tick migration denominator is unchanged.
+
+Vat timings already meet the requested limits and were retained: material batches take 12 in-game minutes at normal speed; fresh elephant extraction takes about 106.5 minutes at reference skills, excluding hauling and recovery. Refinery preparation remains 30–90 minutes, so its slow end exceeds one hour. Existing corpse meat/condition sampling, wastage, salvage and butcher-product filtering are unchanged; whole corpses still produce no separate meat/leather. Fabrication sources and calculations are unchanged. Inspected the installed Biotech Skin_Green definition and its zero-complexity parent; the existing single-gene price remains 10 refined biomass. Added explicitly qualified first-pack examples to About.xml and the [biomass guide](Biomass.md#green-skin-first-pack-example). Research categories now allow eight rows per column, and the tab label is Gene Foundry; research gates and IDs are unchanged.
+
+Verified: 369 portable tests and 501 managed tests passed, including specified fresh yields, decay, reduced remaining-material inputs, wastage, ingredient metadata, hopper consumption at 44/45/50 available biomass, the twelve-processor timing/allocation boundary, saved settings conversion/round-trips and existing refinery lifecycle/fabrication regressions. Release build succeeded with zero warnings/errors using deployment disabled; local package validation passed (183 runtime files, 20 definition files); release workflow safety regressions passed using disposable fixtures. No installed mod deployment, push, publication or live RimWorld verification was performed. Managed fixtures do not simulate live missing-limb stat recalculation, actual colony hauling, complete corpse salvage, or UI rendering; use the [extraction](Testing.md#biomass-storage-and-extraction), [refinery](Testing.md#refinery) and [research](Testing.md#research) acceptance checks.
+
 
 ## Development deployment verification — 4 November 2026
 

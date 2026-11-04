@@ -22,7 +22,7 @@ namespace GeneFoundry.Tests
             var defs = Definitions();
             XElement tab = Assert.Single(defs, def => def.Name == "ResearchTabDef");
             Assert.Equal("GF_GeneFoundry", (string)tab.Element("defName"));
-            Assert.Equal("GeneFoundry", (string)tab.Element("label"));
+            Assert.Equal("Gene Foundry", (string)tab.Element("label"));
             Assert.Equal("true", (string)tab.Element("visibleByDefault"));
             var projects = defs.Where(def => def.Name == "ResearchProjectDef").ToList();
             Assert.Equal(2, projects.Count);

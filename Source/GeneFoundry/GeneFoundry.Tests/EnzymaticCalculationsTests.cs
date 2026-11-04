@@ -20,17 +20,17 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(100f, 1f, 55)]
-        [InlineData(100f, 0.5f, 27)]
-        [InlineData(100f, 0.1f, 5)]
-        [InlineData(28f, 1f, 15)]
-        [InlineData(28f, 0.5f, 7)]
+        [InlineData(100f, 1f, 41)]
+        [InlineData(100f, 0.5f, 20)]
+        [InlineData(100f, 0.1f, 4)]
+        [InlineData(28f, 1f, 11)]
+        [InlineData(28f, 0.5f, 5)]
         [InlineData(28f, 0.1f, 1)]
-        [InlineData(560f, 1f, 308)]
-        [InlineData(560f, 0.5f, 154)]
-        [InlineData(560f, 0.1f, 30)]
+        [InlineData(560f, 1f, 231)]
+        [InlineData(560f, 0.5f, 115)]
+        [InlineData(560f, 0.1f, 23)]
         [InlineData(0f, 0.1f, 1)]
-        public void EnzymaticYieldAppliesFiftyPercentBeforeFinalRounding(float material, float decay, int expected)
+        public void EnzymaticYieldAppliesDryMassAndSeventyFivePercentBeforeFinalRounding(float material, float decay, int expected)
         {
             Assert.Equal(expected, BiomassCalculations.CorpseYield(material, decay, enzymatic: true));
         }
@@ -38,8 +38,8 @@ namespace GeneFoundry.Tests
         [Fact]
         public void EnzymesUseFixedRecoveryWithoutChangingCatalystCost()
         {
-            Assert.Equal(308, BiomassCalculations.CorpseYield(560, 1, true));
-            Assert.Equal(30, BiomassCalculations.CorpseYield(560, 0.1f, true));
+            Assert.Equal(231, BiomassCalculations.CorpseYield(560, 1, true));
+            Assert.Equal(23, BiomassCalculations.CorpseYield(560, 0.1f, true));
             Assert.Equal(12, BiomassCalculations.EnzymaticCatalystCount(560));
         }
 

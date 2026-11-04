@@ -8,7 +8,7 @@
     <researchPrerequisite>GF_GeneFabrication</researchPrerequisite>
     <label>extract raw biomass from meat</label>
 
-    <description>50 raw meat yields up to 20 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
+    <description>Extract raw biomass from 50 raw meat. Dry mass is 25% of input mass; 60% recovery gives 7 raw biomass before operator wastage, rounded down. Successful extraction yields at least one raw biomass. Existing skill speed, wastage and environmental penalties apply.</description>
 
     <jobString>Extracting raw biomass from meat.</jobString>
 
@@ -46,7 +46,7 @@
     </fixedIngredientFilter>
 
     <products>
-      <GF_RawBiomass>20</GF_RawBiomass>
+      <GF_RawBiomass>7</GF_RawBiomass>
     </products>
 
   </RecipeDef>
@@ -59,7 +59,7 @@
     <researchPrerequisite>GF_EnzymaticExtraction</researchPrerequisite>
     <label>extract raw biomass from meat (enzymatic)</label>
 
-    <description>50 raw meat and 1 herbal medicine yield up to 25 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
+    <description>Extract raw biomass from 50 raw meat and 1 herbal medicine. Dry mass is 25% of input mass; 75% recovery gives 9 raw biomass before operator wastage, rounded down. Successful extraction yields at least one raw biomass. Existing skill speed, wastage and environmental penalties apply.</description>
 
     <jobString>Extracting raw biomass from meat using enzymes.</jobString>
 
@@ -115,7 +115,7 @@
     </fixedIngredientFilter>
 
     <products>
-      <GF_RawBiomass>25</GF_RawBiomass>
+      <GF_RawBiomass>9</GF_RawBiomass>
     </products>
 
   </RecipeDef>
@@ -126,7 +126,7 @@
     <defName>GF_ExtractBiomassPlant</defName>
     <researchPrerequisite>GF_GeneFabrication</researchPrerequisite>
     <label>extract raw biomass from plants</label>
-    <description>50 raw plant food yields up to 8 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
+    <description>Extract raw biomass from 50 raw plant food. Dry mass is 24% of input mass; 60% recovery gives 7 raw biomass before operator wastage, rounded down. All eligible raw plant foods use the same dry mass; wood is excluded. Successful extraction yields at least one raw biomass. Existing skill speed, wastage and environmental penalties apply.</description>
     <jobString>Extracting raw biomass from plants.</jobString>
 
     <skillRequirements>
@@ -162,7 +162,7 @@
     </fixedIngredientFilter>
 
     <products>
-      <GF_RawBiomass>8</GF_RawBiomass>
+      <GF_RawBiomass>7</GF_RawBiomass>
     </products>
 
   </RecipeDef>
@@ -171,7 +171,7 @@
     <defName>GF_ExtractBiomassPlantEnzymatic</defName>
     <researchPrerequisite>GF_EnzymaticExtraction</researchPrerequisite>
     <label>extract raw biomass from plants (enzymatic)</label>
-    <description>50 raw plant food and 1 herbal medicine yield up to 10 raw biomass. Cooking/Medicine/Intellectual reference levels 10/6/4 give full recovery. Weighted shortfalls cause random wastage, with at least one biomass recovered. Above-reference skills improve speed only. All inputs can release rot stink during active extraction when any of these skills is below 10.</description>
+    <description>Extract raw biomass from 50 raw plant food and 1 herbal medicine. Dry mass is 24% of input mass; 75% recovery gives 9 raw biomass before operator wastage, rounded down. All eligible raw plant foods use the same dry mass; wood is excluded. Successful extraction yields at least one raw biomass. Existing skill speed, wastage and environmental penalties apply.</description>
     <jobString>Extracting raw biomass from plants using enzymes.</jobString>
     <skillRequirements>
       <Cooking>3</Cooking>
@@ -214,7 +214,7 @@
       </thingDefs>
     </fixedIngredientFilter>
     <products>
-      <GF_RawBiomass>10</GF_RawBiomass>
+      <GF_RawBiomass>9</GF_RawBiomass>
     </products>
   </RecipeDef>
 </Defs>

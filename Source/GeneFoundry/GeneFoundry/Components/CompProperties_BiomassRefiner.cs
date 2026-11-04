@@ -7,7 +7,7 @@ namespace GeneFoundry.Components
         public ThingDef inputDef;
         public ThingDef outputDef;
 
-        public int inputCount = 40;
+        public int inputCount = 45;
         public int outputCount = 10;
 
         public int processingTicks = 30000;

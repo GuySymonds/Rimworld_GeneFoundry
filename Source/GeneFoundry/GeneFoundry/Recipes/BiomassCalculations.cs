@@ -80,6 +80,14 @@ namespace GeneFoundry.Recipes
         public static int RefinementPreparationTicks(int intellectual, int crafting, int medicine) =>
             (int)Math.Round((90d - 4d * (RefinementSkill(intellectual, crafting, medicine) - 5d)) * 2500d / 60d);
 
+        public static int RefinementUsefulProcessors(int durationMinutes, int minimumMinutes, float reductionMinutes)
+        {
+            int duration = Math.Max(1, durationMinutes);
+            int minimum = Math.Max(1, Math.Min(duration, minimumMinutes));
+            return reductionMinutes <= 0f ? 0 :
+                (int)Math.Ceiling((duration - minimum) / (double)reductionMinutes - .00001d);
+        }
+
         public const float CookingWeight = 0.4f;
         public const float MedicineWeight = 0.4f;
         public const float IntellectualWeight = 0.2f;
@@ -129,7 +137,11 @@ namespace GeneFoundry.Recipes
 
         public static int CorpseYield(float material, float decayMultiplier, bool enzymatic = false)
         {
-            return Math.Max(1, (int)Math.Floor(Math.Max(0f, material) * 1.10d * (enzymatic ? 0.50d : 0.40d) * decayMultiplier));
+            // Decimal factors keep exact dry-mass boundaries (including 10% decay)
+            // from losing a whole item to binary floating-point representation.
+            decimal dryMass = (decimal)Math.Max(0f, material) * .25m * 2.2m;
+            return Math.Max(1, (int)Math.Floor(dryMass * (enzymatic ? .75m : .60m) *
+                (decimal)decayMultiplier));
         }
 
         public static int CorpseWorkTicks(float material, float workSpeed, float decayMultiplier,
