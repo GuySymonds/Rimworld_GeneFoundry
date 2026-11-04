@@ -1,6 +1,7 @@
 # GeneFoundry v1.0.0
 
 [![Portable checks](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml/badge.svg?branch=main&event=push)](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml)
+[![CodeQL](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/codeql.yml/badge.svg?branch=main&event=push)](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/codeql.yml)
 [![RimWorld 1.6](https://img.shields.io/badge/RimWorld-1.6-blue)](Mod/About/About.xml)
 [![Requires Biotech](https://img.shields.io/badge/DLC-Biotech_required-blue)](Mod/About/About.xml)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
