@@ -80,8 +80,8 @@ namespace GeneFoundry.Components
             GeneFoundrySettings settings = GeneFoundryMod.Settings;
             float baseMinutes = Math.Max(1, settings.processingMinutes);
             float minimumMinutes = Math.Max(1, Math.Min(baseMinutes, settings.minimumProcessingMinutes));
-            float reduction = Math.Max(0, Math.Min(100, settings.processorReductionPercent)) / 100f;
-            return Math.Max(minimumMinutes, baseMinutes * (1f - processors * reduction)) * 2500f / 60f;
+            float reduction = Math.Max(0f, settings.processorReductionMinutes);
+            return Math.Max(minimumMinutes, baseMinutes - Math.Max(0, processors) * reduction) * 2500f / 60f;
         }
 
         public override void PostSpawnSetup(bool respawningAfterLoad)

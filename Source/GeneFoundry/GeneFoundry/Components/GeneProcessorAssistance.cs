@@ -31,11 +31,8 @@ namespace GeneFoundry.Components
                 return;
 
             GeneFoundrySettings settings = GeneFoundryMod.Settings;
-            float baseMinutes = System.Math.Max(1, settings.processingMinutes);
-            float minimumMinutes = System.Math.Max(1, System.Math.Min(baseMinutes, settings.minimumProcessingMinutes));
-            float reduction = System.Math.Max(0, System.Math.Min(100, settings.processorReductionPercent)) / 100f;
-            int usefulProcessors = reduction <= 0f ? 0 :
-                (int)System.Math.Ceiling((1f - minimumMinutes / baseMinutes) / reduction - 0.00001f);
+            int usefulProcessors = Recipes.BiomassCalculations.RefinementUsefulProcessors(
+                settings.processingMinutes, settings.minimumProcessingMinutes, settings.processorReductionMinutes);
 
             List<Thing> refineries = map.listerThings.ThingsOfDef(refineryDef);
             List<Thing> assemblers = map.listerThings.ThingsOfDef(ThingDefOf.GeneAssembler);

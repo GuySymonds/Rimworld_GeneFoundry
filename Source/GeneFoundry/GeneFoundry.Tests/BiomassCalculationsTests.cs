@@ -45,7 +45,7 @@ namespace GeneFoundry.Tests
         public void MinimumOutputAndVanillaCeilingMatchDesiredRecovery()
         {
             Assert.Equal(1,BiomassCalculations.ExtractionOutput(1,0,0,0,1));
-            foreach (int baseline in new[] {8,10,20,25})
+            foreach (int baseline in new[] {7,9,20,25})
                 for(int output=1;output<=baseline;output++)
                     Assert.Equal(output,(int)Math.Ceiling(baseline * BiomassCalculations.MaterialYieldEfficiency(output/(float)baseline)));
         }
@@ -73,15 +73,15 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(100f, 1f, 44)]
-        [InlineData(100f, 0.5f, 22)]
-        [InlineData(100f, 0.1f, 4)]
-        [InlineData(28f, 1f, 12)]
-        [InlineData(28f, 0.5f, 6)]
+        [InlineData(100f, 1f, 33)]
+        [InlineData(100f, 0.5f, 16)]
+        [InlineData(100f, 0.1f, 3)]
+        [InlineData(28f, 1f, 9)]
+        [InlineData(28f, 0.5f, 4)]
         [InlineData(28f, 0.1f, 1)]
-        [InlineData(560f, 1f, 246)]
-        [InlineData(560f, 0.5f, 123)]
-        [InlineData(560f, 0.1f, 24)]
+        [InlineData(560f, 1f, 184)]
+        [InlineData(560f, 0.5f, 92)]
+        [InlineData(560f, 0.1f, 18)]
         public void YieldIncludesWholeBodyBonusAndDecay(float material, float decay, int expected)
         {
             Assert.Equal(expected, BiomassCalculations.CorpseYield(material, decay));
@@ -102,8 +102,54 @@ namespace GeneFoundry.Tests
         public void MissingMaterialStillReceivesWholeBodyBonus()
         {
             // An initially 100-material body has lost 20 material in missing parts.
-            Assert.Equal(35, BiomassCalculations.CorpseYield(80f, 1f));
-            Assert.True(BiomassCalculations.CorpseYield(80f, 1f) > 80f * 0.4f);
+            Assert.Equal(26, BiomassCalculations.CorpseYield(80f, 1f));
+            Assert.Equal(33, BiomassCalculations.CorpseYield(80f, 1f, true));
+            Assert.True(BiomassCalculations.CorpseYield(80f, 1f) > 80f * 0.25f * 0.60f);
+        }
+
+        [Theory]
+        [InlineData(28f, 9, 11)]
+        [InlineData(140f, 46, 57)]
+        [InlineData(336f, 110, 138)]
+        [InlineData(560f, 184, 231)]
+        [InlineData(200f, 66, 82)]
+        public void DryMassTargetsAreFlooredBeforeOperatorWastage(float meat, int basic, int enzymatic)
+        {
+            Assert.Equal(basic, BiomassCalculations.CorpseYield(meat, 1f));
+            Assert.Equal(enzymatic, BiomassCalculations.CorpseYield(meat, 1f, true));
+            Assert.Equal(basic, BiomassCalculations.ExtractionOutput(basic, 10, 6, 4, 1));
+            Assert.Equal(enzymatic, BiomassCalculations.ExtractionOutput(enzymatic, 10, 6, 4, 1));
+        }
+
+        [Fact]
+        public void DryMassOutputStillReceivesExistingSkillAndEnvironmentWastage()
+        {
+            int baseline = BiomassCalculations.CorpseYield(140f, 1f);
+            Assert.Equal(41, BiomassCalculations.ExtractionOutput(baseline, 5, 6, 4, 0));
+            Assert.Equal(36, BiomassCalculations.ExtractionOutput(baseline, 5, 6, 4, 1));
+            Assert.Equal(41, BiomassCalculations.ExtractionOutput(baseline, 10, 6, 4, 0, .1f));
+        }
+
+        [Fact]
+        public void ExistingCorpseTimingMeetsElephantTargetWithoutFlatteningMaterialOrSkillScaling()
+        {
+            int elephantTicks = (Work(560f) + 1) / 2; // Existing job halves configured work.
+            Assert.InRange(elephantTicks, 1, 5000); // Two in-game hours.
+            Assert.True((Work(28f) + 1) / 2 < elephantTicks);
+            Assert.True((Work(140f) + 1) / 2 < elephantTicks);
+            Assert.True((Work(560f, speed: 2f) + 1) / 2 < elephantTicks);
+        }
+
+        [Fact]
+        public void GreenSkinDescriptionEstimatesUseUnchangedFabricationAndSequentialProduction()
+        {
+            Assert.Equal(10, Fabrication.FabricationCalculations.Biomass(new[] { 0 }));
+            double fabricationMinutes = Fabrication.FabricationCalculations.Work(1, 0) /
+                Fabrication.FabricationCalculations.Speed(10, 6, 4) * 60d / 2500d;
+            double sharedMinutes = 90d + 360d + fabricationMinutes;
+            Assert.Equal(580d, Math.Round(7 * 500d * 60d / 2500d + sharedMinutes));
+            Assert.Equal(527d, Math.Round(((Work(140f) + 1) / 2) * 60d / 2500d + sharedMinutes));
+            Assert.Equal(602d, Math.Round(((Work(560f) + 1) / 2) * 60d / 2500d + sharedMinutes));
         }
 
         [Theory]

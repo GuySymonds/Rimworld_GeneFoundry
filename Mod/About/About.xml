@@ -25,5 +25,16 @@ GeneFoundry adds a three-stage biotechnology chain: extract raw biomass from mea
 
 Features weighted operator skills, corpse stripping and artificial-part salvage, enzymatic extraction, rot-stink incidents, batch failure influenced by skill and room conditions, and a dedicated gene research tree generated from loaded gene categories. Raw extraction guarantees some recovery; failed refinery batches lose their ingredients.
 
+Example: one Green Skin cosmetic genepack
+After Xenogenetics and Gene fabrication research, use a powered Gene Vat, a Biomass Refinery with an adjacent hopper, and a Gene Fabricator. Green Skin needs 10 refined biomass, no gene sample and no archite capsules. One successful refinery batch supplies it: 45 raw biomass + 1 neutroamine = 10 refined biomass.
+
+At default settings, using BASIC extraction, fresh undamaged corpses, reference extraction skills and normal work speed:
+- Raw meat: 350 meat (seven 50-meat batches) yields 49 raw biomass; about 9 h 40 min to the first pack.
+- Raw vegetables/berries: 350 food (seven 50-food batches) yields 49 raw biomass; about 9 h 40 min to the first pack. Wood is excluded.
+- Human corpse (140 recoverable meat): one yields 46 raw biomass; about 8 h 47 min to the first pack.
+- Elephant corpse (560 recoverable meat): one yields 184 raw biomass; about 10 h 2 min to the first pack, with enough raw biomass left for three more refinery batches.
+
+These sequential estimates include extraction, 90-minute refinery preparation, 6-hour automated refining with no processors and about 46 minutes of fabrication at minimum qualified skills (Intellectual 10, Medicine 6, Crafting 4). Every processor removes 20 refining minutes; 12 reach the 2-hour minimum, cutting four hours from these estimates. Estimates assume successful batches without wastage and exclude hauling, implant recovery and interruptions; better skills can shorten work and reduce failure. Enzymatic extraction can reduce food requirements to 250 meat or plant food + 5 herbal medicine for the same 45 raw biomass.
+
 Requires RimWorld 1.6 and Biotech. No Harmony dependency. Other game versions and mod combinations are not declared supported.</description>
 </ModMetaData>

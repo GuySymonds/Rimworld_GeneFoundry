@@ -2,6 +2,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using GeneFoundry.Components;
 using GeneFoundry.Jobs;
 using GeneFoundry.Recipes;
@@ -17,6 +19,120 @@ namespace GeneFoundry.Tests
     {
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
         private static FieldInfo Field(string name) => typeof(CompBiomassRefiner).GetField(name, Private);
+
+        [Theory]
+        [InlineData(360, 120, 20)]
+        [InlineData(2160, 1080, 108)]
+        [InlineData(180, 90, 10)]
+        public void ProcessingSettingsRoundTripWithoutReplacingSavedValues(int minutes, int minimum, int reduction)
+        {
+            string path = Path.GetTempFileName();
+            bool profiling = DeepProfiler.enabled;
+            DeepProfiler.enabled = false;
+            try
+            {
+                var source = new GeneFoundrySettings { processingMinutes = minutes,
+                    minimumProcessingMinutes = minimum, processorReductionMinutes = reduction };
+                Scribe.saver.InitSaving(path, "settings");
+                source.ExposeData();
+                Scribe.saver.FinalizeSaving();
+                var loaded = new GeneFoundrySettings();
+                Scribe.loader.InitLoading(path);
+                loaded.ExposeData();
+                Scribe.loader.FinalizeLoading();
+                Assert.Equal(minutes, loaded.processingMinutes);
+                Assert.Equal(minimum, loaded.minimumProcessingMinutes);
+                Assert.Equal(reduction, loaded.processorReductionMinutes);
+            }
+            finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling; }
+        }
+
+        private static T Uninitialized<T>() => (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
+
+        [Theory]
+        [InlineData("<processorReductionPercent>10</processorReductionPercent>", 2160, 1080, 216f)]
+        [InlineData("<processingMinutes>180</processingMinutes><minimumProcessingMinutes>60</minimumProcessingMinutes>", 180, 60, 9f)]
+        [InlineData("<processingMinutes>360</processingMinutes><minimumProcessingMinutes>120</minimumProcessingMinutes><processorReductionPercent>5</processorReductionPercent>", 360, 120, 18f)]
+        public void LegacyPercentageSettingsKeepEquivalentDurations(string fields, int minutes, int minimum, float reduction)
+        {
+            string path = Path.GetTempFileName();
+            bool profiling = DeepProfiler.enabled;
+            DeepProfiler.enabled = false;
+            try
+            {
+                File.WriteAllText(path, "<settings>" + fields + "</settings>");
+                var loaded = new GeneFoundrySettings();
+                Scribe.loader.InitLoading(path);
+                loaded.ExposeData();
+                Scribe.loader.FinalizeLoading();
+                Assert.Equal(minutes, loaded.processingMinutes);
+                Assert.Equal(minimum, loaded.minimumProcessingMinutes);
+                Assert.Equal(reduction, loaded.processorReductionMinutes);
+                Scribe.saver.InitSaving(path, "settings");
+                loaded.ExposeData();
+                Scribe.saver.FinalizeSaving();
+                var reloaded = new GeneFoundrySettings();
+                Scribe.loader.InitLoading(path);
+                reloaded.ExposeData();
+                Scribe.loader.FinalizeLoading();
+                Assert.Equal(reduction, reloaded.processorReductionMinutes);
+                Assert.Equal(minutes, reloaded.processingMinutes);
+                Assert.Equal(minimum, reloaded.minimumProcessingMinutes);
+            }
+            finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling; }
+        }
+
+        private class BiomassStack : Thing
+        {
+            public override Thing SplitOff(int count)
+            {
+                stackCount -= count;
+                return new BiomassStack { def = def, stackCount = count };
+            }
+            public override void Destroy(DestroyMode mode = DestroyMode.Vanish) { }
+        }
+
+        [Theory]
+        [InlineData(44, false)]
+        [InlineData(45, true)]
+        [InlineData(50, true)]
+        public void RefineryRequiresAndConsumesExactlyFortyFiveFromHoppers(int available, bool sufficient)
+        {
+            Game previous = Current.Game;
+            try
+            {
+                var map = Uninitialized<Map>();
+                map.info = Uninitialized<MapInfo>();
+                typeof(MapInfo).GetField("sizeInt", Private).SetValue(map.info, new IntVec3(5, 1, 5));
+                map.cellIndices = new CellIndices(5, 5);
+                map.thingGrid = new ThingGrid(map);
+                var game = Uninitialized<Game>();
+                typeof(Game).GetField("maps", Private).SetValue(game, new List<Map> { map });
+                Current.Game = game;
+                var parent = Uninitialized<ThingWithComps>();
+                parent.def = Uninitialized<ThingDef>();
+                parent.def.size = new IntVec2(1, 1);
+                typeof(Thing).GetField("positionInt", Private).SetValue(parent, new IntVec3(2, 0, 2));
+                typeof(Thing).GetField("mapIndexOrState", Private).SetValue(parent, (sbyte)0);
+                var hopper = Uninitialized<Building_Storage>();
+                hopper.def = Uninitialized<ThingDef>();
+                hopper.def.defName = "GF_BiomassHopper";
+                var hopperCell = new IntVec3(2, 0, 1);
+                typeof(Thing).GetField("positionInt", Private).SetValue(hopper, hopperCell);
+                map.thingGrid.ThingsListAt(hopperCell).Add(hopper);
+                var biomass = Uninitialized<ThingDef>();
+                var stack = new BiomassStack { def = biomass, stackCount = available };
+                map.thingGrid.ThingsListAt(hopperCell).Add(stack);
+                var refinery = new CompBiomassRefiner { parent = parent };
+                refinery.Initialize(new CompProperties_BiomassRefiner { inputDef = biomass });
+                var consume = typeof(CompBiomassRefiner).GetMethod("TryConsumeInputs", Private);
+                Assert.Equal(sufficient, consume.Invoke(refinery, new object[] { false }));
+                Assert.Equal(available, stack.stackCount);
+                Assert.Equal(sufficient, consume.Invoke(refinery, new object[] { true }));
+                Assert.Equal(sufficient ? available - 45 : available, stack.stackCount);
+            }
+            finally { Current.Game = previous; }
+        }
 
         [Fact]
         public void EnvironmentSettingsPersistAndClampTheNewLightPenalty()
@@ -50,25 +166,30 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(0,90000f)] [InlineData(1,85500f)]
-        [InlineData(10,45000f)] [InlineData(20,45000f)]
-        public void ActualRefineryUsesIndependentProcessorTiming(int processors,float ticks)
+        [InlineData(0,360f)] [InlineData(1,340f)]
+        [InlineData(11,140f)] [InlineData(12,120f)]
+        [InlineData(10,160f)] [InlineData(20,120f)]
+        public void ActualRefineryUsesIndependentProcessorTiming(int processors,float minutes)
         {
             var settings = GeneFoundryMod.Settings;
-            int previous = settings.processingMinutes, minimum = settings.minimumProcessingMinutes,
-                reduction = settings.processorReductionPercent;
+            int previous = settings.processingMinutes, minimum = settings.minimumProcessingMinutes;
+            float reduction = settings.processorReductionMinutes;
             try
             {
-                settings.processingMinutes=2160; settings.minimumProcessingMinutes=1080;
-                settings.processorReductionPercent=5;
+                var defaults = new GeneFoundrySettings();
+                Assert.Equal(360, defaults.processingMinutes);
+                Assert.Equal(120, defaults.minimumProcessingMinutes);
+                Assert.Equal(20f, defaults.processorReductionMinutes);
+                settings.processingMinutes=defaults.processingMinutes; settings.minimumProcessingMinutes=defaults.minimumProcessingMinutes;
+                settings.processorReductionMinutes=defaults.processorReductionMinutes;
                 var comp=new CompBiomassRefiner();
-                Assert.Equal(ticks,(float)typeof(CompBiomassRefiner).GetMethod("ProcessingDurationTicks",Private)
+                Assert.Equal(minutes*2500f/60f,(float)typeof(CompBiomassRefiner).GetMethod("ProcessingDurationTicks",Private)
                     .Invoke(comp,new object[]{processors}));
             }
             finally
             {
                 settings.processingMinutes=previous; settings.minimumProcessingMinutes=minimum;
-                settings.processorReductionPercent=reduction;
+                settings.processorReductionMinutes=reduction;
             }
         }
 

@@ -80,8 +80,8 @@ namespace GeneFoundry.Research
                     // Draw the foundation link for every category; retain the additional archite gate.
                     prerequisites = new List<ResearchProjectDef> { fabrication },
                     hiddenPrerequisites = prerequisites.Where(project => project != fabrication).ToList(),
-                    researchViewX = 1.25f + 1.1f * (index / 6),
-                    researchViewY = .75f * (index % 6),
+                    researchViewX = 1.25f + 1.1f * (index / 8),
+                    researchViewY = .75f * (index % 8),
                     modContentPack = fabrication.modContentPack,
                     genes = members,
                     automaticallyResearched = automatic
