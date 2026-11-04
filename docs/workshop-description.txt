@@ -1,0 +1,31 @@
+[h1]GeneFoundry[/h1]
+Turn organic matter into genetic possibilities. GeneFoundry adds an industrial production chain for manufacturing your own genepacks, with meaningful research, material and operator requirements.
+
+[h2]Extract. Refine. Fabricate.[/h2]
+[list]
+[*][b]Gene Vat[/b] - Process raw meat, raw plant food or organic corpses into raw biomass. Herbal enzymes improve recovery. Whole bodies offer a material advantage, and corpse processing strips equipment and attempts artificial-part salvage first. Operator skill controls wastage and extraction speed. Every completed extraction recovers at least one biomass, but inexperienced operators can trigger rot-stink incidents with any input.
+[*][b]Biomass Refinery[/b] - Feed raw biomass through correctly oriented adjacent hoppers. An operator supplies neutroamine and prepares the batch, then leaves the automated cycle running. Each successful batch converts 40 raw biomass and 1 neutroamine into exactly 10 refined biomass. Skill and room conditions affect failure; failed batches lose their ingredients. Gene processors shorten the automated cycle. Extended power loss spoils an incomplete reaction. Preparation stops when power or bill eligibility is lost. Successful completed output waiting for space remains safe through outages and save/load, and can be placed without power.
+[*][b]Gene Fabricator[/b] - Queue selected single- or multi-gene genepacks using refined biomass and, where required, archite capsules. Qualified operators manufacture a real unfinished pack that retains its materials, progress and original operator across interruptions. Successful packs work with the vanilla gene-storage and xenogerm systems. Gene samples are not required.
+[/list]
+
+Raw biomass spoils after six days at normal temperature. Refrigeration slows spoilage; freezing stops it. Sealed biomass hoppers pause spoilage without power and retain existing spoilage when emptied. Refined biomass is shelf-stable, but remains damageable.
+
+[h2]Research and balance[/h2]
+A dedicated GeneFoundry research tab starts after Xenogenetics. Fabrication research is generated from loaded gene categories; archite genes retain the Archogenetics gate. Cosmetic genes are available through the fabrication foundation without separate category research. Loaded genes are subject to the mod's manufacturing and research checks; universal compatibility with other mods is not claimed.
+
+Refinery preparation takes 90 minutes at weighted skill 5 and 30 minutes at 20, with linear progression. Operator failure falls from 30% at 5 to 5% at 10, then 0% at 20. Dirt or outdoor/unroofed exposure adds risk, with dim light adding a further penalty. Automated processing defaults to 36 hours, reduced by available processors to an 18-hour minimum. Useful extraction, timing, processor and cleanliness settings are available in Mod Settings.
+
+[h2]Requirements[/h2]
+[list]
+[*]RimWorld 1.6
+[*]Biotech DLC
+[*]Load after Core and Biotech. No Harmony requirement.
+[/list]
+Other game versions are not declared supported. GeneFoundry is the public name of the mod; the established internal package ID remains GBF.GeneticBiomassFabrication.
+
+[h2]Source and bug reports[/h2]
+[url=https://github.com/GuySymonds/Rimworld_GeneFoundry]GitHub repository and full documentation[/url]
+[url=https://github.com/GuySymonds/Rimworld_GeneFoundry/issues]Report a bug[/url]
+Please include your RimWorld version, GeneFoundry version, active mod list, relevant Player.log errors, and steps to reproduce. Remove personal information before sharing logs or saves.
+
+Created by Guy Symonds. Source and artwork distributed under the repository's MIT license.

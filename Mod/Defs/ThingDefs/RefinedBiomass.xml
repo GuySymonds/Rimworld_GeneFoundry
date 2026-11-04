@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ThingDef ParentName="ResourceBase">
+
+    <defName>GF_RefinedBiomass</defName>
+    <label>refined biomass</label>
+
+    <description>Highly purified, shelf-stable biological material produced in a biomass refinery. Does not rot or deteriorate from outdoor exposure, but can still be damaged or destroyed. Each successful batch converts 40 raw biomass and 1 neutroamine into 10 refined biomass. Used by the Gene Fabricator to manufacture genepacks.</description>
+
+    <graphicData>
+      <texPath>GeneFoundry/RefinedBiomass</texPath>
+      <graphicClass>Graphic_StackCount</graphicClass>
+    </graphicData>
+
+    <stackLimit>25</stackLimit>
+    <useHitPoints>true</useHitPoints>
+
+    <statBases>
+      <MarketValue>6</MarketValue>
+      <Mass>0.1</Mass>
+      <MaxHitPoints>100</MaxHitPoints>
+      <Flammability>0.4</Flammability>
+      <DeteriorationRate>0</DeteriorationRate>
+    </statBases>
+
+    <thingCategories>
+      <li>Manufactured</li>
+    </thingCategories>
+
+  </ThingDef>
+</Defs>

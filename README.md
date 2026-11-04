@@ -1,7 +1,43 @@
-# Rimworld_GeneFoundry
+# GeneFoundry v1.0.0
+
+[![Portable checks](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml/badge.svg?branch=main&event=push)](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml)
+[![RimWorld 1.6](https://img.shields.io/badge/RimWorld-1.6-blue)](Mod/About/About.xml)
+[![Requires Biotech](https://img.shields.io/badge/DLC-Biotech_required-blue)](Mod/About/About.xml)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+The workflow badge covers portable tests and script syntax only. Game API, production build, package and in-game checks are separate; see [pipeline scope](docs/Pipelines.md) and the [review and outstanding tasks](docs/Review.md).
 GeneFoundry — A RimWorld biotechnology mod that transforms organic matter into genetic resources for refining and fabricating custom genes.
 
 For RimWorld 1.6 with Biotech. The Gene Vat, Biomass Refinery and manual Gene Fabricator are implemented.
+
+## Installation, building and releases
+
+Requires **RimWorld 1.6 and Biotech**. Enable Core, Biotech, then GeneFoundry in the mod list. The public name is GeneFoundry; the established internal package ID remains `GBF.GeneticBiomassFabrication`.
+
+Build a complete, validated local upload package with one command (Windows PowerShell 5.1 or PowerShell 7 on Windows):
+
+```powershell
+pwsh -NoProfile -File scripts/Release.ps1
+```
+
+Pass `-RimWorldManagedDir 'C:\Path To\RimWorld\RimWorldWin64_Data\Managed'` for another installation, or set the same-named environment variable. The existing local S: drive installation remains the default. Builds use .NET Framework 4.7.2 reference assemblies; tests use the .NET 10 SDK.
+
+The output is **`dist/GeneFoundry`**, ready to copy into the game's local `Mods` directory. Packaging never installs or uploads the mod. Only its fixed staging directory is cleaned, and an existing Workshop publication ID is preserved. Detailed build, verification, publishing, updating and version-bumping instructions are in [docs/RELEASE.md](docs/RELEASE.md). The [Workshop description](docs/workshop-description.txt) uses Steam BBCode; [CHANGELOG.md](CHANGELOG.md) contains the initial release notes.
+
+```text
+Mod/                   Checked-in Workshop runtime content
+  About/               Metadata, preview and icon
+  Defs/                Production XML definitions
+  Languages/           Translations
+  Textures/            Runtime sprites and animation frames
+  LICENSE
+Source/                C# projects, tests and source artwork
+  Textures/            Source artwork; never included in a release
+scripts/               Deployment, artwork and release tooling
+dist/GeneFoundry/       Generated upload package, including Assemblies/GeneFoundry.dll
+```
+
+For a production build without installation side effects: `dotnet build Source/GeneFoundry/GeneFoundry/GeneFoundry.csproj -c Release -p:DeployMod=false`. `Source/Textures/` is your working artwork directory. Export final PNGs manually into `Mod/Textures/`; builds never modify them. Normal local builds run deployment after the build, even when compilation is already up to date; `scripts/Deploy-Mod.ps1` reads assets from `Mod/`. Do not enable both an old development copy and the packaged mod simultaneously.
 
 ## Building costs and power
 
@@ -17,6 +53,12 @@ The Fabricator is the late-game construction investment; its genepack ingredient
 An unassisted 36-hour refinery cycle uses 36 kWh and produces 10 refined biomass on success. This excludes idle draw, processor power and failed batches. At the default 18-hour minimum, the refinery itself uses 18 kWh; assisting processors draw their own power. Power-loss pausing and spoilage after two continuous hours are unchanged.
 
 ## Raw biomass extraction
+
+### Storage and degradation
+
+Raw biomass spoils after six days at normal temperature using vanilla rot rules. Refrigeration slows rot and freezing stops it. A biomass hopper provides sealed, refrigerated storage: spoilage pauses while biomass occupies its cell, without power or room cooling. This works even when disconnected from a refinery. Removing biomass resumes its existing rot progress; the hopper never makes old biomass fresh. Hoppers also protect stored contents from environmental deterioration. Outside protected storage, raw biomass retains its exposure deterioration rate of 1 and 75 hit points.
+
+Refined biomass does not rot and has zero environmental deterioration. It can still suffer damage, fire or destruction. Ingredients in an incomplete refinery reaction follow the separate two-hour continuous-power-outage spoilage rule, rather than the loose biomass rot timer. Successful completed batches awaiting output space do not spoil. Existing raw stacks begin using the new rot component when loaded; no historical spoilage can be reconstructed.
 
 The Gene Vat supports these material extraction bills:
 
@@ -129,11 +171,15 @@ Hoppers must touch a side of the refinery and face it. Multiple hoppers combine 
 | Weighted skill | Preparation | Operator failure |
 |---|---:|---:|
 | 5 | 90 minutes | 30% |
-| 10 | 70 minutes | 20% |
-| 15 | 50 minutes | 10% |
+| 10 | 70 minutes | 5% |
+| 15 | 50 minutes | 2.5% |
 | 20 | 30 minutes | 0% |
 
-Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is `0.30 * (20 - skill) / 15`. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **36 hours**, **5% reduction per available gene processor**, **18-hour minimum** by default. Existing processor allocation gives active gene assemblers priority. Power loss pauses work and spoils the batch after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
+Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is piecewise linear: `0.30 - 0.05 * (skill - 5)` from skill 5 to 10, then `0.05 * (20 - skill) / 10` from 10 to 20. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **36 hours**, **5% reduction per available gene processor**, **18-hour minimum** by default. Existing processor allocation gives active gene assemblers priority. Power loss pauses work and spoils the batch after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
+
+Preparation interrupts when the workstation becomes unusable (including power loss), the bill is suspended/deleted or no longer eligible, or the worker is drafted. No further preparation XP is awarded and no batch ingredients are consumed on interruption. Current-job save/load retains preparation duration and remaining work; it rechecks usability and bill state when toils resume. A cancelled job starts a fresh preparation when scheduled again.
+
+A successful completed batch awaiting output space is shelf-stable, remains saved and blocks new batches until its output is placed. It retries placement even without electricity, uses the refinery's 100 W idle load when powered, and needs no processor assistance. Inspection shows **Output waiting for space**. Outages cannot spoil completed output or cause another failure roll; exactly 10 refined biomass is placed once space becomes available.
 
 ### Research progression
 
@@ -181,11 +227,13 @@ Open **Options -> Mod Settings -> GeneFoundry** for automated processing duratio
 
 ### Refinement cleanliness
 
-Environmental failure is additive at every operator level. Indoors, `clamp(-cleanliness / 2, 0, 1) * 0.15` gives no penalty at 0 or above, +7.5 percentage points at -1 and +15 at -2 or worse. Sterile rooms give no bonus. Outdoor, map-edge or unroofed rooms instead add a fixed 10 points; penalties do not stack. `totalFailure = clamp(operatorFailure + environmentFailure, 0, 1)` is captured at batch start. A level-20 operator therefore still has 7.5% risk at cleanliness -1, 15% at -2, or 10% outdoors. Dirty/exposure penalty controls and the environment enable checkbox remain. Changes affect new batches only.
+Environmental failure is additive at every operator level. Indoors, `clamp(-cleanliness / 2, 0, 1) * 0.15` gives no penalty at 0 or above, +7.5 percentage points at -1 and +15 at -2 or worse. Sterile rooms give no bonus. Outdoor, map-edge or unroofed rooms instead add a fixed 10 points, replacing dirt. Dim light adds up to 10 further points at darkness, tapering to zero at 30% light at the operator interaction cell. `totalFailure = clamp(operatorFailure + environmentFailure, 0, 1)` is captured at batch start. A level-20 operator therefore still has 7.5% risk at cleanliness -1, 15% at -2, or 10% outdoors. The shared processing-environment controls adjust dirt, exposure and darkness penalties. The cleanliness checkbox affects dirt only; exposure and light remain independent. Changes affect new refinery batches only.
 
 Manual verification: compare all input types, qualification levels, clean/dirty/outdoor rooms, hopper orientation, interrupted preparation, power spoilage, processor assistance, save/load during work and blocked-output retries. No in-game validation is claimed by the unit suite.
 
-The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and starts a zero-risk batch.
+Managed refinery lifecycle regressions exercise real job failure/learning callbacks and Scribe round-trips: preparation duration/remaining ticks survive loading, then power loss, bill suspension/deletion, drafting and workstation despawn stop eligibility and XP without starting a batch. Completed-output checks cover the first success transition, long outages, save/load, no reroll, idle power/no assistance and exactly-once placement. Incomplete reactions still spoil at precisely 5,000 outage ticks. Headless fixtures replace output placement and player notifications; live-colony scheduling and Unity rendering remain manual checks.
+
+The XML processing duration of 2,500 ticks is retained solely to migrate saves made before settings existed. Runtime processing uses Mod Settings. The developer start-refinement command bypasses operator preparation and operator/dirt risk; exposure and dim-light penalties still apply.
 
 ### Final in-game regression checks
 
@@ -193,7 +241,7 @@ Use a disposable save and short processing settings:
 
 1. Run two refineries near shared processors; confirm no processor assists both and excess capacity can assist the second refinery.
 2. Start, interrupt and cancel an assembler job. Verify it retains priority during operator breaks and releases processors when its job ends.
-3. Save/reload during preparation, assisted processing and a power outage. Check progress, learning, risk and outage time continue correctly.
+3. Save/reload during preparation, assisted processing and a power outage. Check progress, learning, risk and outage time continue correctly. Cut power, suspend/delete a bill or draft its worker during preparation: preparation and XP must stop without charging ingredients. Block completed output, save/reload and cut power for more than two hours; clear space while still unpowered and confirm exactly 10 refined biomass appears once. Confirm an incomplete reaction still spoils after two hours without power.
 4. Check Do X times and Do until X after both successful and failed batches.
 5. Load an existing colony with a refinery built before processor support, and confirm nearby processors can assist it.
 
@@ -220,9 +268,9 @@ Manufacturing defaults are centralized in `FabricationCalculations.cs`, separate
 
 For example, one complexity-2 gene costs 20 biomass and 4,500 work. Three genes with summed positive complexity 5 cost 44 biomass (20% off 55) and 12,500 work. Two genes with summed positive complexity 1 cost 23 biomass, rounding 22.5 upward. The discount applies only to Refined Biomass; work and Archite Capsules are unchanged. Negative modded complexity or archite values cannot discount another gene. These are initial balancing defaults, not new settings. Estimated game hours use 2,500 ticks/hour and minimum-qualified skills with normal capacities and general work speed. Hauling and interruptions add time.
 
-Operator failure probability is `30% × (0.60 × clamp((16 − Intellectual)/6, 0, 1) + 0.25 × clamp((12 − Medicine)/6, 0, 1) + 0.15 × clamp((10 − Crafting)/6, 0, 1))`. Minimum-qualified operators have 30% risk; 16/12/10 or better gives zero risk. The unfinished item saves actual work and the sum of `work × operator risk`; final risk is that sum divided by work done, clamped to 0–30%. Final-tick work is capped to the remaining amount, so overshoot cannot inflate an operator's contribution. There is no cleanliness penalty and no XP during hauling, travel or waiting. Vanilla passion and learning modifiers apply to each skill's XP.
+Operator failure probability is `30% × (0.60 × clamp((16 − Intellectual)/6, 0, 1) + 0.25 × clamp((12 − Medicine)/6, 0, 1) + 0.15 × clamp((10 − Crafting)/6, 0, 1))`. Minimum-qualified operators have 30% risk; 16/12/10 or better gives zero operator risk before environmental penalties. The unfinished item saves actual work and the sum of `work × (operator risk + environment penalty)`; final risk is that sum divided by work done, clamped to 0–100%. Final-tick work is capped to the remaining amount, so overshoot cannot inflate an operator's contribution. Fabrication uses the same dirt and exposure penalties as refinement, plus dim light. Conditions are evaluated during active work, so cleaning or improving lighting affects remaining work without rewriting saved risk. There is no XP during hauling, travel or waiting. Vanilla passion and learning modifiers apply to each skill's XP.
 
-Drafting, incapacity, higher-priority jobs, leaving the map and power loss stop active work while the machine retains its paid unfinished item. The pawn who begins actual manufacturing owns the unfinished pack; hauling alone does not claim it. Only that same pawn can resume it, but their paused work no longer locks the machine. The unfinished pack is a real spawned, selectable item, labelled with its intended genes and assigned pawn. Its bill also displays the assigned pawn. Another qualified pawn can reserve the idle workstation, physically set the pack aside, and start the next eligible bill. The owner later retrieves their original pack with its progress and payment intact. Right-click the bench with a qualified pawn enabled for Research and choose the standard Prioritize fabrication option. It starts eligible work immediately and sustains the native priority through bill preparation, hauling and fabrication. There are no per-bill colonist assignments or Assign/Unassign controls. Any qualified pawn can start an unstarted bill; a started pack remains locked to its creator. Existing saved per-bill assignments are ignored. If the owner dies or leaves permanently, cancel the job (or delete its active bill) and start a new entry. Discarding or destroying an unfinished pack keeps its bill and selected genes, clears its ownership and progress, and allows a fresh paid attempt. Explicitly deleting the bill still removes the entry. Existing unowned work from older saves is claimed by the first pawn who resumes it, without resetting progress. The owner reference and a separate ownership flag are saved, so an unavailable reference does not silently unlock the pack. Active work is placed on the workstation as an ordinary selectable, haulable item, drawn 0.06 of a tile left and 0.12 of a tile farther up the bench without changing its physical cell. Adjust `WorkSurfaceOffsetX` and `WorkSurfaceOffsetZ` near the top of `Source/GeneFoundry/GeneFoundry/Fabrication/FabricationState.cs`: negative X moves left, positive X right; positive Z moves up, negative Z down. These are map-tile units, so their apparent pixel distance varies with zoom. Rebuild and deploy the mod, then restart RimWorld after changing them. Native right-click availability and sustained priority are configured by `directOrderable` and `prioritizeSustains` in `Defs/WorkGiverDefs/GeneFabrication.xml`. Parked work may be hauled into storage and is retrieved through vanilla carrying and reservations. Selected genes, delivered materials, work, weighted risk, bill association and the completion result are serialized. A saved generation marker prevents cancelled jobs from acting on replacement orders. A developer-spawned unfinished item has no paid state and cannot produce a free pack.
+Drafting, incapacity, higher-priority jobs, leaving the map and power loss stop active work while the machine retains its paid unfinished item. The pawn who begins actual manufacturing owns the unfinished pack; hauling alone does not claim it. Only that same pawn can resume it, but their paused work no longer locks the machine. The unfinished pack is a real spawned, selectable item, labelled with its intended genes and assigned pawn. Its bill also displays the assigned pawn. Another qualified pawn can reserve the idle workstation, physically set the pack aside, and start the next eligible bill. The owner later retrieves their original pack with its progress and payment intact. Right-click the bench with a qualified pawn enabled for Research and choose the standard Prioritize fabrication option. It starts eligible work immediately and sustains the native priority through bill preparation, hauling and fabrication. There are no per-bill colonist assignments or Assign/Unassign controls. Any qualified pawn can start an unstarted bill; a started pack remains locked to its creator. Existing saved per-bill assignments are ignored. If the owner dies or leaves permanently, cancel the job (or delete its active bill) and start a new entry. Discarding or destroying an unfinished pack keeps its bill and selected genes, clears its ownership and progress, and allows a fresh paid attempt. Explicitly deleting the bill still removes the entry. Existing unowned work from older saves is claimed by the first pawn who resumes it, without resetting progress. The owner reference and a separate ownership flag are saved, so an unavailable reference does not silently unlock the pack. Active work is placed on the workstation as an ordinary selectable, haulable item, drawn 0.06 of a tile left and 0.12 of a tile farther up the bench without changing its physical cell. Adjust `WorkSurfaceOffsetX` and `WorkSurfaceOffsetZ` near the top of `Source/GeneFoundry/GeneFoundry/Fabrication/FabricationState.cs`: negative X moves left, positive X right; positive Z moves up, negative Z down. These are map-tile units, so their apparent pixel distance varies with zoom. Rebuild and deploy the mod, then restart RimWorld after changing them. Native right-click availability and sustained priority are configured by `directOrderable` and `prioritizeSustains` in `Mod/Defs/WorkGiverDefs/GeneFabrication.xml`. Parked work may be hauled into storage and is retrieved through vanilla carrying and reservations. Selected genes, delivered materials, work, weighted risk, bill association and the completion result are serialized. A saved generation marker prevents cancelled jobs from acting on replacement orders. A developer-spawned unfinished item has no paid state and cannot produce a free pack.
 
 Completion rolls failure once. Failure loses the paid materials and unfinished item, sends a notification and clears the order. Success calls vanilla `Genepack.Initialize` with exactly the selected genes on a vanilla genepack. The output stays in the machine's saved ThingOwner if placement is blocked, with periodic placement retries and no second completion or roll. It uses vanilla hauling, Gene Bank and Xenogerm Assembler data. Vanilla extraction and assembly are unchanged.
 
@@ -240,7 +288,7 @@ Runtime acceptance still requires RimWorld. Use a disposable colony to check:
 6. Complete with minimum-skilled and expert workers; check failure notifications and exact selected gene contents on success. Haul the result into a Gene Bank and use it in the vanilla Xenogerm Assembler. Obstruct output placement and save/reload before clearing space; confirm exactly one output appears.
 7. Load an older colony with a built Fabricator; check idle and already-running Fabricators migrate correctly, get an empty Bills tab when no bills were saved, and existing vats, refineries and research still work. Developer-spawn an unfinished item and inspect/haul it without errors or free production.
 
-No in-game runtime verification is claimed by the automated suite. Build with `/p:PostBuildEvent=` to skip the repository's deployment script when verification should not modify the installed mod.
+No in-game runtime verification is claimed by the automated suite. Build with `-p:DeployMod=false` to skip the repository's deployment target when verification should not modify the installed mod.
 
 ### Corpse liquidation visuals
 
@@ -248,7 +296,7 @@ During actual corpse extraction, the corpse visually advances through fresh, rot
 
 Presentation measures the native render meshes with their laying orientation, node and life-stage offsets. Small corpses keep their natural scale; oversized corpses shrink proportionally using twice the basin width and height as their mesh fit allowance; the natural-size cap remains. This relaxed allowance compensates for sprite padding and can let large silhouettes extend beyond the basin. The pose and one fit scale are cached for the work session across all three rot appearances. Each appearance is centred on the same basin centre. Mesh bounds are conservative and include transparent texture padding; no biological body-size guesses or GPU texture readbacks are used. The corpse's map position is unchanged.
 
-Eight unchanged BubbleMass textures from `Source/Textures/BubbleMass` are copied to `Textures/GeneFoundry/Effects/BubbleMass` for the existing deployment mechanism. The overlay uses alpha blending, preserves the 500:203 aspect ratio and sits against the lower interior edge of the basin. It loops forward 00 through 07 at 6 game ticks per frame (48 ticks per cycle), above the corpse and below ordinary item/pawn layers. Each work session has its own tick origin. Pausing freezes playback. Hauling, stripping and part recovery do not show the overlay. Active meat and crop extraction also show the bubbles, using the same cached resources. Interruptions and power loss remove it; normal corpse drawing returns. Save/load rebuilds this transient presentation from the active job.
+Eight final BubbleMass textures live in `Mod/Textures/GeneFoundry/Effects/BubbleMass` and are copied unchanged during deployment. The overlay uses alpha blending, preserves the 500:203 aspect ratio and sits 0.06 tiles inside the basin edge nearest the operator in every orientation. It loops forward 00 through 07 at 6 game ticks per frame (48 ticks per cycle), above the corpse and below ordinary item/pawn layers. Each work session has its own tick origin. Pausing freezes playback. Hauling, stripping and part recovery do not show the overlay. Active meat and crop extraction also show the bubbles, using the same cached resources. Interruptions and power loss remove it; normal corpse drawing returns. Save/load rebuilds this transient presentation from the active job.
 
 The native Gene Vat graphic uses `BuildingOnTop`, above vanilla walls' `Building` layer, for both idle and animated materials. Its footprint, draw size, interaction cell and directional images are unchanged. The vial animation keeps its existing sequence and timing.
 
@@ -262,8 +310,10 @@ Each vat persists its own incident deadline and emission schedule. An incident l
 
 ### Gene Vat machine animation
 
-The north-facing vat uses the original idle sprite until a pawn reaches actual biomass extraction. Meat, plant and corpse extraction use eight unchanged runtime frames, held for 6 game ticks each, in the sequence 00–07–01 (14 displayed frames, 84 ticks). Pausing freezes the frame; game speed controls playback. Each vat starts its own visual cycle. Hauling and artificial-part recovery remain static. The native Multi graphic supplies geometry, offsets and other directions; realtime drawing adds only the transparent transition layer above the original north image. Explicit material queues order transitions, corpse/ingredients and foreground BubbleMass in that order. Missing animation assets log once and fall back to the static sprite. No animation state is saved.
+The rotatable vat selects directional idle artwork through its custom Graphic_Multi subclass until a pawn reaches actual biomass extraction. Meat, plant and corpse extraction use eight aligned runtime frames per direction, held for 6 game ticks each, in the sequence 00–07–01 (14 displayed frames, 84 ticks). Pausing freezes the frame; game speed controls playback. Each vat starts its own visual cycle. Hauling and artificial-part recovery remain static. The base selects its directional sprite without rotating that artwork; the transition layer selects the matching directional frame and draws it on the same mesh without an extra rotation. Its bubbles remain behind the animal, with the separate foreground BubbleMass layer near the operator. Basin contents and foreground bubbles use measured bounds for each view and follow its processing orientation. Explicit material queues order transitions, corpse/ingredients and foreground BubbleMass in that order. Missing animation assets log once and fall back to the static sprite. No animation state is saved.
 
-In-game checks still required: exercise all six extraction bills, check idle/hauling/part recovery, draft or interrupt the worker, cut power, finish a bill, and save/reload during work. Check two vats with different start times. Confirm alpha edges, alignment, dimensions, corpse placement/liquidation and selection/placement previews remain correct. Automated tests verify timing, sequence, definition wiring and byte-identical runtime assets; they do not verify Unity rendering.
+In-game checks still required: exercise all six extraction bills, check idle/hauling/part recovery, draft or interrupt the worker, cut power, finish a bill, and save/reload during work. Check two vats with different start times. Confirm alpha edges, alignment, dimensions, corpse placement/liquidation and selection/placement previews remain correct. Automated tests verify timing, sequence, definition wiring and runtime PNG dimensions, transparency formats and frame counts; they do not verify Unity rendering.
 
-Material extraction draws delivered meat/crop stacks inside the lower basin beneath the bubbles, shifted 0.25 cells towards the top so more of the ingredients remain visible. Their ordinary map graphics return on interruption; map positions and tracked quantities are unchanged. Biomass extraction work is halved for meat, crops and corpses; artificial-part recovery and animation cadence are unchanged.
+Material extraction draws delivered meat/crop stacks inside the lower basin beneath the bubbles, shifted 0.25 cells towards the top so more of the ingredients remain visible. Herbal medicine is hidden during both material and corpse processing, without changing its consumption or position. Ingredient graphics return on interruption; map positions and tracked quantities are unchanged. Biomass extraction work is halved for meat, crops and corpses; artificial-part recovery and animation cadence are unchanged.
+
+Final Gene Vat artwork belongs in `Mod/Textures/GeneFoundry/Buildings/`: provide `GeneVat_north.png`, `GeneVat_east.png`, `GeneVat_south.png`, and `GeneVat_west.png`. Keep the XML graphic class as `GeneFoundry.Recipes.Graphic_GeneVat` to retain animation; it inherits `Graphic_Multi`. Export eight frames per direction into `GeneVatFrames/`, named `vat_00_north.png` through `vat_07_north.png`, and likewise `_east`, `_south`, and `_west`. Each frame must use the exact canvas dimensions and alignment of its directional base (currently 1086x1448 north/south and 1448x1086 east/west). Directional frames are not rotated again. A missing or incomplete set leaves that direction static and logs an error; release validation requires all 32 frames. Basin bounds for job contents and foreground bubbles are measured per view in `MapComponent_CorpseLiquidationVisuals.BasinBounds`. Keep working files in `Source/Textures/`; nothing copies from that directory automatically.

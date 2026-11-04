@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GeneFoundry.Research;
+using GeneFoundry.Recipes;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -9,6 +10,20 @@ using Verse.AI;
 
 namespace GeneFoundry.Fabrication
 {
+    public class Graphic_UnfinishedGenePack : Graphic_Single
+    {
+        public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+        {
+            if (thing is UnfinishedGenePack item && item.Spawned && item.fabricator != null &&
+                item.fabricator.AtWorkSurface(item) && item.fabricator.Rotation.IsHorizontal)
+                extraRotation += 90f;
+            base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+        }
+
+        public override Graphic GetColoredVersion(Shader shader, Color color, Color colorTwo)
+            => GraphicDatabase.Get<Graphic_UnfinishedGenePack>(path, shader, drawSize, color, colorTwo, data);
+    }
+
     // Vanilla UnfinishedThing requires a fixed recipe and Bill_ProductionWithUft. This
     // selected-gene item lives in its workstation's ThingOwner with its paid job state.
     public class UnfinishedGenePack : ThingWithComps
@@ -45,8 +60,48 @@ namespace GeneFoundry.Fabrication
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            if (!cancellationHandled) fabricator?.NotifyUnfinishedDestroyed(this);
+            if (!cancellationHandled)
+            {
+                fabricator?.NotifyUnfinishedDestroyed(this);
+                bill?.ReleaseUnfinished(this);
+            }
             base.Destroy(mode);
+        }
+        internal int DiscardBiomass => paidBiomass >= 0 ? paidBiomass : committed && genes != null &&
+            genes.Count > 0 && genes.All(g => g != null)
+                ? FabricationCalculations.Biomass(genes.Count, Building_GeneFabricator.Complexity(genes)) : 0;
+        internal int DiscardCapsules => paidCapsules >= 0 ? paidCapsules : committed && genes != null &&
+            genes.All(g => g != null) ? Building_GeneFabricator.Archites(genes) : 0;
+        internal bool CanRecoverOnDiscard => !cancellationHandled && (DiscardBiomass > 0 || DiscardCapsules > 0);
+        public void Discard()
+        {
+            if (Destroyed || cancellationHandled) return;
+            if (fabricator != null && !fabricator.Destroyed)
+            {
+                fabricator.CancelItem(this);
+                return;
+            }
+            int biomass = FabricationCalculations.CancellationRecovery(DiscardBiomass);
+            int capsules = FabricationCalculations.CancellationRecovery(DiscardCapsules);
+            if ((biomass > 0 || capsules > 0) && MapHeld == null) return;
+            cancellationHandled = true;
+            if (biomass > 0) RecoverDiscardMaterial(Building_GeneFabricator.BiomassDef, biomass);
+            if (capsules > 0) RecoverDiscardMaterial(Building_GeneFabricator.CapsuleDef, capsules);
+            fabricator?.NotifyUnfinishedDestroyed(this);
+            bill?.ReleaseUnfinished(this);
+            Destroy();
+        }
+        private void RecoverDiscardMaterial(ThingDef materialDef, int count)
+        {
+            while (count > 0)
+            {
+                int amount = Math.Min(count, Math.Max(1, materialDef.stackLimit));
+                Thing material = ThingMaker.MakeThing(materialDef);
+                material.stackCount = amount;
+                if (!GenPlace.TryPlaceThing(material, PositionHeld, MapHeld, ThingPlaceMode.Near, out Thing placed))
+                    GenSpawn.Spawn(material, PositionHeld, MapHeld);
+                count -= amount;
+            }
         }
         public bool TryClaim(Pawn pawn)
         {
@@ -56,14 +111,14 @@ namespace GeneFoundry.Fabrication
         public bool Valid => committed && !cancellationHandled && genes != null && genes.Count > 0 &&
             genes.All(g => g != null) && genes.Distinct().Count() == genes.Count &&
             totalWork > 0 && !float.IsInfinity(totalWork) && workDone >= 0 && workDone <= totalWork &&
-            riskWork >= 0 && !float.IsInfinity(riskWork) && riskWork <= workDone * .30001f;
+            riskWork >= 0 && !float.IsInfinity(riskWork) && riskWork <= workDone * 1.00001f;
         public float Failure => FabricationCalculations.WeightedFailure(riskWork, workDone);
         public float AddWork(float amount, float risk)
         {
             if (!Valid || float.IsNaN(amount) || float.IsInfinity(amount) || float.IsNaN(risk) || amount <= 0) return 0;
             float actual = Math.Min(amount, totalWork - workDone);
             workDone += actual;
-            riskWork += actual * Mathf.Clamp(risk, 0, .30f);
+            riskWork += actual * Mathf.Clamp(risk, 0, 1f);
             return actual;
         }
         public override void ExposeData()
@@ -94,9 +149,11 @@ namespace GeneFoundry.Fabrication
         public override IEnumerable<Gizmo> GetGizmos()
         {
             foreach (var gizmo in base.GetGizmos()) yield return gizmo;
-            if (Valid && fabricator != null && !fabricator.Destroyed)
-                yield return new Command_Action { defaultLabel = "Discard unfinished genepack", defaultDesc = "Keep its bill and recover 75% of committed ingredients, rounded down.",
-                    icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = () => fabricator.CancelItem(this) };
+            yield return new Command_Action { defaultLabel = "Discard unfinished genepack",
+                defaultDesc = CanRecoverOnDiscard
+                    ? "Keep its bill and recover 75% of committed ingredients, rounded down."
+                    : "Destroy this unfinished genepack and release its bill. No paid materials are recorded for recovery.",
+                icon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel"), action = Discard };
         }
     }
 
@@ -214,7 +271,9 @@ namespace GeneFoundry.Fabrication
         {
             if (!CanWork || !FabricationSkills.Qualified(pawn) || !TryCommit(pawn)) return;
             var item = Unfinished;
-            float actual = item.AddWork(FabricationSkills.Speed(pawn) * ticks, FabricationSkills.Failure(pawn));
+            float risk = BiomassCalculations.CombinedRefinementFailure(FabricationSkills.Failure(pawn),
+                ProcessingEnvironment.Adjustment(this, true));
+            float actual = item.AddWork(FabricationSkills.Speed(pawn) * ticks, risk);
             if (actual > 0) FabricationSkills.Learn(pawn, ticks);
             if (item.workDone >= item.totalWork) Complete(item.outcomeRolled ? 0 : Rand.Value);
         }
@@ -356,6 +415,7 @@ namespace GeneFoundry.Fabrication
         {
             string state = !Pending ? (contents.OfType<Genepack>().Any() ? "Output waiting for space" : "Ready") : !Powered ? "No power / breakdown" : Unfinished == null ? "Awaiting materials" : Unfinished.Valid ? "Fabricating / awaiting qualified operator" : "Invalid job: cancel to clear";
             string text = base.GetInspectString() + "\n" + state;
+            if (Spawned) text += "\n" + ProcessingEnvironment.Description(this, true);
             if (Pending) text += $"\nGenes: {selected.Count}";
             if (Unfinished != null) text += $"\nProgress: {Unfinished.workDone / Math.Max(1, Unfinished.totalWork):P0}; remaining work: {Math.Max(0, Unfinished.totalWork - Unfinished.workDone):0}\nFailure estimate: {Unfinished.Failure:P1}";
             else if (Pending) text += $"\nMissing: {Missing(BiomassDef)} refined biomass, {Missing(CapsuleDef)} archite capsules";

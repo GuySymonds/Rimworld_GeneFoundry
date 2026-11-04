@@ -13,7 +13,9 @@ namespace GeneFoundry.Recipes
         public static float LiquidationVisualScale(float width, float height, float availableWidth, float availableHeight)
         {
             if (width <= 0f || height <= 0f || availableWidth <= 0f || availableHeight <= 0f) return 1f;
-            return Math.Min(1f, Math.Min(availableWidth / width, availableHeight / height));
+            // Native mesh bounds include transparent sprite padding. Allow twice the
+            // basin dimensions while retaining natural size as the upper limit.
+            return Math.Min(1f, Math.Min(2f * availableWidth / width, 2f * availableHeight / height));
         }
         public static int BubbleMassFrame(int elapsedTicks) => Math.Max(0, elapsedTicks) / 6 % 8;
         public static int LiquidationVisualStage(int actualStage, float progress) =>
@@ -45,6 +47,20 @@ namespace GeneFoundry.Recipes
             return Math.Max(0f, Math.Min(1f, operatorRisk + environmentAdjustment));
         }
 
+        public const float AdequateLight = .30f;
+        public static float DimLightAdjustment(float light, int penaltyPoints = 10) =>
+            Math.Max(0f, Math.Min(1f, 1f - light / AdequateLight)) *
+                Math.Max(0, Math.Min(50, penaltyPoints)) / 100f;
+
+        public static float ProcessingEnvironmentAdjustment(double cleanliness, bool exposed, float light,
+            bool includeCleanliness, bool cleanlinessEnabled = true, int dirtyPenaltyPoints = 15,
+            int exposurePenaltyPoints = 10, int dimLightPenaltyPoints = 10)
+        {
+            float room = exposed ? Math.Max(0, Math.Min(50, exposurePenaltyPoints)) / 100f :
+                RefinementCleanlinessAdjustment(cleanliness, false, includeCleanliness && cleanlinessEnabled, dirtyPenaltyPoints);
+            return Math.Min(1f, room + DimLightAdjustment(light, dimLightPenaltyPoints));
+        }
+
         private static double Progress(int level, int minimum, int maximum)
         {
             return Math.Max(0d, Math.Min(1d, (level - minimum) / (double)(maximum - minimum)));
@@ -53,8 +69,13 @@ namespace GeneFoundry.Recipes
         public static double RefinementSkill(int intellectual, int crafting, int medicine) =>
             Math.Max(5d, Math.Min(20d, 0.60d * intellectual + 0.25d * crafting + 0.15d * medicine));
 
-        public static float RefinementFailureChance(int intellectual, int crafting, int medicine) =>
-            (float)(0.30d * (20d - RefinementSkill(intellectual, crafting, medicine)) / 15d);
+        public static float RefinementFailureChance(int intellectual, int crafting, int medicine)
+        {
+            double skill = RefinementSkill(intellectual, crafting, medicine);
+            return (float)(skill <= 10d
+                ? 0.30d - (skill - 5d) * 0.05d
+                : 0.05d * (20d - skill) / 10d);
+        }
 
         public static int RefinementPreparationTicks(int intellectual, int crafting, int medicine) =>
             (int)Math.Round((90d - 4d * (RefinementSkill(intellectual, crafting, medicine) - 5d)) * 2500d / 60d);
@@ -78,11 +99,14 @@ namespace GeneFoundry.Recipes
             0.4d * (1d - Progress(medicine, 0, 6)) +
             0.2d * (1d - Progress(intellectual, 0, 4));
 
-        public static int ExtractionOutput(int baseOutput, int cooking, int medicine, int intellectual, double roll)
+        public static int ExtractionOutput(int baseOutput, int cooking, int medicine, int intellectual, double roll,
+            float environmentPenalty = 0f)
         {
             double loss = ExtractionShortfall(cooking, medicine, intellectual) *
                 (0.5d + 0.5d * Math.Max(0d, Math.Min(1d, roll)));
-            return Math.Max(1, (int)Math.Floor(baseOutput * (1d - loss)));
+            // Remove float representation noise before flooring whole-item output.
+            loss = Math.Min(1d, loss + Math.Round(Math.Max(0f, Math.Min(1f, environmentPenalty)), 6));
+            return Math.Max(1, (int)Math.Floor(baseOutput * (1d - loss) + .000001d));
         }
 
         // Vanilla rounds products up: choose the preceding float to keep exact integer recovery.

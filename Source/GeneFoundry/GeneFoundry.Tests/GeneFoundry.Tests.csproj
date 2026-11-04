@@ -17,11 +17,15 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(RimWorldManagedDir)' != ''">
+    <Compile Include="../GeneFoundry/Jobs/JobDriver_PrepareBiomassRefinement.cs" Link="Production/JobDriver_PrepareBiomassRefinement.cs" />
+    <Compile Include="../GeneFoundry/Components/CompRawBiomassRottable.cs" Link="Production/CompRawBiomassRottable.cs" />
     <Compile Include="../GeneFoundry/GeneFoundryMod.cs" Link="Production/GeneFoundryMod.cs" />
     <Compile Include="../GeneFoundry/Components/CompBiomassRefiner.cs" Link="Production/CompBiomassRefiner.cs" />
+    <Compile Include="../GeneFoundry/Components/BiomassRefineryOverlay.cs" Link="Production/BiomassRefineryOverlay.cs" />
     <Compile Include="../GeneFoundry/Components/CompProperties_BiomassRefiner.cs" Link="Production/CompProperties_BiomassRefiner.cs" />
     <Compile Include="../GeneFoundry/Components/GeneProcessorAssistance.cs" Link="Production/GeneProcessorAssistance.cs" />
     <Compile Include="../GeneFoundry/Recipes/GeneVatSkills.cs" Link="Production/GeneVatSkills.cs" />
+    <Compile Include="../GeneFoundry/Recipes/ProcessingEnvironment.cs" Link="Production/ProcessingEnvironment.cs" />
     <Compile Include="../GeneFoundry/Jobs/JobDriver_ExtractMaterialBiomass.cs" Link="Production/JobDriver_ExtractMaterialBiomass.cs" />
     <Compile Include="../GeneFoundry/Recipes/Graphic_GeneVat.cs" Link="Production/Graphic_GeneVat.cs" />
     <Compile Include="../GeneFoundry/Components/CompGeneVatAnimation.cs" Link="Production/CompGeneVatAnimation.cs" />
@@ -37,6 +41,7 @@
     <Compile Include="../GeneFoundry/Fabrication/FabricationState.cs" Link="Production/FabricationState.cs" />
     <Compile Include="../GeneFoundry/Fabrication/Dialog_GeneFabrication.cs" Link="Production/Dialog_GeneFabrication.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationJobs.cs" Link="Production/FabricationJobs.cs" />
+    <Compile Include="../GeneFoundry/Fabrication/Graphic_GeneFabricator.cs" Link="Production/Graphic_GeneFabricator.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationBills.cs" Link="Production/FabricationBills.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationWorkspace.cs" Link="Production/FabricationWorkspace.cs" />
     <Compile Include="../GeneFoundry/Recipes/MapComponent_CorpseLiquidationVisuals.cs" Link="Production/MapComponent_CorpseLiquidationVisuals.cs" />
@@ -48,15 +53,19 @@
   <ItemGroup>
     <Compile Include="../GeneFoundry/Fabrication/FabricationCalculations.cs" Link="Production/FabricationCalculations.cs" />
     <Compile Include="../GeneFoundry/Components/GeneVatAnimationTiming.cs" Link="Production/GeneVatAnimationTiming.cs" />
-    <Content Include="../../../Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../Textures/GeneVatFrames/vat_*.png" Link="Fixtures/SourceFrames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../../Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../Textures/BubbleMass/*.png" Link="Fixtures/SourceBubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../GeneFoundry/Components/BiomassRefineryAnimation.cs" Link="Production/BiomassRefineryAnimation.cs" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/BiomassRefineryFrames/*.png" Link="Fixtures/Refinery/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVat_north.png" Link="Fixtures/Vat/GeneVat.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVatFrames/vat_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
+    <Content Include="../../../Mod/About/*" Exclude="../../../Mod/About/PublishedFileId.txt" Link="Fixtures/About/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/LICENSE" Link="Fixtures/Mod-LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../LICENSE" Link="Fixtures/Repository-LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../GeneFoundry/Recipes/BiomassCalculations.cs" Link="Production/BiomassCalculations.cs" />
     <Compile Include="../GeneFoundry/Research/GeneResearchCalculations.cs" Link="Production/GeneResearchCalculations.cs" />
-    <Content Include="../../../Defs/**/*.xml" Link="Fixtures/Defs/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../../Languages/**/*.xml" Link="Fixtures/Languages/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Defs/**/*.xml" Link="Fixtures/Defs/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/Languages/**/*.xml" Link="Fixtures/Languages/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../GeneFoundry/**/*.cs" Exclude="../GeneFoundry/bin/**;../GeneFoundry/obj/**" Link="Fixtures/Source/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../GeneFoundry/GeneFoundry.csproj" Link="Fixtures/GeneFoundry.csproj" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

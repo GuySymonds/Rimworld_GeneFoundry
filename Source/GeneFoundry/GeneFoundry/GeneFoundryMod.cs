@@ -16,6 +16,7 @@ namespace GeneFoundry
         public bool refinementCleanlinessEnabled = true;
         public int refinementDirtyPenalty = 15;
         public int refinementExposurePenalty = 10;
+        public int dimLightPenalty = 10;
         public int geneFabricationResearchCost = 1500;
         public int geneCategoryBaseCost = 500;
         public int geneResearchPerGene = 100;
@@ -36,6 +37,7 @@ namespace GeneFoundry
             expertSpeedPercent = Math.Max(150, Math.Min(300, expertSpeedPercent));
             refinementDirtyPenalty = Math.Max(0, Math.Min(50, refinementDirtyPenalty));
             refinementExposurePenalty = Math.Max(0, Math.Min(50, refinementExposurePenalty));
+            dimLightPenalty = Math.Max(0, Math.Min(50, dimLightPenalty));
             geneFabricationResearchCost = Math.Max(100, Math.Min(10000, geneFabricationResearchCost));
             geneCategoryBaseCost = Math.Max(0, Math.Min(5000, geneCategoryBaseCost));
             geneResearchPerGene = Math.Max(0, Math.Min(1000, geneResearchPerGene));
@@ -59,6 +61,7 @@ namespace GeneFoundry
             Scribe_Values.Look(ref refinementCleanlinessEnabled, "refinementCleanlinessEnabled", true);
             Scribe_Values.Look(ref refinementDirtyPenalty, "refinementDirtyPenalty", 15);
             Scribe_Values.Look(ref refinementExposurePenalty, "refinementExposurePenalty", 10);
+            Scribe_Values.Look(ref dimLightPenalty, "dimLightPenalty", 10);
             Scribe_Values.Look(ref geneFabricationResearchCost, "geneFabricationResearchCost", 1500);
             Scribe_Values.Look(ref geneCategoryBaseCost, "geneCategoryBaseCost", 500);
             Scribe_Values.Look(ref geneResearchPerGene, "geneResearchPerGene", 100);
@@ -137,25 +140,28 @@ namespace GeneFoundry
                 $"Time reduction per gene processor: {Settings.processorReductionPercent}%",
                 Settings.processorReductionPercent, 0, 25, 0.75f,
                 "Each available processor removes this percentage of the unassisted duration. Reductions add together until the shortest allowed time is reached. 0% disables assistance. Range: 0–25% in 1% steps."));
-            listing.Label("Preparation: 90 minutes at weighted skill 5, falling linearly to 30 at 20 (Intellectual 60%, Crafting 25%, Medicine 15%). Operator failure falls linearly from 30% to 0%. Success converts 40 raw biomass and 1 neutroamine into 10 refined biomass.");
+            listing.Label("Preparation: 90 minutes at weighted skill 5, falling linearly to 30 at 20 (Intellectual 60%, Crafting 25%, Medicine 15%). Operator failure interpolates from 30% at skill 5 to 5% at 10, then 0% at 20. Success converts 40 raw biomass and 1 neutroamine into 10 refined biomass.");
             listing.Label("Active gene assemblers have priority. Each powered processor assists at most one refinery.");
             listing.GapLine();
-            listing.Label("Refinement cleanliness and exposure");
-            listing.CheckboxLabeled("Room cleanliness affects batch failure risk", ref Settings.refinementCleanlinessEnabled,
-                "Add room cleanliness or exposure risk to the operator's failure chance. Applies only to refinement; artificial-part recovery still ignores cleanliness. Changes affect new batches only.");
+            listing.Label("Processing environment — all three machines");
+            listing.CheckboxLabeled("Room cleanliness affects refinement and fabrication failure risk", ref Settings.refinementCleanlinessEnabled,
+                "Dirt adds failure risk to refinement and fabrication. Extraction and artificial-part recovery ignore room cleanliness. Outdoor and dim-light penalties apply independently.");
             if (Settings.refinementCleanlinessEnabled)
             {
                 Settings.refinementDirtyPenalty = (int)Math.Round(listing.SliderLabeled(
                     $"Very dirty room (cleanliness -2): +{Settings.refinementDirtyPenalty} risk points",
                     Settings.refinementDirtyPenalty, 0, 50, 0.75f,
                     "Maximum added failure probability, in percentage points, at cleanliness -2 or worse. Scales linearly to zero at cleanliness 0. Default: +15 points; -1 gives +7.5. Range: 0–50 points."));
-                Settings.refinementExposurePenalty = (int)Math.Round(listing.SliderLabeled(
-                    $"Outdoor or unroofed exposure: +{Settings.refinementExposurePenalty} risk points",
-                Settings.refinementExposurePenalty, 0, 50, 0.75f,
-                    "Fixed added failure probability when the refinery is outside an enclosed, fully roofed room. Replaces the room cleanliness adjustment; the two penalties do not stack. Default: +10 percentage points. Range: 0–50 points."));
             }
-            listing.Label("Risk = operator risk + room adjustment, clamped to 0–100%. Captured when processing starts; later dirt, cleaning or settings changes do not alter that batch. Speed and yield are unaffected.");
-            if (listing.ButtonText("Restore refined biomass defaults"))
+            Settings.refinementExposurePenalty = (int)Math.Round(listing.SliderLabeled(
+                $"Outdoor or unroofed exposure: +{Settings.refinementExposurePenalty} penalty points",
+                Settings.refinementExposurePenalty, 0, 50, 0.75f,
+                "All three processes: +10 points by default outside an enclosed, fully roofed room. Replaces room dirt; stacks with dim light. Adds failure risk for refinement/fabrication, wastage for extraction. Range: 0–50 points."));
+            Settings.dimLightPenalty = (int)Math.Round(listing.SliderLabeled(
+                $"Darkness: up to +{Settings.dimLightPenalty} penalty points", Settings.dimLightPenalty, 0, 50, 0.75f,
+                "All three processes: maximum penalty at 0% light, tapering linearly to zero at 30% light. Uses light at the operator interaction cell. Default: +10 points. Range: 0–50."));
+            listing.Label("Refinement captures conditions at batch start. Fabrication weights failure risk by work done under each condition. Extraction adds environmental wastage at completion and still yields at least one biomass. Existing work speed is unchanged.");
+            if (listing.ButtonText("Restore refinement and environment defaults"))
             {
                 Settings.processingMinutes = 2160;
                 Settings.minimumProcessingMinutes = 1080;
@@ -163,6 +169,7 @@ namespace GeneFoundry
                 Settings.refinementCleanlinessEnabled = true;
                 Settings.refinementDirtyPenalty = 15;
                 Settings.refinementExposurePenalty = 10;
+                Settings.dimLightPenalty = 10;
             }
             listing.GapLine();
             listing.Label("Gene research — Fabrication and categories");

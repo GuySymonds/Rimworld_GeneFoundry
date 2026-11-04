@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System.Reflection;
+using Verse;
 
 namespace GeneFoundry
 {
@@ -7,7 +8,8 @@ namespace GeneFoundry
     {
         static Bootstrap()
         {
-            Log.Message("[GeneFoundry] Development build v0.2 loaded successfully.");
+            var version = typeof(Bootstrap).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            Log.Message($"[GeneFoundry] v{version} loaded successfully.");
         }
     }
 }

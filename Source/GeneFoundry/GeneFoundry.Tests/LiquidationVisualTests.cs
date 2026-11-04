@@ -14,17 +14,18 @@ namespace GeneFoundry.Tests
         [Theory]
         [InlineData(.4f,.2f,2,1,1)]
         [InlineData(2,1,2,1,1)]
-        [InlineData(4,2,2,1,.5f)]
-        [InlineData(4,1,2,1,.5f)]
-        [InlineData(1,4,2,1,.25f)]
-        [InlineData(2,4,2,1,.25f)]
+        [InlineData(4,2,2,1,1)]
+        [InlineData(4,1,2,1,1)]
+        [InlineData(1,4,2,1,.5f)]
+        [InlineData(2,4,2,1,.5f)]
+        [InlineData(8,4,2,1,.5f)]
         [InlineData(0,0,2,1,1)]
         public void CorpseFitUsesOrientedDimensionsWithoutEnlargement(float width,float height,float basinWidth,float basinHeight,float expected)
         {
             float scale = BiomassCalculations.LiquidationVisualScale(width,height,basinWidth,basinHeight);
             Assert.Equal(expected,scale,5);
             Assert.InRange(scale,0f,1f);
-            Assert.True(width * scale <= basinWidth && height * scale <= basinHeight);
+            Assert.True(width * scale <= 2f * basinWidth && height * scale <= 2f * basinHeight);
             // The same factor on both axes preserves aspect ratio. No progress input.
             Assert.Equal(4,typeof(BiomassCalculations).GetMethod("LiquidationVisualScale").GetParameters().Length);
         }

@@ -1,0 +1,42 @@
+name: Portable checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portable-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable-checks:
+    name: Portable tests and script syntax
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Run portable calculation, definition and asset tests
+        run: dotnet test Source/GeneFoundry/GeneFoundry.Tests/GeneFoundry.Tests.csproj -c Release -p:RimWorldManagedDir= --logger trx --results-directory TestResults --blame-hang-timeout 2m
+      - name: Parse PowerShell scripts
+        shell: pwsh
+        run: |
+          Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
+            $parseErrors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$parseErrors)
+            if ($parseErrors) { throw ($parseErrors | Out-String) }
+          }
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
+          retention-days: 14

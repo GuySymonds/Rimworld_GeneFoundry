@@ -76,14 +76,14 @@ namespace GeneFoundry.Fabrication
         }
         public void CancelItem(UnfinishedGenePack item)
         {
-            if (item == null || item.Destroyed || item.cancellationHandled || !item.Valid ||
+            if (item == null || item.Destroyed || item.cancellationHandled ||
                 (item.fabricator != null ? item.fabricator != this : Unfinished != item)) return;
+            int biomass = item.DiscardBiomass;
+            int capsules = item.DiscardCapsules;
             item.cancellationHandled = true; // Persist the receipt before creating any recovery.
             bool current = Unfinished == item;
             var associatedBill = item.bill;
             if (current) { currentItem = null; activeBill = null; selected.Clear(); generation++; }
-            int biomass = item.paidBiomass >= 0 ? item.paidBiomass : FabricationCalculations.Biomass(item.genes.Count, Complexity(item.genes));
-            int capsules = item.paidCapsules >= 0 ? item.paidCapsules : Archites(item.genes);
             if (FabricationCalculations.CancellationRecovery(biomass) > 0) RecoverMaterial(BiomassDef, FabricationCalculations.CancellationRecovery(biomass));
             if (FabricationCalculations.CancellationRecovery(capsules) > 0) RecoverMaterial(CapsuleDef, FabricationCalculations.CancellationRecovery(capsules));
             contents.Remove(item);

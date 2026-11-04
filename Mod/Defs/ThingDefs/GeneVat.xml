@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef ParentName="BenchBase">
+
+    <defName>GF_GeneVat</defName>
+    <researchPrerequisites>
+      <li>GF_BiomassExtraction</li>
+    </researchPrerequisites>
+    <label>gene vat</label>
+
+    <description>Extract raw biomass from meat, raw plant food and organic corpses. 50 meat yields up to 20 biomass (25 with 1 herbal medicine); 50 plants yields up to 8 (10 with 1 herbal medicine). Whole corpses give 10% more material than butchered meat, recovered at 40% basic or 50% enzymatic efficiency, then scaled by decay (fresh 100%, rotting 50%, desiccated 10%). Corpse catalyst requirements scale with material. Cooking/Medicine/Intellectual weights are 40/40/20 with references 10/6/4: below reference causes random wastage, above reference improves speed only, up to 200% by default at all level 20. Outdoor or unroofed exposure adds 10 percentage points of wastage. Dim light adds up to 10 further points at darkness, falling to zero at 30% light at the interaction cell. These conditions are evaluated at completion. Every completed extraction yields at least one biomass. Existing recipe qualifications apply. Each skill below 10 adds 5 percentage points of rot-stink incident risk per 250 active extraction ticks for every input type. Incidents last 2,500 ticks and persist if work stops. Stripping and artificial-part recovery use separate medical rules before corpse extraction.</description>
+
+    <thingClass>Building_WorkTable</thingClass>
+    <tickerType>Normal</tickerType>
+    <drawerType>RealtimeOnly</drawerType>
+
+    <!-- GeneFoundry Gene Vat artwork -->
+    <graphicData>
+      <texPath>GeneFoundry/Buildings/GeneVat</texPath>
+      <graphicClass>GeneFoundry.Recipes.Graphic_GeneVat</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+      <drawSize>(3,3.6)</drawSize>
+      <drawRotated>false</drawRotated>
+    </graphicData>
+
+    <!-- Construction -->
+    <size>(3,3)</size>
+    <rotatable>true</rotatable>
+
+    <costList>
+      <Steel>150</Steel>
+      <ComponentIndustrial>4</ComponentIndustrial>
+    </costList>
+
+    <statBases>
+      <WorkToBuild>3000</WorkToBuild>
+      <MaxHitPoints>220</MaxHitPoints>
+      <Flammability>0.5</Flammability>
+    </statBases>
+
+    <useHitPoints>true</useHitPoints>
+
+    <!-- Placement -->
+    <altitudeLayer>BuildingOnTop</altitudeLayer>
+    <passability>PassThroughOnly</passability>
+    <pathCost>50</pathCost>
+    <fillPercent>0.5</fillPercent>
+
+    <designationCategory>Biotech</designationCategory>
+
+    <hasInteractionCell>true</hasInteractionCell>
+    <interactionCellOffset>(0,0,-2)</interactionCellOffset>
+    <surfaceType>Item</surfaceType>
+
+    <!-- Available recipes -->
+    <recipes>
+      <li>GF_ExtractBiomassPlant</li>
+      <li>GF_ExtractBiomassPlantEnzymatic</li>
+      <li>GF_ExtractBiomassBasic</li>
+      <li>GF_ExtractBiomassEnzymatic</li>
+      <li>GF_ExtractBiomassCorpse</li>
+      <li>GF_ExtractBiomassCorpseEnzymatic</li>
+    </recipes>
+
+    <!-- Bills interface -->
+    <inspectorTabs>
+      <li>ITab_Bills</li>
+    </inspectorTabs>
+
+    <!-- Electrical components -->
+    <comps>
+      <li Class="GeneFoundry.Components.CompProperties_GeneVatAnimation" />
+      <li Class="GeneFoundry.Components.CompProperties_GeneVatRotStink" />
+      <li Class="CompProperties_Power">
+        <compClass>CompPowerTrader</compClass>
+        <basePowerConsumption>250</basePowerConsumption>
+        <shortCircuitInRain>true</shortCircuitInRain>
+      </li>
+
+      <li Class="CompProperties_Flickable" />
+      <li Class="CompProperties_Breakdownable" />
+    </comps>
+
+    <building>
+      <spawnedConceptLearnOpportunity>BillsTab</spawnedConceptLearnOpportunity>
+      <workTableRoomRole>Laboratory</workTableRoomRole>
+    </building>
+
+  </ThingDef>
+
+</Defs>

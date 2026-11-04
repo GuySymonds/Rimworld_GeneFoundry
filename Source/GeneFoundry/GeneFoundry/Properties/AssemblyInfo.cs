@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("GeneFoundry")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Industrial biotechnology and custom genepack fabrication for RimWorld 1.6.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Guy Symonds")]
 [assembly: AssemblyProduct("GeneFoundry")]
 [assembly: AssemblyCopyright("Copyright ©  2026")]
 [assembly: AssemblyTrademark("")]
@@ -31,3 +31,5 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+[assembly: AssemblyInformationalVersion("1.0.0")]

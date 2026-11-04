@@ -12,6 +12,9 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <!-- Override with -p:RimWorldManagedDir=... or the same-named environment variable. -->
+    <RimWorldManagedDir Condition=" '$(RimWorldManagedDir)' == '' ">S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldManagedDir>
+    <DeployMod Condition=" '$(DeployMod)' == '' ">true</DeployMod>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,11 +35,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(RimWorldManagedDir)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.IMGUIModule"><HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath><Private>False</Private></Reference>
-    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(RimWorldManagedDir)\UnityEngine.IMGUIModule.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(RimWorldManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath><Private>False</Private></Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,18 +49,20 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>S:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(RimWorldManagedDir)\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="Components\CompRawBiomassRottable.cs" />
     <Compile Include="Components\CompGeneVatAnimation.cs" />
     <Compile Include="Components\GeneVatAnimationTiming.cs" />
     <Compile Include="Recipes\Graphic_GeneVat.cs" />
     <Compile Include="Fabrication\FabricationCalculations.cs" />
     <Compile Include="Fabrication\FabricationState.cs" />
     <Compile Include="Fabrication\FabricationJobs.cs" />
+    <Compile Include="Fabrication\Graphic_GeneFabricator.cs" />
     <Compile Include="Fabrication\FabricationBills.cs" />
     <Compile Include="Fabrication\FabricationWorkspace.cs" />
     <Compile Include="Fabrication\FabricationHandlingJob.cs" />
@@ -71,12 +76,15 @@
     <Compile Include="Components\GameComponent_GeneFoundryIntroduction.cs" />
     <Compile Include="Components\GameComponent_GeneResearch.cs" />
     <Compile Include="Components\CompBiomassRefiner.cs" />
+    <Compile Include="Components\BiomassRefineryAnimation.cs" />
+    <Compile Include="Components\BiomassRefineryOverlay.cs" />
     <Compile Include="Components\CompGeneVatRotStink.cs" />
     <Compile Include="Components\CompProperties_BiomassRefiner.cs" />
     <Compile Include="Jobs\JobDriver_PrepareBiomassRefinement.cs" />
     <Compile Include="Jobs\JobDriver_ExtractCorpseBiomass.cs" />
     <Compile Include="Recipes\CorpseBiomassUtility.cs" />
     <Compile Include="Recipes\BiomassCalculations.cs" />
+    <Compile Include="Recipes\ProcessingEnvironment.cs" />
     <Compile Include="Recipes\Building_GeneVat.cs" />
     <Compile Include="Recipes\MapComponent_CorpseLiquidationVisuals.cs" />
     <Compile Include="Recipes\ArtificialPartRecovery.cs" />
@@ -89,12 +97,15 @@
     <Compile Include="WorkGivers\WorkGiver_RefineBiomass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <Target Name="ValidateRimWorldReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(RimWorldManagedDir)\Assembly-CSharp.dll')" Text="RimWorld assemblies not found. Set RimWorldManagedDir to the RimWorld 1.6 Managed directory." />
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)..\..\..\scripts\Deploy.ps1" -Dll "$(TargetPath)"</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="DeployGeneFoundry" AfterTargets="Build" Condition=" '$(DeployMod)' == 'true' ">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Deploy-Mod.ps1&quot; -Dll &quot;$(TargetPath)&quot;" />
+  </Target>
 </Project>

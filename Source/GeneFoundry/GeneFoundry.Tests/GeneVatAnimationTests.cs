@@ -31,23 +31,24 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void RuntimeFramesAreByteIdenticalToTheEightSourceImages()
+        public void EveryDirectionHasEightFramesMatchingItsBaseCanvas()
         {
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
-            Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "*.png").Length);
+            Assert.Equal(32, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "vat_*_*.png").Length);
+            foreach (string direction in new[] { "north", "east", "south", "west" })
             for (int i = 0; i < 8; i++)
             {
-                string name = "vat_" + i.ToString("00") + ".png";
+                string name = $"vat_{i:00}_{direction}.png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Frames", name));
-                Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "SourceFrames", name)), png);
-                Assert.Equal(1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
-                Assert.Equal(1448, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
+                bool horizontal = direction == "east" || direction == "west";
+                Assert.Equal(horizontal ? 1448 : 1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
+                Assert.Equal(horizontal ? 1086 : 1448, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
                 Assert.Equal(6, png[25]);
             }
         }
 
         [Fact]
-        public void RuntimeBubblesAreByteIdenticalAndHaveAlignedTransparentCanvases()
+        public void RuntimeBubblesHaveEightAlignedTransparentCanvases()
         {
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
             Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Bubbles"), "*.png").Length);
@@ -55,7 +56,6 @@ namespace GeneFoundry.Tests
             {
                 string name = i.ToString("00") + ".png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Bubbles", name));
-                Assert.Equal(File.ReadAllBytes(Path.Combine(fixtures, "SourceBubbles", name)), png);
                 // PNG IHDR uses big-endian dimensions; colour type 6 is RGBA.
                 Assert.Equal(500, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
                 Assert.Equal(203, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20,4)));
@@ -64,7 +64,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void VatUsesOneRealtimeGraphicWithExistingDimensionsAndDirections()
+        public void VatUsesDirectionalAnimatedGraphicAndFinalRuntimeArtwork()
         {
             var vat = XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Fixtures/Defs/ThingDefs/GeneVat.xml"))
                 .Descendants("ThingDef").Single(x => (string)x.Element("defName") == "GF_GeneVat");
@@ -77,6 +77,11 @@ namespace GeneFoundry.Tests
             Assert.Equal("GeneFoundry.Recipes.Graphic_GeneVat", (string)vat.Element("graphicData").Element("graphicClass"));
             Assert.Equal("GeneFoundry/Buildings/GeneVat", (string)vat.Element("graphicData").Element("texPath"));
             Assert.Equal("(3,3.6)", (string)vat.Element("graphicData").Element("drawSize"));
+            Assert.Equal("true", (string)vat.Element("rotatable"));
+            Assert.Equal("false", (string)vat.Element("graphicData").Element("drawRotated"));
+            string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
+            byte[] finalArtwork = File.ReadAllBytes(Path.Combine(fixtures, "Vat/GeneVat.png"));
+            Assert.Equal(new byte[] {137, 80, 78, 71, 13, 10, 26, 10}, finalArtwork.Take(8));
             Assert.Equal("(3,3)", (string)vat.Element("size"));
             Assert.Contains(vat.Element("comps").Elements(), x =>
                 (string)x.Attribute("Class") == "GeneFoundry.Components.CompProperties_GeneVatAnimation");

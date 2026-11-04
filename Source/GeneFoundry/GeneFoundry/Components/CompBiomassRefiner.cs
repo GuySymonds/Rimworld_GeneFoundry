@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RimWorld;
 using Verse;
 using GeneFoundry.Recipes;
+using GeneFoundry.Jobs;
 
 namespace GeneFoundry.Components
 {
@@ -17,11 +18,49 @@ namespace GeneFoundry.Components
         private float batchOperatorRisk;
         private float batchRoomCleanliness;
         private float batchCleanlinessAdjustment;
+        private float batchLightLevel = 1f;
         private bool batchExposed;
         private bool batchCleanlinessEnabled;
         private bool completionRollMade;
 
         private bool processing;
+        private bool vatHasProcessed;
+        private int vatStartedAt = -1;
+        private Pawn preparationWorker;
+        private JobDriver_PrepareBiomassRefinement preparationDriver;
+        private int preparationStartedAt;
+
+        public void NotifyPreparing(Pawn pawn, JobDriver_PrepareBiomassRefinement driver)
+        {
+            preparationWorker = pawn;
+            preparationDriver = driver;
+            preparationStartedAt = Find.TickManager.TicksGame;
+        }
+
+        private int PreparationFrameAt(int tick) => !processing && parent.Spawned && Power?.PowerOn == true &&
+            preparationWorker != null && preparationWorker.Spawned && !preparationWorker.Destroyed &&
+            !preparationWorker.Drafted && preparationWorker.Map == parent.Map &&
+            preparationWorker.jobs?.curDriver == preparationDriver && preparationDriver.Preparing
+                ? BiomassRefineryAnimation.PreparationFrameAt(tick - preparationStartedAt) : -1;
+
+        // Output placement can remain pending after the reaction has finished.
+        public int VatFrameAt(int tick) => BiomassRefineryAnimation.FrameAt(
+            processing && batchProgress < 1d, vatHasProcessed, tick - vatStartedAt);
+
+        internal void TickVatAnimation(bool powered)
+        {
+            // Move the origin with the game clock during outages, preserving even
+            // partial-frame progress. The existing saved timestamp is sufficient.
+            if (!powered) vatStartedAt++;
+        }
+
+        public override void PostDraw()
+        {
+            base.PostDraw();
+            BiomassRefineryOverlay.Draw(parent, VatFrameAt(Find.TickManager.TicksGame));
+            int preparationFrame = PreparationFrameAt(Find.TickManager.TicksGame);
+            if (preparationFrame >= 0) BiomassRefineryOverlay.DrawPreparation(parent, preparationFrame);
+        }
 
         private CompProperties_BiomassRefiner Props =>
             (CompProperties_BiomassRefiner)props;
@@ -30,7 +69,7 @@ namespace GeneFoundry.Components
             parent.TryGetComp<CompPowerTrader>();
 
         public bool AcceptsProcessorAssistance =>
-            processing && parent.Spawned && Power != null && Power.PowerOn;
+            processing && batchProgress < 1d && parent.Spawned && Power != null && Power.PowerOn;
 
         private int AssistingProcessors => parent.Spawned
             ? parent.Map.GetComponent<GeneProcessorAssistance>().ProcessorCount(parent)
@@ -49,6 +88,13 @@ namespace GeneFoundry.Components
         {
             base.PostSpawnSetup(respawningAfterLoad);
 
+            // An older active save has no visual timestamp: resume mixing, not filling.
+            if (processing && vatStartedAt < 0)
+            {
+                vatHasProcessed = true;
+                vatStartedAt = Find.TickManager.TicksGame - BiomassRefineryAnimation.FillingDuration;
+            }
+
             UpdatePowerConsumption();
         }
 
@@ -66,11 +112,14 @@ namespace GeneFoundry.Components
             }
             Scribe_Values.Look(ref powerOutageTicks, "gfPowerOutageTicks", 0);
             Scribe_Values.Look(ref processing, "gfProcessing", false);
+            Scribe_Values.Look(ref vatHasProcessed, "gfVatHasProcessed", false);
+            Scribe_Values.Look(ref vatStartedAt, "gfVatStartedAt", -1);
 
             Scribe_Values.Look(ref batchFailureChance, "gfBatchFailureChance", 0f);
             Scribe_Values.Look(ref batchOperatorRisk, "gfBatchOperatorRisk", 0f);
             Scribe_Values.Look(ref batchRoomCleanliness, "gfBatchRoomCleanliness", 0f);
             Scribe_Values.Look(ref batchCleanlinessAdjustment, "gfBatchCleanlinessAdjustment", 0f);
+            Scribe_Values.Look(ref batchLightLevel, "gfBatchLightLevel", 1f);
             Scribe_Values.Look(ref batchExposed, "gfBatchExposed", false);
             Scribe_Values.Look(ref batchCleanlinessEnabled, "gfBatchCleanlinessEnabled", true);
             Scribe_Values.Look(ref completionRollMade, "gfCompletionRollMade", false);
@@ -80,12 +129,23 @@ namespace GeneFoundry.Components
         {
             base.CompTick();
 
-            if (!parent.Spawned || Power == null)
+            if (!parent.Spawned)
                 return;
+
+            // A completed reaction is shelf-stable output, even without electricity.
+            // Use the existing saved progress/roll receipt so older pending saves work too.
+            if (processing && batchProgress >= 1d)
+            {
+                CompleteBatch();
+                return;
+            }
+
+            if (Power == null) return;
 
             // Handle an existing batch.
             if (processing)
             {
+                TickVatAnimation(Power.PowerOn);
                 // Processing cannot continue without electricity.
                 if (!Power.PowerOn)
                 {
@@ -127,12 +187,7 @@ namespace GeneFoundry.Components
             UpdatePowerConsumption();
 
             // Notify the player.
-            Messages.Message(
-                "GeneFoundry: Biomass refinery batch lost after two hours without power.",
-                parent,
-                MessageTypeDefOf.NegativeEvent,
-                true
-            );
+            NotifyBatchLost("GeneFoundry: Biomass refinery batch lost after two hours without power.");
         }
 
         public bool CanStartBatch()
@@ -159,18 +214,21 @@ namespace GeneFoundry.Components
                 return false;
 
             // Capture the operator's skills once for this batch.
-            // The developer command starts a zero-risk test batch.
+            // The developer command starts a batch with zero operator risk.
+            // Exposure and lighting penalties still apply.
             batchOperatorRisk = operatorPawn == null
                 ? 0f
                 : CalculateFailureChance(operatorPawn);
             batchCleanlinessEnabled = operatorPawn != null && GeneFoundryMod.Settings.refinementCleanlinessEnabled;
             batchCleanlinessAdjustment = EnvironmentAdjustment(batchCleanlinessEnabled,
-                out batchRoomCleanliness, out batchExposed);
+                out batchRoomCleanliness, out batchExposed, out batchLightLevel);
             batchFailureChance = BiomassCalculations.CombinedRefinementFailure(batchOperatorRisk, batchCleanlinessAdjustment);
             completionRollMade = false;
 
             // Begin automated processing.
             processing = true;
+            vatHasProcessed = true;
+            vatStartedAt = Find.TickManager.TicksGame;
             batchProgress = 0f;
             powerOutageTicks = 0;
 
@@ -271,16 +329,29 @@ namespace GeneFoundry.Components
                     powerOutageTicks = 0;
                     UpdatePowerConsumption();
 
-                    Messages.Message(
-                        "GeneFoundry: Biomass refinement failed. The batch was lost.",
-                        parent,
-                        MessageTypeDefOf.NegativeEvent,
-                        true);
+                    NotifyBatchLost("GeneFoundry: Biomass refinement failed. The batch was lost.");
 
                     return;
                 }
             }
 
+            // The successful outcome is already saved. Waiting for space needs neither
+            // reaction power nor processors, and cannot accumulate outage spoilage.
+            powerOutageTicks = 0;
+            UpdatePowerConsumption();
+
+            if (!TryPlaceOutput()) return;
+
+            processing = false;
+            batchProgress = 0f;
+            UpdatePowerConsumption();
+        }
+
+        protected virtual void NotifyBatchLost(string message) =>
+            Messages.Message(message, parent, MessageTypeDefOf.NegativeEvent, true);
+
+        protected virtual bool TryPlaceOutput()
+        {
             // Fixed recovery requires no yield roll, including output-placement retries.
             Thing output = ThingMaker.MakeThing(Props.outputDef);
             output.stackCount = Props.outputCount;
@@ -296,15 +367,10 @@ namespace GeneFoundry.Components
             if (!placed)
             {
                 output.Destroy(DestroyMode.Vanish);
-                return;
+                return false;
             }
 
-            processing = false;
-
-            batchProgress = 0f;
-            powerOutageTicks = 0;
-
-            UpdatePowerConsumption();
+            return true;
         }
 
         private void UpdatePowerConsumption()
@@ -312,7 +378,7 @@ namespace GeneFoundry.Components
             if (Power == null)
                 return;
 
-            float watts = processing
+            float watts = processing && batchProgress < 1d
                 ? Props.activePower
                 : Props.idlePower;
 
@@ -374,9 +440,13 @@ namespace GeneFoundry.Components
 
         public override string CompInspectStringExtra()
         {
-            string environmentInfo = !batchCleanlinessEnabled ? "Cleanliness influence: disabled for this batch" :
-                batchExposed ? $"Outdoor/unroofed exposure: +{batchCleanlinessAdjustment * 100f:0.#} percentage points" :
-                $"Captured room cleanliness: {batchRoomCleanliness:0.##} ({batchCleanlinessAdjustment * 100f:+0.#;-0.#;0} percentage points)";
+            if (processing && batchProgress >= 1d && completionRollMade)
+                return $"Status: Output waiting for space\nStored output: {Props.outputCount} refined biomass\nNo power required; output will not spoil.";
+
+            string roomInfoCaptured = batchExposed ? "Outdoor/unroofed" : !batchCleanlinessEnabled
+                ? "Room cleanliness influence disabled" : $"Captured room cleanliness: {batchRoomCleanliness:0.##}";
+            string environmentInfo = $"{roomInfoCaptured}; captured light: {batchLightLevel:P0}\n" +
+                $"Captured environment penalty: +{batchCleanlinessAdjustment * 100f:0.#} percentage points";
             string failureInfo = $"Operator risk: {batchOperatorRisk * 100f:0.#}%\n" + environmentInfo + "\n" +
                 $"Batch failure chance: {batchFailureChance * 100f:0.#}%\n" +
                 $"Expected output on success: {Props.outputCount} refined biomass";
@@ -390,10 +460,10 @@ namespace GeneFoundry.Components
                     return "Status: Idle (insufficient raw biomass)";
 
                 float adjustment = EnvironmentAdjustment(GeneFoundryMod.Settings.refinementCleanlinessEnabled,
-                    out float cleanliness, out bool exposed);
+                    out float cleanliness, out bool exposed, out float light);
                 string roomInfo = !GeneFoundryMod.Settings.refinementCleanlinessEnabled ? "Cleanliness influence disabled" :
                     exposed ? "Outdoor/unroofed exposure" : $"Room cleanliness: {cleanliness:0.##}";
-                return $"Status: Ready for preparation\n{roomInfo}: {adjustment * 100f:+0.#;-0.#;0} risk percentage points";
+                return $"Status: Ready for preparation\n{roomInfo}; light: {light:P0}\nEnvironment: +{adjustment * 100f:0.#} risk percentage points";
             }
 
             int percentage = Math.Min(100, (int)(batchProgress * 100f));
@@ -427,14 +497,9 @@ namespace GeneFoundry.Components
                 pawn.skills.GetSkill(SkillDefOf.Medicine).Level);
         }
 
-        private float EnvironmentAdjustment(bool enabled, out float cleanliness, out bool exposed)
+        private float EnvironmentAdjustment(bool enabled, out float cleanliness, out bool exposed, out float light)
         {
-            Room room = parent.GetRoom();
-            exposed = room == null || room.OutdoorsForWork || room.TouchesMapEdge || room.OpenRoofCount > 0;
-            cleanliness = exposed ? 0f : room.GetStat(RoomStatDefOf.Cleanliness);
-            GeneFoundrySettings settings = GeneFoundryMod.Settings;
-            return BiomassCalculations.RefinementCleanlinessAdjustment(cleanliness, exposed, enabled,
-                settings.refinementDirtyPenalty, settings.refinementExposurePenalty);
+            return ProcessingEnvironment.Adjustment(parent, true, enabled, out cleanliness, out exposed, out light);
         }
 
         public static int CalculatePreparationTicks(Pawn pawn)

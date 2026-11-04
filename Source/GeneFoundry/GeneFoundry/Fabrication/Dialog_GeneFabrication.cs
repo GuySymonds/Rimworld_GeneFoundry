@@ -64,7 +64,7 @@ namespace GeneFoundry.Fabrication
                 $"Materials: {FabricationCalculations.Biomass(selected.Count, complexity)} refined biomass ({FabricationCalculations.BiomassDiscountPercent(selected.Count)}% discount) + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
                 $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills ({work:0} work)\n" +
                 "Minimum: Intellectual 10, Medicine 6, Crafting 4. Weights: 60% / 25% / 15%.\n" +
-                "Failure: 30% at minimum; 0% at 16 / 12 / 10. Work is locked to its first operator.\n" +
+                "Base failure: 30% at minimum; 0% at 16 / 12 / 10. Dirt, outdoors and dim light add risk.\n" +
                 "Cancellation recovers 75% of committed ingredients, rounded down.");
             Rect buttons = new Rect(0, rect.height - ButSize.y, rect.width, ButSize.y);
             if (!ReadOnly) DoBottomButtons(buttons);

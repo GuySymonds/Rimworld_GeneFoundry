@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>GeneFoundry</name>
+  <author>Guy Symonds</author>
+  <packageId>GBF.GeneticBiomassFabrication</packageId>
+  <modVersion>1.0.0</modVersion>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>Ludeon.RimWorld.Biotech</packageId>
+      <displayName>Biotech</displayName>
+      <steamWorkshopUrl>https://store.steampowered.com/app/1826140/</steamWorkshopUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>Ludeon.RimWorld</li>
+    <li>Ludeon.RimWorld.Biotech</li>
+  </loadAfter>
+  <url>https://github.com/GuySymonds/Rimworld_GeneFoundry</url>
+  <description>Turn organic matter into genetic possibilities.
+
+GeneFoundry adds a three-stage biotechnology chain: extract raw biomass from meat, plants or organic corpses at the Gene Vat; refine it using hopper-fed, processor-assisted machinery; then manufacture selected single- or multi-gene genepacks at the Gene Fabricator.
+
+Features weighted operator skills, corpse stripping and artificial-part salvage, enzymatic extraction, rot-stink incidents, batch failure influenced by skill and room conditions, and a dedicated gene research tree generated from loaded gene categories. Raw extraction guarantees some recovery; failed refinery batches lose their ingredients.
+
+Requires RimWorld 1.6 and Biotech. No Harmony dependency. Other game versions and mod combinations are not declared supported.</description>
+</ModMetaData>
