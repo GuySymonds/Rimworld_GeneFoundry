@@ -106,6 +106,6 @@
     </PreBuildEvent>
   </PropertyGroup>
   <Target Name="DeployGeneFoundry" AfterTargets="Build" Condition=" '$(DeployMod)' == 'true' ">
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Deploy-Mod.ps1&quot; -Dll &quot;$(TargetPath)&quot;" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\..\..\scripts\Deploy-Mod.ps1&quot; -Dll &quot;$(TargetPath)&quot; -Configuration &quot;$(Configuration)&quot;" />
   </Target>
 </Project>

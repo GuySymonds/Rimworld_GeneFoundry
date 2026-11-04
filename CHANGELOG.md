@@ -2,17 +2,7 @@
 
 ## Unreleased
 
-- Place Enzymatic extraction below Gene fabrication and bring categories closer in a six-row grid with additional columns as needed.
-
-- Allow transparent mod icons during release validation; retain preview opacity and existing artwork dimension, PNG and size checks.
-
-- Price selected genes individually by descending biomass cost: 100%, 90%, 80%, 70%, 60%, then 50% for each remaining gene. Sort by cost then name and round the combined total up once.
-
-- Use an organic race corpse allow list for both extraction recipes, excluding unknown modded robots while retaining enzymatic herbal catalysts.
-
-- Preserve completed Gene fabrication/category research across cost increases; leave unfinished progress and new categories subject to current costs.
-- Combine biomass extraction and refinement unlocks into Gene fabrication after Xenogenetics; keep Enzymatic extraction separate and show category links to the foundation.
-- Start the gene picker with collapsed categories, add Show all / Hide all, simplify its footer with hover details, enlarge gene cards, and grow the selected area only when more rows are needed.
+- Deploy Debug builds to `GeneFoundry_dev` and Release builds to `GeneFoundry`; allow first deployment into missing or empty folders while retaining existing-installation safety checks.
 
 - Upgrade CodeQL to v4, document incomplete C# dependency resolution, and align main-branch protection with squash merging and required portable/CodeQL checks.
 

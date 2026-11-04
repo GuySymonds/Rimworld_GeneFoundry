@@ -77,11 +77,11 @@ For later updates, retain the same publication ID and package ID, rebuild/valida
 
 ## Development deployment
 
-Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to an existing local mod directory whose About.xml has the established package ID. `scripts/Deploy-Mod.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
+Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to the local `RimWorld/Mods/GeneFoundry` path. Release builds deploy there; Debug builds deploy to the sibling `GeneFoundry_dev` folder. Missing or empty targets are created automatically. Nonempty targets must contain About.xml with the established package ID. Both copies retain the same package ID: enable only one in RimWorld. After changing the user environment variable, restart Visual Studio so it inherits the new value. `scripts/Deploy-Mod.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
 
 ```powershell
 $env:GENEFOUNDRY_MOD_DIR = 'C:\Path To\RimWorld\Mods\GeneFoundry'
-pwsh -NoProfile -File scripts/Deploy-Mod.ps1 -Dll ./dist/GeneFoundry/Assemblies/GeneFoundry.dll
+pwsh -NoProfile -File scripts/Deploy-Mod.ps1 -Dll ./dist/GeneFoundry/Assemblies/GeneFoundry.dll -Configuration Release
 ```
 
 Use `-p:DeployMod=false` for standalone builds. The release script always disables deployment regardless of environment settings. Close RimWorld before replacing a DLL.
