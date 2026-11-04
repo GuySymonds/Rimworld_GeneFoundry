@@ -10,7 +10,7 @@ The other badges identify the declared RimWorld 1.6 target, required Biotech DLC
 
 ## Game and package validation
 
-Hosted CI has no installed RimWorld assemblies. The portable suite compiles selected production sources; it does not build the entire mod or run the conditional game API tests. Use the explicit game test command and release/package workflow in [RELEASE.md](RELEASE.md) on a machine with RimWorld installed. Those checks still do not render Unity or simulate a live colony.
+Hosted CI has no installed RimWorld assemblies. The portable suite compiles selected production sources; it does not build the entire mod or run the conditional game API tests. Use the explicit [managed game test command](Testing.md#automated-commands) and [release/package workflow](RELEASE.md#build-and-package) on a machine with RimWorld installed. Those checks still do not render Unity or simulate a live colony.
 
 No dormant self-hosted job is added: a runner would need provisioning and access controls, particularly before accepting pull-request code. If unattended full validation becomes necessary, supply a trusted Windows runner with legally installed game assemblies, restrict it to trusted revisions, run managed API tests, package and validate, and retain the validated artifact. Give that workflow a separate **Game and package validation** badge. Never make a missing game installation look like a successful skipped validation.
 

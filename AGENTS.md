@@ -1,5 +1,7 @@
 # GeneFoundry contributor instructions
 
+This is the canonical shared guidance for Codex and GitHub Copilot. Copilot's repository-wide [entry point](.github/copilot-instructions.md) directs it here; keep common rules in this file.
+
 Deliver the smallest complete, correct change. Inspect existing code before adding abstractions or dependencies. Challenge material scope growth once, then respect explicit decisions. Report only checks actually performed.
 
 ## Collaboration
@@ -24,15 +26,22 @@ Deliver the smallest complete, correct change. Inspect existing code before addi
 
 ## Gameplay decisions
 
-- Raw biomass uses vanilla temperature-based rot: six days at normal temperature, destroyed on spoilage, with a Rare ticker. Refrigeration slows rot and freezing stops it. Biomass hoppers pause rot without power or room cooling, retain prior progress and prevent environmental deterioration. Existing exposure deterioration remains separate outside protected storage.
-- Refined biomass is shelf-stable: no rot component and zero outdoor deterioration. It remains damageable. Refinery outage spoilage applies only to incomplete reactions. Completed output waiting for space survives outages/save-load, retries placement without power, uses idle power and receives no processor assistance.
-- Refinery preparation must interrupt and stop XP when workstation usability, bill eligibility or worker drafting prevents work. Consume batch ingredients only after successful preparation and final readiness checks.
-- Prefer vanilla systems over a custom degradation framework. Do not silently change these policies or add settings for them.
+- Read the approved policies in [Biomass.md](docs/Biomass.md), [Research.md](docs/Research.md), [Fabrication.md](docs/Fabrication.md) and [ProcessingEnvironment.md](docs/ProcessingEnvironment.md) before changing related behavior. Keep numeric defaults and detailed rules in those documents, rather than copying them here.
+- Prefer vanilla systems over custom frameworks. Do not silently change approved balance/storage policies or add settings for them.
+- Preserve exactly-once ingredient charging and output, saved progress, ownership and completion receipts. Normal save/load of current jobs and settings is required. Migration of older development saves is not a release requirement, but do not casually rename persisted contracts.
 
 ## Verification and documentation
 
-- Run the portable test project after code/definition changes. For managed game tests pass `RimWorldManagedDir` explicitly; the production project's local fallback does not enable game tests.
+- Follow the commands, coverage limits and runtime checks in [Testing.md](docs/Testing.md). Run portable tests after code/definition changes and managed game regressions for game integration changes when assemblies are available. Add regression tests for corrected behavior, rather than tests that merely mirror implementation.
 - Build with `-p:DeployMod=false` during review and CI. Normal production builds deploy; do not overwrite an installed mod as a verification side effect.
-- Use `scripts/Release.ps1` and `scripts/Test-ReleaseWorkflow.ps1` for package verification when installed game assemblies are available. Never upload or publish as part of review.
-- Update player-facing README, affected technical docs, Workshop text and CHANGELOG when behavior changes. Keep pending work and evidence in `docs/Review.md`; do not describe runtime checks as passed without running the game.
-- CI badges describe their actual scope. Portable tests do not certify a production build, package, release, game compatibility, coverage percentage or Unity behavior. See `docs/Pipelines.md`.
+- Follow [RELEASE.md](docs/RELEASE.md) for build/package/deployment commands and release checks. Never upload or publish as part of a review.
+- Report checks actually run and distinguish managed tests from live RimWorld verification. CI/badge semantics belong in [Pipelines.md](docs/Pipelines.md).
+
+## Documentation ownership
+
+- Keep [README.md](README.md) as a short overview, getting-started pointer and document index. Link to specific documents/anchors instead of copying formulas, command sets, asset specifications or checklists into it.
+- Gameplay rules and settings belong in the topic guides linked above. Shared environment rules have one home in `docs/ProcessingEnvironment.md`; other guides link to it.
+- Artwork/animation specifications belong in [GeneVatVisuals.md](docs/GeneVatVisuals.md) and [BiomassRefineryOverlay.md](docs/BiomassRefineryOverlay.md). Test commands, coverage and gameplay runtime acceptance belong in `docs/Testing.md`; visual acceptance stays alongside its artwork specifications and is linked from Testing.
+- Update the authoritative topic document when behavior changes. Update [CHANGELOG.md](CHANGELOG.md) and the concise Steam BBCode [Workshop listing](docs/workshop-description.txt) where relevant; these summaries may link or describe changes but must not become competing technical specifications.
+- Keep dated review findings and executed verification evidence in [Review.md](docs/Review.md), linking to current acceptance instructions rather than duplicating them. Historical evidence is not a claim that later changes were tested.
+- When moving documentation, update incoming links and relative paths, preserve unique useful information, and check local targets and heading anchors. Documentation-only edits need link/content checks, not a ceremonial full game build.

@@ -9,14 +9,12 @@ Reviewed the extraction, medical recovery, refinement, processor allocation, fab
 | P2 | Preparation kept waiting/granting XP after power loss or bill suspension/deletion. | Fixed: a global job failure condition checks workstation/bill eligibility and drafting; the learning callback independently checks eligibility. Managed tests rebuild toils after a Scribe round-trip and exercise power loss, native bill deletion, suspension, missing bill, drafting and despawn without further XP or batch start. |
 | P2 | Completed output waiting for space could spoil during a power outage. | Fixed: completed reactions retry placement before power/outage handling. Existing saved progress and completion receipts preserve success without new save fields. Waiting output uses idle power, accepts no processors, survives outages/save-load and places exactly once without rerolling. An incomplete-reaction test retains the 5,000-tick spoilage boundary. |
 
-Both code findings are resolved and covered by 10 managed lifecycle regression cases in `GameRefineryLifecycleTests.cs`. Output-placement and notification boundaries are replaced by headless fixtures; preparation tests execute the real registered job failure and learning callbacks and vanilla workstation power usability. They do not simulate a live colony or Unity. Live-game acceptance remains part of the release checklist below.
+Both code findings are resolved and covered by 10 managed lifecycle regression cases in `GameRefineryLifecycleTests.cs`. Output-placement and notification boundaries are replaced by headless fixtures; preparation tests execute the real registered job failure and learning callbacks and vanilla workstation power usability. They do not simulate a live colony or Unity. Live-game acceptance is tracked under required release work below.
 
 ## Required release work
 
-- Run the packaged mod in RimWorld with Core and Biotech, checking startup errors, the complete production chain, research gates and save/load. Use the detailed runtime checks in README and [RELEASE.md](RELEASE.md), including artwork in all directions and native right-click work prioritization.
-- Check new storage behavior in a warm room, refrigerator, freezer and hopper, including partially aged stacks, merging/splitting, moving out, hauling, hopper destruction and save/load. Hopper preservation is passive, independent of refinery connection and power; it must never reset rot age or cool the room. Older stacks acquire the new component without reconstructed historical age.
-- Push the new workflow and inspect its first hosted run. Configure the **Portable tests and script syntax** required check on `main`. No GitHub settings, commits, pushes or uploads were performed by this review.
-- Review Workshop artwork/listing/change notes and complete the manual publication checklist. Version remains 1.0.0; new work is under **Unreleased** until the release is deliberately cut.
+- Complete [runtime acceptance](Testing.md#runtime-acceptance) on the actual packaged mod and the [human release checklist](RELEASE.md#human-release-checklist). These are the authoritative checklists; they have not been performed by the automated review.
+- Push the workflow and inspect its first hosted run, then configure the required check described in [Pipelines.md](Pipelines.md). No GitHub settings, commits, pushes or uploads were performed by this review.
 
 ## Corrections delivered
 

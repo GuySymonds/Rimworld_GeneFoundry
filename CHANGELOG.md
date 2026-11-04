@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Share contributor guidance between Codex and Copilot; replace the long README with links to focused gameplay, artwork, testing and release documents.
+
 - Interrupt refinery preparation and stop XP when power/workstation usability, bill eligibility or worker drafting prevents work, without consuming batch inputs.
 - Preserve completed refinery output through outages and save/load while placement is blocked. Retry without power or rerolling; use idle power and release processor assistance. Incomplete reactions retain two-hour outage spoilage.
 - Add managed refinery lifecycle regressions for interrupted preparation after loading, stopped XP, completion/output retries, long outages and exact active-reaction spoilage timing.
