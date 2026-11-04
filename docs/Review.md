@@ -1,5 +1,9 @@
 # Solution review — 4 November 2026
 
+## Adaptive gene picker follow-up — 4 November 2026
+
+Selected genes now use only the rows needed (a compact empty state, growing to 38% before scrolling); larger 110 × 90 gene cards share column/row calculations with the library. Read-only details can use the full gene area. Verified 347 portable and 467 managed tests passed; Debug build passed with zero warnings/errors, deployed to `Mods/GeneFoundry_dev`, and installed DLL hash matched the build. Live layout acceptance remains under [fabrication checks](Testing.md#fabrication).
+
 ## Research layout follow-up — 4 November 2026
 
 Moved Gene fabrication to the left of Enzymatic extraction on the same row. Verified 347 portable tests passed; deployed to `Mods/GeneFoundry_dev` and verified the installed research XML hash matches the source. Displayed placement still needs live RimWorld verification.

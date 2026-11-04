@@ -28,6 +28,7 @@ namespace GeneFoundry.Fabrication
         private readonly List<GeneDef> selected;
         private readonly List<GeneDef> available;
         private readonly HashSet<GeneCategoryDef> collapsed = new HashSet<GeneCategoryDef>();
+        private static readonly Vector2 CardSize = new Vector2(110f, 90f);
         private Vector2 selectedScroll;
         protected override List<GeneDef> SelectedGenes => selected;
         protected override string Header => ReadOnly ? "Selected fabrication genes" : editingBill != null ? "Edit fabrication bill" : addBill ? "Add fabrication bill" : "Fabricate genepack";
@@ -77,7 +78,10 @@ namespace GeneFoundry.Fabrication
 
         protected override void DrawGenes(Rect rect)
         {
-            float selectedHeight = Mathf.Min(190f, rect.height * .38f);
+            int selectedRows = Mathf.CeilToInt(selected.Count / (float)Columns(rect.width));
+            float neededHeight = selected.Count == 0 ? 32f : 8f + selectedRows * (CardSize.y + 12f);
+            float selectedHeight = Mathf.Min(neededHeight,
+                ReadOnly ? rect.height - 26f : rect.height * .38f);
             Widgets.Label(new Rect(rect.x, rect.y, rect.width, 25), "SelectedGenes".Translate() + " — " + "ClickToAddOrRemove".Translate());
             DrawSection(new Rect(rect.x, rect.y + 26, rect.width, selectedHeight), selected.ToList(), ref selectedScroll, false);
             if (ReadOnly) return;
@@ -95,9 +99,12 @@ namespace GeneFoundry.Fabrication
                 ref scrollPosition, true);
         }
 
+        private static int Columns(float width) =>
+            Mathf.Max(1, Mathf.FloorToInt((width - 24f) / (CardSize.x + 12f)));
+
         private void DrawSection(Rect rect, List<GeneDef> genes, ref Vector2 scroll, bool grouped)
         {
-            int columns = Mathf.Max(1, Mathf.FloorToInt((rect.width - 24) / (GeneSize.x + 12)));
+            int columns = Columns(rect.width);
             var groups = grouped ? genes.GroupBy(g => g.displayCategory).Select(g => g.ToList()).ToList()
                 : new List<List<GeneDef>> { genes };
             float height = 8;
@@ -105,7 +112,7 @@ namespace GeneFoundry.Fabrication
             {
                 if (grouped) height += 30;
                 if (!grouped || !collapsed.Contains(group[0].displayCategory) || quickSearchWidget.filter.Active)
-                    height += Mathf.CeilToInt(group.Count / (float)columns) * (GeneSize.y + 12);
+                    height += Mathf.CeilToInt(group.Count / (float)columns) * (CardSize.y + 12);
             }
             Rect view = new Rect(0, 0, rect.width - 16, Mathf.Max(rect.height, height));
             Widgets.DrawRectFast(rect, Widgets.MenuSectionBGFillColor);
@@ -127,7 +134,7 @@ namespace GeneFoundry.Fabrication
                 for (int i = 0; i < group.Count; i++)
                 {
                     GeneDef gene = group[i];
-                    Rect card = new Rect(4 + i % columns * (GeneSize.x + 12), y + i / columns * (GeneSize.y + 12), GeneSize.x, GeneSize.y);
+                    Rect card = new Rect(4 + i % columns * (CardSize.x + 12), y + i / columns * (CardSize.y + 12), CardSize.x, CardSize.y);
                     GeneUIUtility.DrawGeneDef(gene, card, GeneType.Xenogene, clickable: false);
                     Widgets.InfoCardButton(card.xMax - 20, card.y, gene);
                     Rect info = new Rect(card.xMax - 20, card.y, 24, 24);
@@ -139,7 +146,7 @@ namespace GeneFoundry.Fabrication
                     }
                     if (Mouse.IsOver(card)) Widgets.DrawHighlight(card);
                 }
-                y += Mathf.CeilToInt(group.Count / (float)columns) * (GeneSize.y + 12);
+                y += Mathf.CeilToInt(group.Count / (float)columns) * (CardSize.y + 12);
             }
             if (genes.Count == 0) Widgets.Label(new Rect(8, 4, view.width - 16, 30), "NoneLower".Translate());
             Widgets.EndScrollView();

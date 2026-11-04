@@ -6,7 +6,7 @@
 
 - Preserve completed Gene fabrication/category research across cost increases; leave unfinished progress and new categories subject to current costs.
 - Combine biomass extraction and refinement unlocks into Gene fabrication after Xenogenetics; keep Enzymatic extraction separate and show category links to the foundation.
-- Start the gene picker with collapsed categories, add Show all / Hide all, and simplify its footer with hover details.
+- Start the gene picker with collapsed categories, add Show all / Hide all, simplify its footer with hover details, enlarge gene cards, and grow the selected area only when more rows are needed.
 
 - Upgrade CodeQL to v4, document incomplete C# dependency resolution, and align main-branch protection with squash merging and required portable/CodeQL checks.
 
