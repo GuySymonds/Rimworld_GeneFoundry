@@ -33,6 +33,6 @@ namespace GeneFoundry.Fabrication
                 Clamp((12 - medicine) / 6f, 0, 1) * MedicineWeight +
                 Clamp((10 - crafting) / 6f, 0, 1) * CraftingWeight);
         public static float WeightedFailure(float riskWork, float workDone) =>
-            workDone > 0 ? Clamp(riskWork / workDone, 0, 0.30f) : 0.30f;
+            workDone > 0 ? Clamp(riskWork / workDone, 0, 1f) : 0.30f;
     }
 }

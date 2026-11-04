@@ -6,17 +6,17 @@
     <defName>GF_GeneFabricator</defName>
     <label>gene fabricator</label>
 
-    <description>A sophisticated genetic engineering workstation used to manufacture custom genepacks from refined biomass.</description>
+    <description>A sophisticated genetic engineering workstation used to manufacture custom genepacks from refined biomass. Room dirt adds up to 15 percentage points of failure risk at cleanliness -2. Outdoor or unroofed exposure instead adds 10 points. Dim light adds up to 10 further points at darkness, falling to zero at 30% light at the operator interaction cell. Environmental risk is weighted by work performed under each condition.</description>
 
     <thingClass>GeneFoundry.Fabrication.Building_GeneFabricator</thingClass>
     <tickerType>Rare</tickerType>
-    <drawerType>MapMeshAndRealTime</drawerType>
+    <drawerType>RealtimeOnly</drawerType>
     <inspectorTabs Inherit="False"><li>GeneFoundry.Fabrication.ITab_GeneFabricationBills</li></inspectorTabs>
 
     <!-- Gene Fabricator artwork -->
     <graphicData>
-      <texPath>GeneFoundry/Buildings/GeneFabrication_north</texPath>
-      <graphicClass>Graphic_Single</graphicClass>
+      <texPath>GeneFoundry/Buildings/GeneFabricator</texPath>
+      <graphicClass>GeneFoundry.Fabrication.Graphic_GeneFabricator</graphicClass>
       <shaderType>CutoutComplex</shaderType>
       <drawSize>(5.4,2.4)</drawSize>
       <drawRotated>false</drawRotated>

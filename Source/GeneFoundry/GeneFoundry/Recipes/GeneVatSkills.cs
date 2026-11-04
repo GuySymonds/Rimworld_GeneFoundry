@@ -17,7 +17,8 @@ namespace GeneFoundry.Recipes
         public static int Output(Pawn pawn, int baseOutput) => BiomassCalculations.ExtractionOutput(
             baseOutput, pawn.skills.GetSkill(SkillDefOf.Cooking).Level,
             pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
-            pawn.skills.GetSkill(SkillDefOf.Intellectual).Level, Rand.Value);
+            pawn.skills.GetSkill(SkillDefOf.Intellectual).Level, Rand.Value,
+            ProcessingEnvironment.Adjustment(pawn.CurJob?.targetA.Thing, false));
 
         public static void Learn(Pawn pawn, int ticks)
         {

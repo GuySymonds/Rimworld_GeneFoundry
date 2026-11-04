@@ -27,7 +27,8 @@ namespace GeneFoundry.Tests
                 "Fixtures/Source/Recipes/Graphic_GeneVat.cs"));
             Assert.DoesNotContain("rot != Rot4.North", source);
             Assert.Contains("Material[] set = frames?[rot.AsInt]", source);
-            Assert.Contains("MeshAt(rot)", source);
+            Assert.Contains("GenDraw.DrawMeshNowOrLater(MeshAt(rot)", source);
+            Assert.DoesNotContain("MakeVialMesh", source);
         }
 
         [Theory]
@@ -91,6 +92,32 @@ namespace GeneFoundry.Tests
             Assert.True(bubbles.yMin >= basin.yMin - .00001f && bubbles.yMax <= basin.yMax + .00001f);
             Assert.True(bubbles.width > 0f && bubbles.height > 0f);
             Assert.Equal(500f / 203f, rot.IsHorizontal ? bubbles.height / bubbles.width : bubbles.width / bubbles.height, 4);
+            // The foreground edge follows the operator, not a baked texture centre.
+            switch (direction)
+            {
+                case 0: Assert.Equal(basin.yMin + .06f, bubbles.yMin, 5); break;
+                case 1: Assert.Equal(basin.xMin + .06f, bubbles.xMin, 5); break;
+                case 2: Assert.Equal(basin.yMax - .06f, bubbles.yMax, 5); break;
+                case 3: Assert.Equal(basin.xMax - .06f, bubbles.xMax, 5); break;
+            }
+        }
+
+        [Fact]
+        public void HerbalMedicineIsTrackedForBothKindsOfProcessing()
+        {
+            var herb = (ThingDef)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ThingDef));
+            herb.defName = "MedicineHerbal";
+            Assert.True(CompGeneVatAnimation.ShouldTrackIngredient(herb, false));
+            Assert.True(CompGeneVatAnimation.ShouldTrackIngredient(herb, true));
+        }
+
+        [Fact]
+        public void MaterialAnimationHookMatchesInstalledRecipeWorkToil()
+        {
+            // If the vanilla work toil changes name, the processing notification
+            // would never run and the vat would remain on its idle graphic.
+            var toil = Verse.AI.Toils_Recipe.DoRecipeWork();
+            Assert.Equal(nameof(Verse.AI.Toils_Recipe.DoRecipeWork), toil.debugName);
         }
 
         [Theory]

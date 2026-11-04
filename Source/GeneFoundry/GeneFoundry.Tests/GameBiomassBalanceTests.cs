@@ -18,6 +18,37 @@ namespace GeneFoundry.Tests
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
         private static FieldInfo Field(string name) => typeof(CompBiomassRefiner).GetField(name, Private);
 
+        [Fact]
+        public void EnvironmentSettingsPersistAndClampTheNewLightPenalty()
+        {
+            string path = Path.GetTempFileName();
+            bool profiling = DeepProfiler.enabled;
+            DeepProfiler.enabled = false;
+            try
+            {
+                var settings = new GeneFoundrySettings {
+                    refinementDirtyPenalty = 20, refinementExposurePenalty = 12, dimLightPenalty = 7 };
+                Scribe.saver.InitSaving(path, "settings");
+                settings.ExposeData();
+                Scribe.saver.FinalizeSaving();
+                var loaded = new GeneFoundrySettings();
+                Scribe.loader.InitLoading(path);
+                loaded.ExposeData();
+                Scribe.loader.FinalizeLoading();
+                Assert.Equal(20, loaded.refinementDirtyPenalty);
+                Assert.Equal(12, loaded.refinementExposurePenalty);
+                Assert.Equal(7, loaded.dimLightPenalty);
+                loaded.dimLightPenalty = 100;
+                loaded.Validate();
+                Assert.Equal(50, loaded.dimLightPenalty);
+                loaded.dimLightPenalty = -10;
+                loaded.Validate();
+                Assert.Equal(0, loaded.dimLightPenalty);
+                Assert.Equal(10, new GeneFoundrySettings().dimLightPenalty);
+            }
+            finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling; }
+        }
+
         [Theory]
         [InlineData(0,90000f)] [InlineData(1,85500f)]
         [InlineData(10,45000f)] [InlineData(20,45000f)]
@@ -129,6 +160,7 @@ namespace GeneFoundry.Tests
             {
                 var source=new CompBiomassRefiner();
                 Field("batchFailureChance").SetValue(source,.375f);
+                Field("batchLightLevel").SetValue(source,.15f);
                 Field("batchProgress").SetValue(source,1d);
                 Field("processing").SetValue(source,true);
                 Field("completionRollMade").SetValue(source,rolled);
@@ -139,6 +171,7 @@ namespace GeneFoundry.Tests
                 var loaded=new CompBiomassRefiner();
                 Scribe.loader.InitLoading(path); loaded.PostExposeData(); Scribe.loader.FinalizeLoading();
                 Assert.Equal(.375f,Field("batchFailureChance").GetValue(loaded));
+                Assert.Equal(.15f,Field("batchLightLevel").GetValue(loaded));
                 Assert.Equal(1d,Field("batchProgress").GetValue(loaded));
                 Assert.Equal(true,Field("processing").GetValue(loaded));
                 Assert.Equal(rolled,Field("completionRollMade").GetValue(loaded));

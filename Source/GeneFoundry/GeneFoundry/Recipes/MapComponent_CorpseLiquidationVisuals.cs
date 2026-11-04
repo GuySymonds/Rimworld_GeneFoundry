@@ -39,26 +39,24 @@ namespace GeneFoundry.Recipes
         }
         internal static Rect BubbleBounds(Rot4 direction, Vector2 drawSize)
         {
-            // Match the bubble centres in the supplied directional transition canvases.
+            // Place one foreground band at the basin edge nearest the interaction cell.
+            // The directional transition's bubbles stay behind the animal; this
+            // separate foreground band sits above it, closer to the operator.
             bool horizontal = direction.IsHorizontal;
-            Vector2 pixelCenter;
-            switch (direction.AsInt)
-            {
-                case 1: pixelCenter = new Vector2(630f, 540f); break;
-                case 2: pixelCenter = new Vector2(545f, 632f); break;
-                case 3: pixelCenter = new Vector2(815f, 545f); break;
-                default: pixelCenter = new Vector2(540f, 815f); break;
-            }
-            Vector2 center = new Vector2(
-                (pixelCenter.x / (horizontal ? 1448f : 1086f) - .5f) * (horizontal ? drawSize.y : drawSize.x),
-                (.5f - pixelCenter.y / (horizontal ? 1086f : 1448f)) * (horizontal ? drawSize.x : drawSize.y));
             Rect basin = BasinBounds(direction, drawSize);
-            float availableX = 2f * Mathf.Min(center.x - basin.xMin, basin.xMax - center.x);
-            float availableZ = 2f * Mathf.Min(center.y - basin.yMin, basin.yMax - center.y);
-            float width = Mathf.Min(horizontal ? availableZ : availableX,
-                (horizontal ? availableX : availableZ) * 500f / 203f);
+            const float inset = .06f;
+            float width = Mathf.Min((horizontal ? basin.height : basin.width) - inset * 2f,
+                ((horizontal ? basin.width : basin.height) - inset * 2f) * 500f / 203f);
             float height = width * 203f / 500f;
             Vector2 size = horizontal ? new Vector2(height, width) : new Vector2(width, height);
+            Vector2 center = basin.center;
+            switch (direction.AsInt)
+            {
+                case 1: center.x = basin.xMin + inset + size.x * .5f; break;
+                case 2: center.y = basin.yMax - inset - size.y * .5f; break;
+                case 3: center.x = basin.xMax - inset - size.x * .5f; break;
+                default: center.y = basin.yMin + inset + size.y * .5f; break;
+            }
             return new Rect(center - size * .5f, size);
         }
         private static Vector2 BasinSize(Thing vat)
@@ -182,8 +180,9 @@ namespace GeneFoundry.Recipes
                     if (request.mesh == null || !renderer.renderTree.TryGetMatrix(request.node, parms, out Matrix4x4 matrix)) continue;
                     Graphic graphic = VisualGraphic(request.node, pawn, stage);
                     Material material = graphic?.MatAt(parms.facing, pawn) ?? request.material;
-                    Mesh mesh = request.node is PawnRenderNode_AnimalPart && graphic != null
-                        ? graphic.MeshAt(parms.facing) : request.mesh;
+                    // Keep the renderer's life-stage/body-size mesh. Replacing it with
+                    // Graphic.MeshAt can shrink animals before fitting even begins.
+                    Mesh mesh = request.mesh;
                     if (mesh == null || material == null) continue;
                     state.parts.Add(new Part { matrix = matrix, mesh = mesh, material = material, stage = stage });
                     EncapsulateMesh(ref bounds[stage], ref haveBounds[stage], mesh.bounds, matrix);

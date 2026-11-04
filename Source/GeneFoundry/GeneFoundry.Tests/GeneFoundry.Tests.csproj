@@ -23,6 +23,7 @@
     <Compile Include="../GeneFoundry/Components/CompProperties_BiomassRefiner.cs" Link="Production/CompProperties_BiomassRefiner.cs" />
     <Compile Include="../GeneFoundry/Components/GeneProcessorAssistance.cs" Link="Production/GeneProcessorAssistance.cs" />
     <Compile Include="../GeneFoundry/Recipes/GeneVatSkills.cs" Link="Production/GeneVatSkills.cs" />
+    <Compile Include="../GeneFoundry/Recipes/ProcessingEnvironment.cs" Link="Production/ProcessingEnvironment.cs" />
     <Compile Include="../GeneFoundry/Jobs/JobDriver_ExtractMaterialBiomass.cs" Link="Production/JobDriver_ExtractMaterialBiomass.cs" />
     <Compile Include="../GeneFoundry/Recipes/Graphic_GeneVat.cs" Link="Production/Graphic_GeneVat.cs" />
     <Compile Include="../GeneFoundry/Components/CompGeneVatAnimation.cs" Link="Production/CompGeneVatAnimation.cs" />
@@ -38,6 +39,7 @@
     <Compile Include="../GeneFoundry/Fabrication/FabricationState.cs" Link="Production/FabricationState.cs" />
     <Compile Include="../GeneFoundry/Fabrication/Dialog_GeneFabrication.cs" Link="Production/Dialog_GeneFabrication.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationJobs.cs" Link="Production/FabricationJobs.cs" />
+    <Compile Include="../GeneFoundry/Fabrication/Graphic_GeneFabricator.cs" Link="Production/Graphic_GeneFabricator.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationBills.cs" Link="Production/FabricationBills.cs" />
     <Compile Include="../GeneFoundry/Fabrication/FabricationWorkspace.cs" Link="Production/FabricationWorkspace.cs" />
     <Compile Include="../GeneFoundry/Recipes/MapComponent_CorpseLiquidationVisuals.cs" Link="Production/MapComponent_CorpseLiquidationVisuals.cs" />

@@ -15,6 +15,7 @@ namespace GeneFoundry.Jobs
         private const float PreparationXpPerTick = 0.1f;
 
         private int preparationTicks;
+        public bool Preparing { get; private set; }
 
         public override void ExposeData()
         {
@@ -72,6 +73,12 @@ namespace GeneFoundry.Jobs
 
             // Perform manual preparation.
             Toil preparation = Toils_General.Wait(preparationTicks);
+            preparation.AddPreInitAction(() =>
+            {
+                Preparing = true;
+                Refinery?.NotifyPreparing(pawn, this);
+            });
+            preparation.AddFinishAction(() => Preparing = false);
 
             preparation.AddPreTickIntervalAction(delta =>
             {

@@ -174,6 +174,27 @@ namespace GeneFoundry.Tests
                 DefDatabase<GeneDef>.Clear(); DefDatabase<GeneDef>.Add(previous);
             }
         }
+        [Fact] public void OrphanedUnfinishedPackRetainsMaterialRecovery()
+        {
+            var item = Paid();
+            Assert.True(item.Valid);
+            Assert.Null(item.fabricator);
+            item.paidBiomass = 20; item.paidCapsules = 4;
+            Assert.True(item.CanRecoverOnDiscard);
+            Assert.Equal(20, item.DiscardBiomass);
+            Assert.Equal(4, item.DiscardCapsules);
+        }
+        [Fact] public void InvalidUnfinishedPackRetainsRecordedMaterialRecovery()
+        {
+            var item = Paid();
+            item.totalWork = 0;
+            item.fabricator = new HeadlessBench();
+            Assert.False(item.Valid);
+            item.paidBiomass = 20; item.paidCapsules = 4;
+            Assert.True(item.CanRecoverOnDiscard);
+            Assert.Equal(20, item.DiscardBiomass);
+            Assert.Equal(4, item.DiscardCapsules);
+        }
         [Fact] public void CancellingParkedWorkRecoversMaterialsOnceWithoutCancellingCurrentWork()
         {
             var previous = DefDatabase<ThingDef>.AllDefsListForReading.ToList();
@@ -189,7 +210,8 @@ namespace GeneFoundry.Tests
                 bench.billStack.AddBill(oldBill); bench.billStack.AddBill(currentBill);
                 bench.GetDirectlyHeldThings().TryAdd(current, false);
                 typeof(Building_GeneFabricator).GetField("activeBill", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(bench, currentBill);
-                bench.CancelItem(parked); bench.CancelItem(parked);
+                parked.totalWork = 0; // Invalid work still refunds its recorded paid ingredients.
+                parked.Discard(); parked.Discard();
                 Assert.Same(current, bench.Unfinished); Assert.Same(currentBill, bench.ActiveBill);
                 Assert.Equal(2, bench.billStack.Count); Assert.Contains(currentBill, bench.billStack.Bills); Assert.Contains(oldBill, bench.billStack.Bills);
                 Assert.False(oldBill.HasStarted); Assert.Null(oldBill.unfinished); Assert.True(oldBill.ShouldDoNow());
@@ -469,15 +491,15 @@ namespace GeneFoundry.Tests
             finally { DefDatabase<ThingDef>.Clear(); DefDatabase<ThingDef>.Add(previous); }
         }
         [Theory]
-        [InlineData(false)] [InlineData(true)]
-        public void ScribeRoundTripPreservesSelectedGenesProgressRiskAndOwner(bool owned)
+        [InlineData(false, .3f)] [InlineData(true, .3f)] [InlineData(true, .55f)]
+        public void ScribeRoundTripPreservesSelectedGenesProgressRiskAndOwner(bool owned, float risk)
         {
             var previous = DefDatabase<GeneDef>.AllDefsListForReading.ToList();
             string path = Path.GetTempFileName();
             bool profiling = DeepProfiler.enabled; DeepProfiler.enabled = false;
             try
             {
-                var item = Paid(); item.AddWork(90, .3f);
+                var item = Paid(); item.AddWork(90, risk);
                 var owner = (Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn));
                 owner.def = ItemDef("Human"); owner.def.category = ThingCategory.Pawn; owner.thingIDNumber = 1234;
                 if (owned) Assert.True(item.TryClaim(owner));
@@ -499,7 +521,7 @@ namespace GeneFoundry.Tests
                 Assert.True(loaded.Valid, $"committed={loaded.committed}, total={loaded.totalWork}, done={loaded.workDone}, risk={loaded.riskWork}, genes={string.Join(",", loaded.genes?.Select(g => g?.defName ?? "null") ?? new string[0])}; XML={File.ReadAllText(path)}");
                 Assert.Equal(item.genes, loaded.genes);
                 Assert.Equal(90,loaded.workDone);
-                Assert.Equal(27,loaded.riskWork,4);
+                Assert.Equal(90 * risk,loaded.riskWork,4);
                 if (owned)
                 {
                     Assert.Same(owner, loaded.creator);
@@ -507,7 +529,7 @@ namespace GeneFoundry.Tests
                     Assert.False(loaded.CanBeWorkedBy((Pawn)RuntimeHelpers.GetUninitializedObject(typeof(Pawn))));
                 }
                 loaded.AddWork(10,0);
-                Assert.Equal(.27f,loaded.Failure,5);
+                Assert.Equal(.9f * risk,loaded.Failure,5);
             }
             finally
             {

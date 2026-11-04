@@ -37,10 +37,11 @@ namespace GeneFoundry.Components
         public override void PostDraw()
         {
             // Corpse effects are drawn by the existing map presentation, once only.
-            if (!(driver is ICorpseLiquidationPresentation) && FrameAt(Find.TickManager.TicksGame) >= 0)
+            if (FrameAt(Find.TickManager.TicksGame) >= 0)
             {
+                if (driver is ICorpseLiquidationPresentation) return;
                 foreach (var ingredient in ingredients)
-                    if (ingredient.Active)
+                    if (ingredient.Active && !ingredient.HideOnly)
                         Graphic_GeneVat.DrawIngredient(ingredient.parent,
                             MapComponent_CorpseLiquidationVisuals.MaterialContentsCenter(parent), parent.Rotation);
                 MapComponent_CorpseLiquidationVisuals.DrawMaterialBubbles(parent, startedAt);
@@ -52,6 +53,8 @@ namespace GeneFoundry.Components
         {
             if (ingredients.Count > 0 && FrameAt(Find.TickManager.TicksGame) < 0) RestoreIngredients();
         }
+        public override string CompInspectStringExtra() => parent.Spawned
+            ? ProcessingEnvironment.Description(parent, false) : null;
         public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
         {
             RestoreIngredients();
@@ -76,24 +79,30 @@ namespace GeneFoundry.Components
             if (driver != pawn.jobs.curDriver) RestoreIngredients();
             worker = pawn;
             driver = pawn.jobs.curDriver;
-            if (ingredients.Count == 0 && !(driver is ICorpseLiquidationPresentation))
+            if (ingredients.Count == 0)
                 foreach (var entry in pawn.CurJob.placedThings ?? new List<ThingCountClass>())
                 {
                     if (!(entry.thing is ThingWithComps food) || food.Destroyed || !food.Spawned || food.AllComps.Count == 0 ||
-                        !(food.def.IsMeat || food.def.IsWithinCategory(ThingCategoryDefOf.PlantFoodRaw))) continue;
+                        !ShouldTrackIngredient(food.def, driver is ICorpseLiquidationPresentation)) continue;
                     if (ingredients.Exists(x => x.parent == food)) continue;
                     var visual = new CompGeneVatIngredientVisual { parent = food, owner = this,
+                        HideOnly = food.def.defName == "MedicineHerbal",
                         props = new CompProperties { compClass = typeof(CompGeneVatIngredientVisual) } };
                     food.AllComps.Add(visual);
                     ingredients.Add(visual);
                     food.Map.mapDrawer.MapMeshDirty(food.Position, MapMeshFlagDefOf.Things);
                 }
         }
+
+        internal static bool ShouldTrackIngredient(ThingDef def, bool corpseProcessing) =>
+            def.defName == "MedicineHerbal" || (!corpseProcessing &&
+                (def.IsMeat || def.IsWithinCategory(ThingCategoryDefOf.PlantFoodRaw)));
     }
     // Transient, per-stack drawing suppression; rebuilt after load, never a Def patch.
     public class CompGeneVatIngredientVisual : ThingComp
     {
         public CompGeneVatAnimation owner;
+        public bool HideOnly;
         public bool Active => parent.Spawned && !parent.Destroyed && owner.parent.Spawned &&
             parent.Map == owner.parent.Map && owner.FrameAt(Find.TickManager.TicksGame) >= 0;
         public override bool DontDrawParent() => Active;

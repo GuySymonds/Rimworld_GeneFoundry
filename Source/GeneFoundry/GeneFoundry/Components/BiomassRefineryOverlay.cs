@@ -26,6 +26,7 @@ namespace GeneFoundry.Components
 
         private static Mesh[] meshes;
         private static Material[] materials;
+        private static Material[][] preparationMaterials;
 
         private static void EnsureResources()
         {
@@ -64,6 +65,38 @@ namespace GeneFoundry.Components
             if (materials[frame] == null) return;
             GenDraw.DrawMeshNowOrLater(meshes[parent.Rotation.AsInt], parent.DrawPos + Vector3.up * .002f,
                 Quaternion.identity, materials[frame], false);
+        }
+
+        internal static void DrawPreparation(Thing parent, int frame)
+        {
+            if (preparationMaterials == null)
+            {
+                preparationMaterials = new Material[4][];
+                string[] directions = { "north", "east", "south", "west" };
+                for (int direction = 0; direction < 4; direction++)
+                {
+                    preparationMaterials[direction] = new Material[8];
+                    for (int index = 0; index < 8; index++)
+                    {
+                        string path = TextureRoot + $"prep{index:00}_{directions[direction]}";
+                        Texture2D texture = ContentFinder<Texture2D>.Get(path, false);
+                        if (texture == null)
+                        {
+                            Log.ErrorOnce("GeneFoundry: missing refinery preparation overlay " + path, 1745200 + direction * 8 + index);
+                            continue;
+                        }
+                        preparationMaterials[direction][index] = MaterialPool.MatFrom(
+                            new MaterialRequest(texture, ShaderDatabase.Transparent, Color.white));
+                    }
+                }
+            }
+            Material material = preparationMaterials[parent.Rotation.AsInt][frame];
+            if (material == null) return;
+            // Preparation artwork uses the full directional chassis canvas, not the vat quad.
+            Graphic graphic = parent.Graphic;
+            GenDraw.DrawMeshNowOrLater(graphic.MeshAt(parent.Rotation),
+                parent.DrawPos + graphic.DrawOffset(parent.Rotation) + Vector3.up * .004f,
+                Quaternion.identity, material, false);
         }
     }
 }

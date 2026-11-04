@@ -7,6 +7,10 @@ namespace GeneFoundry.Components
         public const int FillingTicksPerFrame = 10;
         public const int ProcessingTicksPerFrame = 5;
         public const int FillingDuration = 8 * FillingTicksPerFrame;
+        public const int PreparationTicksPerFrame = 6;
+
+        public static int PreparationFrameAt(int elapsedTicks) =>
+            Math.Max(0, elapsedTicks) / PreparationTicksPerFrame % 8;
 
         // Material indices: clean=0, dirty=1, filling=2..9, processing=10..25.
         public static int FrameAt(bool processing, bool used, int elapsedTicks)

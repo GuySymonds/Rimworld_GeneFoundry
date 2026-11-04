@@ -9,6 +9,27 @@ namespace GeneFoundry.Tests
     public class BiomassRefineryAnimationTests
     {
         [Fact]
+        public void PreparationLoopsAllEightFramesIndependentlyOfVatAnimation()
+        {
+            for (int tick = 0; tick < 144; tick++)
+                Assert.Equal(tick / 6 % 8, BiomassRefineryAnimation.PreparationFrameAt(tick));
+            Assert.Equal(0, BiomassRefineryAnimation.PreparationFrameAt(-1));
+        }
+
+        [Fact]
+        public void PreparationHasEightTransparentFramesForEveryDirection()
+        {
+            string root = Path.Combine(AppContext.BaseDirectory, "Fixtures/Refinery");
+            Assert.Equal(32, Directory.GetFiles(root, "prep*.png").Length);
+            foreach (string direction in new[] { "north", "east", "south", "west" })
+                for (int frame = 0; frame < 8; frame++)
+                {
+                    byte[] png = File.ReadAllBytes(Path.Combine(root, $"prep{frame:00}_{direction}.png"));
+                    Assert.Equal(6, png[25]);
+                }
+        }
+
+        [Fact]
         public void FillingRunsOnceThenAllSixteenFramesLoop()
         {
             for (int tick = 0; tick < 560; tick++)
@@ -33,7 +54,7 @@ namespace GeneFoundry.Tests
         public void AllTwentySixAssetsShareAnRgbaCanvas()
         {
             string root = Path.Combine(AppContext.BaseDirectory, "Fixtures/Refinery");
-            Assert.Equal(26, Directory.GetFiles(root, "*.png").Length);
+            Assert.Equal(26, Directory.GetFiles(root, "*.png").Length - Directory.GetFiles(root, "prep*.png").Length);
             byte[] first = File.ReadAllBytes(Path.Combine(root, "CleanVat.png"));
             for (int frame = 0; frame < 26; frame++)
             {

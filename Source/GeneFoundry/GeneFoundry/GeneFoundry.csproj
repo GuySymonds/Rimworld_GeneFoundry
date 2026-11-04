@@ -61,6 +61,7 @@
     <Compile Include="Fabrication\FabricationCalculations.cs" />
     <Compile Include="Fabrication\FabricationState.cs" />
     <Compile Include="Fabrication\FabricationJobs.cs" />
+    <Compile Include="Fabrication\Graphic_GeneFabricator.cs" />
     <Compile Include="Fabrication\FabricationBills.cs" />
     <Compile Include="Fabrication\FabricationWorkspace.cs" />
     <Compile Include="Fabrication\FabricationHandlingJob.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Jobs\JobDriver_ExtractCorpseBiomass.cs" />
     <Compile Include="Recipes\CorpseBiomassUtility.cs" />
     <Compile Include="Recipes\BiomassCalculations.cs" />
+    <Compile Include="Recipes\ProcessingEnvironment.cs" />
     <Compile Include="Recipes\Building_GeneVat.cs" />
     <Compile Include="Recipes\MapComponent_CorpseLiquidationVisuals.cs" />
     <Compile Include="Recipes\ArtificialPartRecovery.cs" />
