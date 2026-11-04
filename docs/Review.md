@@ -1,5 +1,9 @@
 # Solution review — 4 November 2026
 
+## Six-row research layout — 4 November 2026
+
+Placed Enzymatic extraction directly below Gene fabrication and moved category projects to a nearby grid on the right. Categories fill down six rows before adding another column, without a column limit. Stable IDs, costs and prerequisites are unchanged. Verified 354 portable and 475 managed tests passed; the layout regression covers 43 categories across eight columns, six rows, unique positions and load-order stability. Debug build passed with zero warnings/errors and deployed to `Mods/GeneFoundry_dev`; installed DLL and research XML hashes matched. Displayed spacing still requires [live research acceptance](Testing.md#research).
+
 ## Mod icon transparency validation — 4 November 2026
 
 Limited opacity sampling to Preview.png; ModIcon.png may use transparency. Artwork dimensions, PNG format, file-size limits and runtime file hashes remain unchanged. The release guide now explicitly permits icon transparency; the documentation search found no other icon opacity restriction.

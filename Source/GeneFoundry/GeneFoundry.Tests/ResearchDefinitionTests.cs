@@ -36,6 +36,11 @@ namespace GeneFoundry.Tests
             });
             Assert.Equal(2, projects.Select(project => (
                 (string)project.Element("researchViewX"), (string)project.Element("researchViewY"))).Distinct().Count());
+            XElement fabrication = projects.Single(project => (string)project.Element("defName") == "GF_GeneFabrication");
+            XElement enzymes = projects.Single(project => (string)project.Element("defName") == "GF_EnzymaticExtraction");
+            Assert.Equal((string)fabrication.Element("researchViewX"), (string)enzymes.Element("researchViewX"));
+            Assert.Equal("0", (string)fabrication.Element("researchViewY"));
+            Assert.Equal("1", (string)enzymes.Element("researchViewY"));
         }
 
         [Theory]

@@ -155,16 +155,21 @@ namespace GeneFoundry.Tests
         [Fact]
         public void ProjectNamesAndLayoutAreStableRegardlessOfGeneLoadOrder()
         {
-            GeneDef[] genes = Enumerable.Range(0, 15).Select(index =>
+            GeneDef[] genes = Enumerable.Range(0, 43).Select(index =>
                 Gene("Gene" + index, new GeneCategoryDef { defName = "Category" + index })).ToArray();
             var first = Build(genes);
             var reversed = Build(genes.Reverse().ToArray());
             Assert.Equal(first.Select(project => project.defName), reversed.Select(project => project.defName));
-            Assert.Equal(15, first.Select(project => (project.researchViewX, project.researchViewY)).Distinct().Count());
+            Assert.Equal(43, first.Select(project => (project.researchViewX, project.researchViewY)).Distinct().Count());
+            Assert.Equal(6, first.Select(project => project.researchViewY).Distinct().Count());
+            Assert.Equal(8, first.Select(project => project.researchViewX).Distinct().Count());
+            Assert.All(first.GroupBy(project => project.researchViewX), column => Assert.InRange(column.Count(), 1, 6));
+            Assert.Equal(first.Select(project => (project.researchViewX, project.researchViewY)),
+                reversed.Select(project => (project.researchViewX, project.researchViewY)));
             Assert.All(first, project =>
             {
-                Assert.InRange(project.researchViewX, 6f, 10.5f);
-                Assert.True(project.researchViewY >= 0f);
+                Assert.True(project.researchViewX >= 1.25f);
+                Assert.InRange(project.researchViewY, 0f, 3.75f);
                 Assert.Equal(new[] { foundation }, project.prerequisites);
                 Assert.Contains(foundation, project.prerequisites);
             });

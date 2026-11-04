@@ -15,8 +15,8 @@
     <baseCost>750</baseCost>
     <techLevel>Industrial</techLevel>
     <tab>GF_GeneFoundry</tab>
-    <researchViewX>2</researchViewX>
-    <researchViewY>0</researchViewY>
+    <researchViewX>0</researchViewX>
+    <researchViewY>1</researchViewY>
     <prerequisites>
       <li>GF_GeneFabrication</li>
     </prerequisites>
