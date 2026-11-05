@@ -8,8 +8,6 @@ namespace GeneFoundry.Recipes
     // Directional base artwork and matching directional animation canvases.
     public class Graphic_GeneVat : Graphic_StyledMachine
     {
-        // Processing follows the building, independently of GraphicData.drawRotated.
-        public override bool ShouldDrawRotated => false;
         internal static Quaternion Orientation(Rot4 rotation)
         {
             double halfAngle = rotation.AsAngle * System.Math.PI / 360d;

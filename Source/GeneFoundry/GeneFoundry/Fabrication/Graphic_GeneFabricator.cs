@@ -27,7 +27,6 @@ namespace GeneFoundry.Fabrication
 
     public class Graphic_GeneFabricator : Graphic_StyledMachine
     {
-        public override bool ShouldDrawRotated => false;
         private readonly Material[][] frames = new Material[4][];
         private readonly Material[] idleFrames = new Material[4];
         private static readonly string[] Directions = { "north", "east", "south", "west" };

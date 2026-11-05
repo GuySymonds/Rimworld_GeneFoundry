@@ -58,6 +58,14 @@ namespace GeneFoundry.Tests
             var oldGraphic = released.Descendants("graphicData").Single();
             foreach (string field in new[] { "graphicClass", "texPath" })
                 graphic.Element(field).Value = oldGraphic.Element(field).Value;
+            // Player-facing prose and comments are not save contracts; allow
+            // corrections while retaining every storage/identity/placement field.
+            foreach (var document in new[] { released, current })
+            {
+                document.Descendants("label").Remove();
+                document.Descendants("description").Remove();
+                document.DescendantNodes().OfType<XComment>().Remove();
+            }
             Assert.True(XNode.DeepEquals(released, current));
         }
 

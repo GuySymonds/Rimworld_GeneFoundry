@@ -158,6 +158,16 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
+        public void HopperBatchDescriptionMatchesTheActualRefineryRequirement()
+        {
+            var refinery = Def("GF_BiomassRefinery").Element("comps").Elements().Single(e =>
+                (string)e.Attribute("Class") == "GeneFoundry.Components.CompProperties_BiomassRefiner");
+            string inputCount = ((int)refinery.Element("inputCount")).ToString(CultureInfo.InvariantCulture);
+            Assert.Contains("consumes " + inputCount + " when a batch starts.",
+                (string)Def("GF_BiomassHopper").Element("description"));
+        }
+
+        [Fact]
         public void AllSixExtractionRecipesHaveHalvedWork()
         {
             foreach (var recipe in Def("GF_GeneVat").Element("recipes").Elements())
@@ -174,6 +184,8 @@ namespace GeneFoundry.Tests
             var givers = Definitions().Where(def => def.Name == "WorkGiverDef" &&
                 def.Element("fixedBillGiverDefs")?.Elements().Any(element => element.Value == "GF_GeneVat") == true);
             XElement giver = Assert.Single(givers);
+            // The cached map scan gate resolves this same single Vat definition.
+            Assert.Equal("GF_GeneVat", Assert.Single(giver.Element("fixedBillGiverDefs").Elements()).Value);
             Assert.Equal("GeneFoundry.WorkGivers.WorkGiver_GeneVat", (string)giver.Element("giverClass"));
             Assert.Equal("Cooking", (string)giver.Element("workType"));
         }

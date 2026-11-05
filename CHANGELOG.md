@@ -2,6 +2,8 @@
 
 ## 1.1.0 — In development
 
+- Correct the Hopper description to show the existing 45-biomass refinery requirement; gameplay quantities are unchanged.
+
 - Skip background corpse-presentation pawn scans when every Vat direction uses Simple graphics; retain Detailed fallback and save compatibility.
 - Add the default-enabled “Enable AI Slop” graphics option: disable it for static Simple machine artwork, with per-direction Detailed fallback where Simple art is absent. Restart required; released saves and settings retain their behavior.
 - Include authored Simple Gene Fabricator artwork for all four orientations, using the existing graphics toggle without idle or processing overlays in Simple mode.
