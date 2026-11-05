@@ -209,6 +209,30 @@ namespace GeneFoundry.Tests
             }
             finally { Scribe.ForceStop(); File.Delete(path); DeepProfiler.enabled = profiling; }
         }
+        [Fact]
+        public void FixedReleasedSettingsPayloadRetainsEveryCustomValueAndDefaultsToDetailed()
+        {
+            bool profiling = DeepProfiler.enabled;
+            DeepProfiler.enabled = false;
+            try
+            {
+                var loaded = Load(Path.Combine(AppContext.BaseDirectory, "Fixtures/ReleasedSettings100.xml"));
+                loaded.Validate();
+                var expected = new GeneFoundrySettings {
+                    processingMinutes = 2160, minimumProcessingMinutes = 1080, processorReductionMinutes = 108f,
+                    corpseMinutesPer50Material = 30f, corpseSetupMinutes = 4f, corpseHandlingPercent = 40,
+                    expertSpeedPercent = 180, refinementCleanlinessEnabled = false, refinementDirtyPenalty = 12,
+                    refinementExposurePenalty = 7, dimLightPenalty = 8, geneFabricationResearchCost = 1700,
+                    geneCategoryBaseCost = 700, geneResearchPerGene = 125, geneResearchPerComplexity = 300,
+                    geneResearchPerArchite = 600, geneCategoryCostPercent = 30,
+                    geneCategoryMaximumCost = 5000, geneCategoryMinimumCost = 1200
+                };
+                foreach (var field in typeof(GeneFoundrySettings).GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                    Assert.Equal(field.GetValue(expected), field.GetValue(loaded));
+            }
+            finally { Scribe.ForceStop(); DeepProfiler.enabled = profiling; }
+        }
+
         private static GeneFoundrySettings Load(string path)
         {
             var loaded = new GeneFoundrySettings { useDetailedGraphics = false };

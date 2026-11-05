@@ -3,6 +3,7 @@
 ## 1.1.0 — In development
 
 - Add the default-enabled “Enable AI Slop” graphics option: disable it for static Simple machine artwork, with per-direction Detailed fallback where Simple art is absent. Restart required; released saves and settings retain their behavior.
+- Include authored Simple Biomass Refinery artwork for all four orientations.
 - Standardise runtime texture names without changing PNG data, Detailed animations or gameplay.
 
 - Declare RimWorld 1.7 support alongside 1.6; Biotech remains required.

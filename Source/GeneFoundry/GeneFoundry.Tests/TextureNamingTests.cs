@@ -44,6 +44,27 @@ namespace GeneFoundry.Tests
             }
         }
 
+        [Theory]
+        [InlineData("GeneVat", 832, 832)]
+        [InlineData("BiomassRefinery", 832, 576)]
+        public void ShippedSimpleArtworkIncludesEveryAuthoredOrientation(string machine, int width, int height)
+        {
+            var paths = Paths;
+            foreach (string direction in new[] { "north", "east", "south", "west" })
+            {
+                string path = $"GeneFoundry/Buildings/{machine}_Simple_{direction}.png";
+                Assert.Contains(path, paths);
+                byte[] image = File.ReadAllBytes(Path.Combine(Root, path));
+                Assert.Equal(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, image.Take(8));
+                bool horizontal = direction == "east" || direction == "west";
+                Assert.Equal(horizontal ? height : width,
+                    System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(image.AsSpan(16, 4)));
+                Assert.Equal(horizontal ? width : height,
+                    System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(image.AsSpan(20, 4)));
+                Assert.Equal(6, image[25]);
+            }
+        }
+
         [Fact]
         public void AllFabricatorIdleAndProcessingFramesMatchEachDirectionalBaseCanvas()
         {
