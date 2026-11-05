@@ -1,5 +1,15 @@
 # Solution review — 4 November 2026
 
+## Remaining 1.1 artwork and tracked Workshop identity — 5 November 2026
+
+Compared the Codex 1.1 branch directly with merged main. Remaining content is the corrected Simple Hopper east/west orientation and five source screenshots/GIFs; production C# is identical to main. Integrated main's squash-merge ancestry while preserving those corrections so the new PR diff excludes the already merged implementation.
+
+The user explicitly approved tracking the public Workshop identity. Committed `Mod/About/PublishedFileId.txt`, updated AGENTS and removed its ignore rule. The confirmed ID is pinned by a portable metadata regression. Steam's public GetPublishedFileDetails API returned GeneFoundry, RimWorld app 294100 and a successful result for the supplied identity. No Steam credentials are stored.
+
+Extracted publication validation into the existing shared content helper. Release.ps1 still performs a Release build with DeployMod=false, but now requires a valid tracked source ID and rejects malformed/conflicting destination IDs before building or cleanup. Removed its duplicate staging cleanup; the shared copier validates inputs, refreshes content and copies the ID. Package validation now requires a nonempty ID matching the source. Release documentation describes the tracked public identity and deliberate replacement for forks.
+
+Verified 380 portable tests and 527 managed tests. Release build passed with zero warnings/errors; the generated distribution contains the same ID as the tracked source and validates 200 runtime files (173 PNGs, including the corrected Hopper exports). All release workflow safety regressions passed, including actual Release.ps1 preflight failures for absent/empty/malformed source IDs, empty/malformed/conflicting destination IDs, untouched staging on rejection, and missing/malformed/mismatched package IDs. Empty-file handling was corrected to use ReadAllText after a regression exposed Get-Content's null result. Six release-guide links/anchors and git diff --check passed. Source screenshots/GIFs remain outside the runtime package. No installed-mod deployment, Workshop upload or merge into main was performed; live rendering remains manual acceptance work.
+
 ## PR #13 follow-up correctness and complexity review — 5 November 2026
 
 Reviewed the cached pawn-scan decision, graphics/material selection, map lifecycle and released settings/job contracts. No confirmed defect was found in the scan gate or released-save handling. The workgiver is explicitly restricted to GF_GeneVat, matching the definition used by the one-time gate; added an assertion preserving that invariant. Unknown graphics and missing Simple directions retain the scan. The transient cache is not Scribed, new map components recompute it, and existing job toils retain their ordering. Kept the simple cached decision rather than adding building registries, scheduling or new invalidation machinery.

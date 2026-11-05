@@ -2,6 +2,8 @@
 
 ## 1.1.0 — In development
 
+- Track the public Workshop identity and require a matching publication ID in distributions; reject identity problems before building or cleaning staging.
+
 - Correct the Hopper description to show the existing 45-biomass refinery requirement; gameplay quantities are unchanged.
 
 - Skip background corpse-presentation pawn scans when every Vat direction uses Simple graphics; retain Detailed fallback and save compatibility.

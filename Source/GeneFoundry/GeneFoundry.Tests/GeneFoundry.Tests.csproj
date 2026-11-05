@@ -65,7 +65,7 @@
     <Content Include="Fixtures/ReleasedHopper100.xml" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Fixtures/ReleasedSettings100.xml" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/**/*.png" Link="Fixtures/Textures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../../Mod/About/*" Exclude="../../../Mod/About/PublishedFileId.txt" Link="Fixtures/About/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../Mod/About/*" Link="Fixtures/About/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/LICENSE" Link="Fixtures/Mod-LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../LICENSE" Link="Fixtures/Repository-LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../GeneFoundry/Recipes/BiomassCalculations.cs" Link="Production/BiomassCalculations.cs" />

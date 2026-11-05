@@ -24,7 +24,7 @@ Deliver the smallest complete, correct change. Inspect existing code before addi
 - `Source/Textures/` holds editable artwork and source exports; `Mod/Textures/` holds runtime PNGs. Source projects may retain descriptive artist filenames; no automated export is implied.
 - `scripts/` holds PowerShell tooling. Executable scripts use Verb-Noun names; `ModContent.ps1` is the shared helper. Dot-source helpers; do not turn them into entry points.
 - `docs/` holds technical notes in PascalCase Markdown files; `RELEASE.md` is the release checklist and `workshop-description.txt` is Steam BBCode. Root `README.md`, `CHANGELOG.md`, `LICENSE`, and `AGENTS.md` are conventional exceptions.
-- `bin/`, `obj/`, `TestResults/`, and `dist/` are generated, ignored outputs. Never commit game assemblies or Workshop publication IDs. Keep root and runtime LICENSE identical.
+- `bin/`, `obj/`, `TestResults/`, and `dist/` are generated, ignored outputs. Never commit game assemblies. Track `Mod/About/PublishedFileId.txt` as the public, stable Workshop identity; preserve it in distributions and reject conflicting IDs. Keep root and runtime LICENSE identical.
 
 ## Gameplay decisions
 

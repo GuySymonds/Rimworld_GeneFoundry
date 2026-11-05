@@ -427,6 +427,5 @@ FodyWeavers.xsd
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
 
-# Generated Workshop package and local publication identity
+# Generated Workshop package (the public Workshop ID is tracked).
 /dist/
-/Mod/About/PublishedFileId.txt

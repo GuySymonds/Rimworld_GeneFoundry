@@ -29,6 +29,12 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
+        public void WorkshopPublicationIdentityRemainsTheReleasedItem()
+        {
+            Assert.Equal("3833789489", File.ReadAllText(Fixture("About/PublishedFileId.txt")).Trim());
+        }
+
+        [Fact]
         public void AssemblyVersionsAgreeWithMetadataAndStartupUsesAssemblyVersion()
         {
             string version = (string)Metadata.Element("modVersion");

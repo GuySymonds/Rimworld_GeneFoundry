@@ -21,11 +21,12 @@ function Assert-SameCanvas([string]$Frame, [string]$Base) {
         if ($baseImage) { $baseImage.Dispose() }
     }
 }
-foreach ($file in @('About/About.xml', 'About/Preview.png', 'Assemblies/GeneFoundry.dll', 'LICENSE')) {
+foreach ($file in @('About/About.xml', 'About/Preview.png', 'About/PublishedFileId.txt', 'Assemblies/GeneFoundry.dll', 'LICENSE')) {
     $path = Join-Path $package $file
     Require (Test-Path -LiteralPath $path -PathType Leaf) "Missing $file"
     Require ((Get-Item -LiteralPath $path).Length -gt 0) "Empty $file"
 }
+Assert-WorkshopPublicationIdentity -Source $source -Destination $package | Out-Null
 [xml]$about = Get-Content -LiteralPath (Join-Path $package 'About/About.xml') -Raw
 $meta = $about.ModMetaData
 Require ($null -ne $meta) 'Expected ModMetaData root.'
@@ -169,4 +170,4 @@ foreach ($name in $refineryNames) {
     Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery overlay: $relative"
     Assert-SameCanvas $relative 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/BiomassRefinery_Detailed_Clean.png'
 }
-Write-Host "Validated GeneFoundry v${version}: $($expected.Count) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."
+Write-Host "Validated GeneFoundry v${version}: $($expected.Count + 1) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."
