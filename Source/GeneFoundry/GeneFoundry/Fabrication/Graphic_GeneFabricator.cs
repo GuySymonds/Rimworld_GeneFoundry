@@ -1,4 +1,5 @@
 using GeneFoundry.Jobs;
+using GeneFoundry.Components;
 using UnityEngine;
 using Verse;
 
@@ -24,9 +25,8 @@ namespace GeneFoundry.Fabrication
             ? (Find.TickManager.TicksGame - animationStartedAt) / 6 % 8 : -1;
     }
 
-    public class Graphic_GeneFabricator : Graphic_Multi
+    public class Graphic_GeneFabricator : Graphic_StyledMachine
     {
-        public override bool ShouldDrawRotated => false;
         private readonly Material[][] frames = new Material[4][];
         private readonly Material[] idleFrames = new Material[4];
         private static readonly string[] Directions = { "north", "east", "south", "west" };
@@ -36,12 +36,13 @@ namespace GeneFoundry.Fabrication
             base.Init(req);
             for (int direction = 0; direction < 4; direction++)
             {
+                if (UsesSimple(new Rot4(direction))) continue;
                 idleFrames[direction] = OverlayMaterial(
-                    $"GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabricationDefault_{Directions[direction]}", req.color);
+                    $"GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabricator_Detailed_Idle_{Directions[direction]}", req.color);
                 var set = new Material[8];
                 for (int frame = 0; frame < set.Length; frame++)
                 {
-                    string framePath = $"GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabrication_Frame{frame}_{Directions[direction]}";
+                    string framePath = $"GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabricator_Detailed_Processing_{frame:00}_{Directions[direction]}";
                     var texture = ContentFinder<Texture2D>.Get(framePath, false);
                     if (texture == null)
                     {
@@ -70,6 +71,7 @@ namespace GeneFoundry.Fabrication
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
             base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            if (UsesSimple(rot)) return;
             int frame = (thing as Building_GeneFabricator)?.AnimationFrame ?? -1;
             Material overlay = frame >= 0 && frames[rot.AsInt] != null
                 ? frames[rot.AsInt][frame] : idleFrames[rot.AsInt];

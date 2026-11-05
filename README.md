@@ -2,11 +2,11 @@
 
 [![Portable checks](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml/badge.svg?branch=main&event=push)](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/portable-checks.yml)
 [![CodeQL](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/codeql.yml/badge.svg?branch=main&event=push)](https://github.com/GuySymonds/Rimworld_GeneFoundry/actions/workflows/codeql.yml)
-[![RimWorld 1.6](https://img.shields.io/badge/RimWorld-1.6-blue)](Mod/About/About.xml)
+[![RimWorld 1.6 / 1.7](https://img.shields.io/badge/RimWorld-1.6%20%2F%201.7-blue)](Mod/About/About.xml)
 [![Requires Biotech](https://img.shields.io/badge/DLC-Biotech_required-blue)](Mod/About/About.xml)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-GeneFoundry **v1.0.0** turns organic matter into custom genepacks in **RimWorld 1.6 with Biotech**. See the [release notes](CHANGELOG.md#100--4-november-2026).
+GeneFoundry **v1.1.0** turns organic matter into custom genepacks in **RimWorld 1.6 or 1.7 with Biotech**. See the [release notes](CHANGELOG.md#110--in-development).
 
 1. **Extract** raw biomass from meat, plants or organic corpses at the Gene Vat, with optional enzymes and artificial-part salvage.
 2. **Refine** hopper-fed biomass in an automated Biomass Refinery.

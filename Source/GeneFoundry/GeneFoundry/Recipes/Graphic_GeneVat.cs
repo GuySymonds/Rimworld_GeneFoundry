@@ -6,10 +6,8 @@ using Verse;
 namespace GeneFoundry.Recipes
 {
     // Directional base artwork and matching directional animation canvases.
-    public class Graphic_GeneVat : Graphic_Multi
+    public class Graphic_GeneVat : Graphic_StyledMachine
     {
-        // Processing follows the building, independently of GraphicData.drawRotated.
-        public override bool ShouldDrawRotated => false;
         internal static Quaternion Orientation(Rot4 rotation)
         {
             double halfAngle = rotation.AsAngle * System.Math.PI / 360d;
@@ -23,7 +21,7 @@ namespace GeneFoundry.Recipes
         private Material[][] frames;
         private static readonly string[] Directions = { "north", "east", "south", "west" };
         internal static string FramePath(int frame, Rot4 rotation) =>
-            $"GeneFoundry/Buildings/GeneVatFrames/vat_{frame:00}_{Directions[rotation.AsInt]}";
+            $"GeneFoundry/Buildings/GeneVatFrames/GeneVat_Detailed_Transition_{frame:00}_{Directions[rotation.AsInt]}";
 
         public override void Init(GraphicRequest req)
         {
@@ -31,6 +29,7 @@ namespace GeneFoundry.Recipes
             frames = new Material[4][];
             for (int direction = 0; direction < 4; direction++)
             {
+                if (UsesSimple(new Rot4(direction))) continue;
                 var set = new Material[8];
                 for (int i = 0; i < set.Length; i++)
                 {

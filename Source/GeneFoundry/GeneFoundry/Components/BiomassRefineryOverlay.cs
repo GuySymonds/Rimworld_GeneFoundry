@@ -34,8 +34,8 @@ namespace GeneFoundry.Components
             materials = new Material[26];
             for (int i = 0; i < materials.Length; i++)
             {
-                string name = i == 0 ? "CleanVat" : i == 1 ? "DirtyVat" :
-                    i < 10 ? "VatFilling" + (i - 2).ToString("00") : "VatProcess" + (i - 10).ToString("00");
+                string name = i == 0 ? "BiomassRefinery_Detailed_Clean" : i == 1 ? "BiomassRefinery_Detailed_Dirty" :
+                    i < 10 ? "BiomassRefinery_Detailed_Filling_" + (i - 2).ToString("00") : "BiomassRefinery_Detailed_Processing_" + (i - 10).ToString("00");
                 Texture2D texture = ContentFinder<Texture2D>.Get(TextureRoot + name, false);
                 if (texture == null)
                 {
@@ -78,7 +78,7 @@ namespace GeneFoundry.Components
                     preparationMaterials[direction] = new Material[8];
                     for (int index = 0; index < 8; index++)
                     {
-                        string path = TextureRoot + $"prep{index:00}_{directions[direction]}";
+                        string path = TextureRoot + $"BiomassRefinery_Detailed_Preparation_{index:00}_{directions[direction]}";
                         Texture2D texture = ContentFinder<Texture2D>.Get(path, false);
                         if (texture == null)
                         {

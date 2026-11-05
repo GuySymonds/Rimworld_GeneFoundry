@@ -1,5 +1,18 @@
 # Release notes
 
+## 1.1.0 — In development
+
+- Correct the Hopper description to show the existing 45-biomass refinery requirement; gameplay quantities are unchanged.
+
+- Skip background corpse-presentation pawn scans when every Vat direction uses Simple graphics; retain Detailed fallback and save compatibility.
+- Add the default-enabled “Enable AI Slop” graphics option: disable it for static Simple machine artwork, with per-direction Detailed fallback where Simple art is absent. Restart required; released saves and settings retain their behavior.
+- Include authored Simple Gene Fabricator artwork for all four orientations, using the existing graphics toggle without idle or processing overlays in Simple mode.
+- Include authored Simple Biomass Refinery and Hopper artwork for all four orientations. The Hopper follows the same restart-required graphics toggle and per-direction fallback.
+- Standardise runtime texture names without changing PNG data, Detailed animations or gameplay.
+
+- Declare RimWorld 1.7 support alongside 1.6; Biotech remains required.
+- Deploy Debug and Release builds to the same GeneFoundry folder, using version metadata instead of a duplicate development copy.
+
 ## 1.0.0 — 4 November 2026
 
 First public release for RimWorld 1.6 with Biotech.

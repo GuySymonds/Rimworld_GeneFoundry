@@ -15,7 +15,7 @@
 
     <!-- Gene Fabricator artwork -->
     <graphicData>
-      <texPath>GeneFoundry/Buildings/GeneFabricator</texPath>
+      <texPath>GeneFoundry/Buildings/GeneFabricator_Detailed</texPath>
       <graphicClass>GeneFoundry.Fabrication.Graphic_GeneFabricator</graphicClass>
       <shaderType>CutoutComplex</shaderType>
       <drawSize>(5.4,2.4)</drawSize>

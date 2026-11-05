@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fixed v1.0.0 Scribe payload: keep released keys independent of today's writer. -->
+<settings>
+  <processingMinutes>2160</processingMinutes>
+  <minimumProcessingMinutes>1080</minimumProcessingMinutes>
+  <processorReductionMinutes>108</processorReductionMinutes>
+  <corpseMinutesPer50Material>30</corpseMinutesPer50Material>
+  <corpseSetupMinutes>4</corpseSetupMinutes>
+  <corpseHandlingPercent>40</corpseHandlingPercent>
+  <expertSpeedPercent>180</expertSpeedPercent>
+  <refinementCleanlinessEnabled>False</refinementCleanlinessEnabled>
+  <refinementDirtyPenalty>12</refinementDirtyPenalty>
+  <refinementExposurePenalty>7</refinementExposurePenalty>
+  <dimLightPenalty>8</dimLightPenalty>
+  <geneFabricationResearchCost>1700</geneFabricationResearchCost>
+  <geneCategoryBaseCost>700</geneCategoryBaseCost>
+  <geneResearchPerGene>125</geneResearchPerGene>
+  <geneResearchPerComplexity>300</geneResearchPerComplexity>
+  <geneResearchPerArchite>600</geneResearchPerArchite>
+  <geneCategoryCostPercent>30</geneCategoryCostPercent>
+  <geneCategoryMaximumCost>5000</geneCategoryMaximumCost>
+  <geneCategoryMinimumCost>1200</geneCategoryMinimumCost>
+</settings>

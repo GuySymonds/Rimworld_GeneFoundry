@@ -2,6 +2,38 @@
 
 [Back to overview](../README.md) · [Extraction behavior](Biomass.md) · [Refinery artwork](BiomassRefineryOverlay.md)
 
+## Graphics styles and texture names
+
+In **Options > Mod Settings > GeneFoundry > Graphics**, **Enable AI Slop** selects Detailed artwork and animations when enabled (the default for new installations and released settings without this key). Disable it for available Simple static sprites. **Restart RimWorld after changing the setting**; the running session keeps its original selection so cached materials cannot mix styles.
+
+Selection is independent for every machine and direction: a missing optional Simple image quietly uses that direction's Detailed base, animations and overlays. Present Simple images suppress the machine's animation layers, decorative bubbles and vanilla recipe visual work effects; work sounds remain unchanged. Simple vats use ordinary RimWorld corpse/ingredient drawing at their existing positions, without custom basin fitting or staged corpse-decay visuals. Actual rot-stink gas, processing, unfinished items, saved progress and ingredient charging remain unchanged. Detailed rendering retains its existing shaders, meshes, dimensions, offsets and timing.
+
+When all four Vat directions resolve to Simple graphics, the corpse-presentation map component skips its per-tick pawn scan entirely. This decision is cached once per map from the actual selected graphics, not merely the checkbox. Any Detailed fallback direction or unknown Vat graphic retains the existing scan. The cache is transient and recomputed after loading; no saved fields or progress are changed.
+
+All paths below are relative to `Mod/Textures/GeneFoundry/`. Names are case-sensitive: use PascalCase asset/style/state components separated by underscores, two-digit frame numbers, lowercase `north`, `east`, `south`, `west`, and lowercase `.png`. Omit inapplicable components. Non-directional overlays retain their original geometry rather than gaining artificial directional frames.
+
+| Folder | Filename pattern | Frames |
+| --- | --- | --- |
+| `Buildings/` | `<machine>_Detailed_<direction>.png` | Four bases per machine |
+| `Buildings/` | `<machine>_Simple_<direction>.png` | Optional, one per direction |
+| `Buildings/GeneVatFrames/` | `GeneVat_Detailed_Transition_<frame>_<direction>.png` | 00–07 per direction |
+| `Buildings/GeneFabricatorFrames/` | `GeneFabricator_Detailed_Idle_<direction>.png` | Four overlays |
+| `Buildings/GeneFabricatorFrames/` | `GeneFabricator_Detailed_Processing_<frame>_<direction>.png` | 00–07 per direction |
+| `Buildings/BiomassRefineryFrames/` | `BiomassRefinery_Detailed_Preparation_<frame>_<direction>.png` | 00–07 per direction |
+| `Buildings/BiomassRefineryFrames/` | `BiomassRefinery_Detailed_Clean.png`, `BiomassRefinery_Detailed_Dirty.png` | Static vat states |
+| `Buildings/BiomassRefineryFrames/` | `BiomassRefinery_Detailed_Filling_<frame>.png` | 00–07 |
+| `Buildings/BiomassRefineryFrames/` | `BiomassRefinery_Detailed_Processing_<frame>.png` | 00–15 |
+| `Effects/BubbleMass/` | `BubbleMass_<frame>.png` | 00–07 |
+| `RawBiomass/`, `RefinedBiomass/` | `RawBiomass_A.png` / `RefinedBiomass_A.png` (also `_B`, `_C`) | Stack variants |
+| `Buildings/` | `BiomassHopper_Detailed_<direction>.png`, `BiomassHopper_Simple_<direction>.png` | Four bases per style |
+| Root | `UnfinishedGenePack.png` | No style variants |
+
+Simple Vat, Refinery, Fabricator and Hopper artwork is supplied in all four directions. Each uses the same toggle and retains per-direction Detailed fallback if an optional Simple image is removed.
+
+To add Simple artwork, export a complete transparent directional PNG into `Buildings/` using `GeneVat`, `BiomassRefinery`, `BiomassHopper` or `GeneFabricator` as `<machine>`. Do not create placeholders for missing directions. Restart after adding images; no C# changes are needed. Each authored direction is used directly without extra rotation or mirroring. All styles use the existing draw sizes: Vat `(3,3.6)`, Refinery `(3.2,2.2)`, Fabricator `(5.4,2.4)`, Hopper `(1.2,1.2)`; east/west use the native horizontal mesh dimensions. Compose transparent margins for those canvases. Footprints, interaction cells, altitude and draw offsets are unchanged. The supplied square Simple Vat canvases deliberately use the existing Vat draw size. Source artwork under `Source/Textures/` retains its artist filenames.
+
+The graphics setting adds only the `useDetailedGraphics` settings key (default `true`). Released setting keys, definition IDs, package ID and persisted types are preserved; no save migration is required. Texture paths were renamed; external retexture path compatibility is not provided.
+
 ## Corpse liquidation visuals
 
 During actual corpse extraction, the corpse visually advances through fresh, rotting and desiccated artwork at one-third and two-thirds progress. An already decayed corpse never looks fresher. Actual rot, yield, work, placement and ingredient handling are unchanged.
@@ -22,4 +54,4 @@ In-game checks still required: exercise all six extraction bills, check idle/hau
 
 Material extraction draws delivered meat/crop stacks inside the lower basin beneath the bubbles, shifted 0.25 cells towards the top so more of the ingredients remain visible. Herbal medicine is hidden during both material and corpse processing, without changing its consumption or position. Ingredient graphics return on interruption; map positions and tracked quantities are unchanged. Biomass extraction work is halved for meat, crops and corpses; artificial-part recovery and animation cadence are unchanged.
 
-Final Gene Vat artwork belongs in `Mod/Textures/GeneFoundry/Buildings/`: provide `GeneVat_north.png`, `GeneVat_east.png`, `GeneVat_south.png`, and `GeneVat_west.png`. Keep the XML graphic class as `GeneFoundry.Recipes.Graphic_GeneVat` to retain animation; it inherits `Graphic_Multi`. Export eight frames per direction into `GeneVatFrames/`, named `vat_00_north.png` through `vat_07_north.png`, and likewise `_east`, `_south`, and `_west`. Each frame must use the exact canvas dimensions and alignment of its directional base (currently 1086x1448 north/south and 1448x1086 east/west). Directional frames are not rotated again. A missing or incomplete set leaves that direction static and logs an error; release validation requires all 32 frames. Basin bounds for job contents and foreground bubbles are measured per view in `MapComponent_CorpseLiquidationVisuals.BasinBounds`. Keep working files in `Source/Textures/`; nothing copies from that directory automatically.
+Final Gene Vat artwork belongs in `Mod/Textures/GeneFoundry/Buildings/`: provide `GeneVat_Detailed_north.png`, `GeneVat_Detailed_east.png`, `GeneVat_Detailed_south.png`, and `GeneVat_Detailed_west.png`. Keep the XML graphic class as `GeneFoundry.Recipes.Graphic_GeneVat` to retain animation; it inherits `Graphic_Multi`. Export eight frames per direction into `GeneVatFrames/`, named `GeneVat_Detailed_Transition_00_north.png` through `GeneVat_Detailed_Transition_07_north.png`, and likewise `_east`, `_south`, and `_west`. Each frame must use the exact canvas dimensions and alignment of its directional base (currently 1086x1448 north/south and 1448x1086 east/west). Directional frames are not rotated again. A missing or incomplete set leaves that direction static and logs an error; release validation requires all 32 frames. Basin bounds for job contents and foreground bubbles are measured per view in `MapComponent_CorpseLiquidationVisuals.BasinBounds`. Keep working files in `Source/Textures/`; nothing copies from that directory automatically.

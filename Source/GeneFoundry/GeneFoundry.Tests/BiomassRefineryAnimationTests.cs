@@ -20,11 +20,11 @@ namespace GeneFoundry.Tests
         public void PreparationHasEightTransparentFramesForEveryDirection()
         {
             string root = Path.Combine(AppContext.BaseDirectory, "Fixtures/Refinery");
-            Assert.Equal(32, Directory.GetFiles(root, "prep*.png").Length);
+            Assert.Equal(32, Directory.GetFiles(root, "BiomassRefinery_Detailed_Preparation_*.png").Length);
             foreach (string direction in new[] { "north", "east", "south", "west" })
                 for (int frame = 0; frame < 8; frame++)
                 {
-                    byte[] png = File.ReadAllBytes(Path.Combine(root, $"prep{frame:00}_{direction}.png"));
+                    byte[] png = File.ReadAllBytes(Path.Combine(root, $"BiomassRefinery_Detailed_Preparation_{frame:00}_{direction}.png"));
                     Assert.Equal(6, png[25]);
                 }
         }
@@ -54,12 +54,12 @@ namespace GeneFoundry.Tests
         public void AllTwentySixAssetsShareAnRgbaCanvas()
         {
             string root = Path.Combine(AppContext.BaseDirectory, "Fixtures/Refinery");
-            Assert.Equal(26, Directory.GetFiles(root, "*.png").Length - Directory.GetFiles(root, "prep*.png").Length);
-            byte[] first = File.ReadAllBytes(Path.Combine(root, "CleanVat.png"));
+            Assert.Equal(26, Directory.GetFiles(root, "*.png").Length - Directory.GetFiles(root, "BiomassRefinery_Detailed_Preparation_*.png").Length);
+            byte[] first = File.ReadAllBytes(Path.Combine(root, "BiomassRefinery_Detailed_Clean.png"));
             for (int frame = 0; frame < 26; frame++)
             {
-                string name = frame == 0 ? "CleanVat" : frame == 1 ? "DirtyVat" :
-                    frame < 10 ? $"VatFilling{frame - 2:00}" : $"VatProcess{frame - 10:00}";
+                string name = frame == 0 ? "BiomassRefinery_Detailed_Clean" : frame == 1 ? "BiomassRefinery_Detailed_Dirty" :
+                    frame < 10 ? $"BiomassRefinery_Detailed_Filling_{frame - 2:00}" : $"BiomassRefinery_Detailed_Processing_{frame - 10:00}";
                 byte[] png = File.ReadAllBytes(Path.Combine(root, name + ".png"));
                 Assert.Equal(BinaryPrimitives.ReadInt32BigEndian(first.AsSpan(16, 4)), BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16, 4)));
                 Assert.Equal(BinaryPrimitives.ReadInt32BigEndian(first.AsSpan(20, 4)), BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20, 4)));

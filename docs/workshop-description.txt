@@ -1,5 +1,5 @@
 [h1]GeneFoundry[/h1]
-[b]Version 1.0.0 — first public release[/b]
+[b]Version 1.1.0 — in development[/b]
 Turn organic matter into genetic possibilities. GeneFoundry adds an industrial production chain for manufacturing your own genepacks, with meaningful research, material and operator requirements.
 
 [h2]Extract. Refine. Fabricate.[/h2]
@@ -11,6 +11,9 @@ Turn organic matter into genetic possibilities. GeneFoundry adds an industrial p
 
 Raw biomass spoils after six days at normal temperature. Refrigeration slows spoilage; freezing stops it. Sealed biomass hoppers pause spoilage without power and retain existing spoilage when emptied. Refined biomass is shelf-stable, but remains damageable.
 
+[h2]Graphics[/h2]
+The default-enabled “Enable AI Slop” option retains Detailed artwork and animations. Disable it for static Simple Vat, Biomass Refinery, Gene Fabricator and Hopper graphics; missing directions fall back to Detailed. Restart RimWorld to apply graphics changes.
+
 [h2]Research and balance[/h2]
 Extraction recovers 60% of dry mass, or 75% with enzymes: meat is 25% dry mass, all raw plant food 24%, and whole corpses use 2.2 times the dry mass of their recoverable meat. Each refinery batch consumes 45 raw biomass and 1 neutroamine for 10 refined biomass on success.
 Multi-gene fabrication prices genes individually by biomass cost, most expensive first: 100%, 90%, 80%, 70%, 60%, then 50% for each remaining gene. Archite capsule costs and work are unchanged.
@@ -20,7 +23,7 @@ Refinery preparation takes 90 minutes at weighted skill 5 and 30 minutes at 20, 
 
 [h2]Requirements[/h2]
 [list]
-[*]RimWorld 1.6
+[*]RimWorld 1.6 or 1.7
 [*]Biotech DLC
 [*]Load after Core and Biotech. No Harmony requirement.
 [/list]

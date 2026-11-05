@@ -56,7 +56,7 @@ try {
     $grid.Dispose()
     $accent = Brush '#ACD85B'
     $g.FillRectangle($accent, 28, 20, 3, 12)
-    Text $g 'RIMWORLD 1.6  /  BIOTECH' 39 17 11 '#B9C5B6' 'Bold'
+    Text $g 'RIMWORLD 1.6 + 1.7  /  BIOTECH' 39 17 11 '#B9C5B6' 'Bold'
     Text $g 'GENEFOUNDRY' 26 38 48 '#080E0F' 'Bold'
     Text $g 'GENEFOUNDRY' 25 36 48 '#F3F0E4' 'Bold'
     Text $g 'ORGANIC MATTER. GENETIC POSSIBILITIES.' 30 98 12 '#ACD85B' 'Bold'
@@ -72,9 +72,9 @@ try {
     $g.FillEllipse($shadow, 187, 257, 165, 24)
     $g.FillEllipse($shadow, 367, 253, 242, 28)
     $shadow.Dispose()
-    Sprite $g 'Buildings/GeneVat_north.png' 37 125 117 156
-    Sprite $g 'Buildings/BiomassRefinery.png' 185 163 166 111
-    Sprite $g 'Buildings/GeneFabrication_north.png' 369 176 240 96
+    Sprite $g 'Buildings/GeneVat_Detailed_north.png' 37 125 117 156
+    Sprite $g 'Buildings/BiomassRefinery_Detailed_north.png' 185 163 166 111
+    Sprite $g 'Buildings/GeneFabricator_Detailed_north.png' 369 176 240 96
     Text $g '01' 29 291 10 '#ACD85B' 'Bold'
     Text $g 'EXTRACT' 46 287 15 '#EEECE0' 'Bold'
     Text $g 'Meat, plants & corpses' 29 308 10 '#AEBAB6'
@@ -101,7 +101,7 @@ try {
     $g.ScaleTransform(4, 4)
     $g.Clear([Drawing.ColorTranslator]::FromHtml('#18211F'))
     $g.InterpolationMode = 'HighQualityBicubic'
-    Sprite $g 'Buildings/GeneVat_north.png' 11 4 42 56
+    Sprite $g 'Buildings/GeneVat_Detailed_north.png' 11 4 42 56
     $frame = [Drawing.Pen]::new([Drawing.ColorTranslator]::FromHtml('#ACD85B'), 1)
     $g.DrawRectangle($frame, 1, 1, 61, 61)
     $frame.Dispose()

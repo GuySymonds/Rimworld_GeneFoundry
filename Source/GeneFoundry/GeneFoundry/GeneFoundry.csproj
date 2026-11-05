@@ -57,6 +57,7 @@
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Components\CompRawBiomassRottable.cs" />
     <Compile Include="Components\CompGeneVatAnimation.cs" />
+    <Compile Include="Components\Graphic_StyledMachine.cs" />
     <Compile Include="Components\GeneVatAnimationTiming.cs" />
     <Compile Include="Recipes\Graphic_GeneVat.cs" />
     <Compile Include="Fabrication\FabricationCalculations.cs" />

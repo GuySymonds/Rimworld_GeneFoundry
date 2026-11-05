@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
@@ -57,6 +57,7 @@ namespace GeneFoundry.Components
         public override void PostDraw()
         {
             base.PostDraw();
+            if (Graphic_StyledMachine.UsesSimple(parent)) return;
             BiomassRefineryOverlay.Draw(parent, VatFrameAt(Find.TickManager.TicksGame));
             int preparationFrame = PreparationFrameAt(Find.TickManager.TicksGame);
             if (preparationFrame >= 0) BiomassRefineryOverlay.DrawPreparation(parent, preparationFrame);

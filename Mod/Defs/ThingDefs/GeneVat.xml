@@ -17,7 +17,7 @@
 
     <!-- GeneFoundry Gene Vat artwork -->
     <graphicData>
-      <texPath>GeneFoundry/Buildings/GeneVat</texPath>
+      <texPath>GeneFoundry/Buildings/GeneVat_Detailed</texPath>
       <graphicClass>GeneFoundry.Recipes.Graphic_GeneVat</graphicClass>
       <shaderType>CutoutComplex</shaderType>
       <drawSize>(3,3.6)</drawSize>

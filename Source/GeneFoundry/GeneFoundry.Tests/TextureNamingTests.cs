@@ -1,0 +1,112 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+using Xunit;
+
+namespace GeneFoundry.Tests
+{
+    public class TextureNamingTests
+    {
+        private static string Root => Path.Combine(AppContext.BaseDirectory, "Fixtures/Textures");
+        private static HashSet<string> Paths => Directory.GetFiles(Root, "*", SearchOption.AllDirectories)
+            .Select(path => Path.GetRelativePath(Root, path).Replace('\\', '/')).ToHashSet(StringComparer.Ordinal);
+
+        [Fact]
+        public void RuntimeNamesHaveConsistentCaseAndNoCollisions()
+        {
+            var paths = Paths;
+            Assert.NotEmpty(paths);
+            Assert.Equal(paths.Count, paths.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            foreach (string path in paths)
+                Assert.Matches(@"^(?:[A-Z][A-Za-z0-9]*/)+[A-Z][A-Za-z0-9]*(?:_(?:[A-Z][A-Za-z0-9]*|[0-9]{2}))*(?:_(?:north|east|south|west))?\.png$", path);
+        }
+
+        [Fact]
+        public void EveryDefinitionTextureResolvesWithExactCaseAndEveryDetailedDirectionExists()
+        {
+            var paths = Paths;
+            string definitions = Path.Combine(AppContext.BaseDirectory, "Fixtures/Defs");
+            foreach (var file in Directory.GetFiles(definitions, "*.xml", SearchOption.AllDirectories))
+            foreach (var texture in XDocument.Load(file).Descendants("texPath").Where(x => x.Value.StartsWith("GeneFoundry/", StringComparison.Ordinal)))
+            {
+                string path = texture.Value;
+                string graphic = (string)texture.Parent.Element("graphicClass");
+                if (graphic == "Graphic_StackCount")
+                    Assert.Contains(paths, candidate => candidate.StartsWith(path + "/", StringComparison.Ordinal));
+                else if (graphic == "Graphic_Multi" || graphic == "GeneFoundry.Components.Graphic_BiomassHopper" || graphic == "GeneFoundry.Recipes.Graphic_GeneVat" ||
+                    graphic == "GeneFoundry.Components.Graphic_BiomassRefinery" || graphic == "GeneFoundry.Fabrication.Graphic_GeneFabricator")
+                    foreach (string direction in new[] { "north", "east", "south", "west" })
+                        Assert.Contains(path + "_" + direction + ".png", paths);
+                else Assert.Contains(path + ".png", paths);
+            }
+        }
+
+        [Fact]
+        public void HopperDefinitionRetainsReleasedStorageAndPlacementContracts()
+        {
+            string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
+            var released = XDocument.Load(Path.Combine(fixtures, "ReleasedHopper100.xml"));
+            var current = XDocument.Load(Path.Combine(fixtures, "Defs/ThingDefs/RawBiomassHopper.xml"));
+            var graphic = current.Descendants("graphicData").Single();
+            Assert.Equal("GeneFoundry.Components.Graphic_BiomassHopper", (string)graphic.Element("graphicClass"));
+            Assert.Equal("GeneFoundry/Buildings/BiomassHopper_Detailed", (string)graphic.Element("texPath"));
+            // Save identity, Building_Storage type, storage filters/priorities,
+            // spoilage behavior, placement, footprint and draw geometry stay released.
+            var oldGraphic = released.Descendants("graphicData").Single();
+            foreach (string field in new[] { "graphicClass", "texPath" })
+                graphic.Element(field).Value = oldGraphic.Element(field).Value;
+            // Player-facing prose and comments are not save contracts; allow
+            // corrections while retaining every storage/identity/placement field.
+            foreach (var document in new[] { released, current })
+            {
+                document.Descendants("label").Remove();
+                document.Descendants("description").Remove();
+                document.DescendantNodes().OfType<XComment>().Remove();
+            }
+            Assert.True(XNode.DeepEquals(released, current));
+        }
+
+        [Theory]
+        [InlineData("GeneVat", 832, 832)]
+        [InlineData("BiomassRefinery", 832, 576)]
+        [InlineData("BiomassHopper", 256, 256)]
+        [InlineData("GeneFabricator", 1344, 576)]
+        public void ShippedSimpleArtworkIncludesEveryAuthoredOrientation(string machine, int width, int height)
+        {
+            var paths = Paths;
+            foreach (string direction in new[] { "north", "east", "south", "west" })
+            {
+                string path = $"GeneFoundry/Buildings/{machine}_Simple_{direction}.png";
+                Assert.Contains(path, paths);
+                byte[] image = File.ReadAllBytes(Path.Combine(Root, path));
+                Assert.Equal(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, image.Take(8));
+                bool horizontal = direction == "east" || direction == "west";
+                Assert.Equal(horizontal ? height : width,
+                    System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(image.AsSpan(16, 4)));
+                Assert.Equal(horizontal ? width : height,
+                    System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(image.AsSpan(20, 4)));
+                Assert.Equal(6, image[25]);
+            }
+        }
+
+        [Fact]
+        public void AllFabricatorIdleAndProcessingFramesMatchEachDirectionalBaseCanvas()
+        {
+            foreach (string direction in new[] { "north", "east", "south", "west" })
+            {
+                string prefix = "GeneFoundry/Buildings/";
+                byte[] chassis = File.ReadAllBytes(Path.Combine(Root, prefix + "GeneFabricator_Detailed_" + direction + ".png"));
+                foreach (string state in new[] { "Idle" }.Concat(Enumerable.Range(0, 8).Select(i => $"Processing_{i:00}")))
+                {
+                    string path = prefix + $"GeneFabricatorFrames/GeneFabricator_Detailed_{state}_{direction}.png";
+                    Assert.Contains(path, Paths);
+                    byte[] frame = File.ReadAllBytes(Path.Combine(Root, path));
+                    Assert.Equal(chassis.Skip(16).Take(8), frame.Skip(16).Take(8));
+                }
+            }
+        }
+    }
+}

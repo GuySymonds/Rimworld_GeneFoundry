@@ -6,6 +6,7 @@ namespace GeneFoundry
 {
     public class GeneFoundrySettings : ModSettings
     {
+        public bool useDetailedGraphics = true;
         public int processingMinutes = 360;
         public int minimumProcessingMinutes = 60;
         public float processorReductionMinutes = 20f;
@@ -51,6 +52,7 @@ namespace GeneFoundry
         public override void ExposeData()
         {
             base.ExposeData();
+            Scribe_Values.Look(ref useDetailedGraphics, "useDetailedGraphics", true);
             bool legacyAssistance = Scribe.mode == LoadSaveMode.LoadingVars &&
                 Scribe.loader.curXmlParent["processorReductionMinutes"] == null &&
                 (Scribe.loader.curXmlParent["processorReductionPercent"] != null ||
@@ -92,12 +94,15 @@ namespace GeneFoundry
     public class GeneFoundryMod : Mod
     {
         public static GeneFoundrySettings Settings { get; private set; } = new GeneFoundrySettings();
+        // Snapshot once: editing the setting cannot mix cached styles during a session.
+        public static bool UseDetailedGraphics { get; private set; } = true;
         private Vector2 scrollPosition;
         private float contentHeight = 1000f;
 
         public GeneFoundryMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<GeneFoundrySettings>();
+            UseDetailedGraphics = Settings.useDetailedGraphics;
         }
 
         public override string SettingsCategory() => "GeneFoundry";
@@ -111,6 +116,11 @@ namespace GeneFoundry
             listing.Begin(new Rect(0f, 0f, viewRect.width, 10000f));
             Settings.Validate();
             listing.Label("All times are in-game time. Hover over sliders for explanations. Settings apply across saves.");
+            listing.GapLine();
+            listing.Label("Graphics");
+            listing.CheckboxLabeled("Enable AI Slop", ref Settings.useDetailedGraphics,
+                "For those who prefer their genetic engineering with fewer pixels and less existential dread.");
+            listing.Label("Restart RimWorld to apply graphics changes. Enabled: Detailed artwork and animations. Disabled: available Simple artwork, with Detailed fallback for missing directions.");
             listing.GapLine();
             listing.Label("Raw biomass — Gene Vat");
             listing.Label("Extraction weights: Cooking 40%, Medicine 40%, Intellectual 20%. References 10/6/4 give full yield and normal speed. Below-reference skills cause random wastage; above-reference skills improve speed only.");

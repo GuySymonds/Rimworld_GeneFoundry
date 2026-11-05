@@ -18,8 +18,8 @@
 
     <!-- GeneFoundry Biomass Refinery artwork -->
     <graphicData>
-      <texPath>GeneFoundry/Buildings/BiomassRefinery</texPath>
-      <graphicClass>Graphic_Multi</graphicClass>
+      <texPath>GeneFoundry/Buildings/BiomassRefinery_Detailed</texPath>
+      <graphicClass>GeneFoundry.Components.Graphic_BiomassRefinery</graphicClass>
       <shaderType>CutoutComplex</shaderType>
       <drawSize>(3.2,2.2)</drawSize>
       <drawRotated>false</drawRotated>

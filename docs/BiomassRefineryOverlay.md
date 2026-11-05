@@ -38,7 +38,7 @@ rotation or mirroring is added. All 26 textures use the same mesh for a directio
 No per-frame position configuration exists. Meshes and transparent materials are
 cached across refineries, with no normal draw-time allocations.
 
-The chassis graphic is unchanged. `RealtimeOnly` in the refinery definition ensures
+The Detailed chassis rendering is unchanged. [Graphics styles and naming](GeneVatVisuals.md#graphics-styles-and-texture-names) describes optional Simple bases; Simple directions omit both vat and preparation overlays while Detailed fallback retains them. `RealtimeOnly` in the refinery definition ensures
 the existing building draw lifecycle invokes the component overlay every draw.
 The overlay sits 0.002 tiles above the chassis, below ordinary item/pawn layers.
 
@@ -53,7 +53,7 @@ Rebuild and restart RimWorld after changing code settings or corner coordinates.
 
 Textures are loaded from
 `Mod/Textures/GeneFoundry/Buildings/BiomassRefineryFrames/`.
-The 26 vat-overlay PNGs share one RGBA canvas. The same folder also contains 32 directional preparation frames (`prep00_north.png` through `prep07_west.png`), drawn only during active manual preparation. Missing assets log once per texture
+The 26 vat-overlay PNGs share one RGBA canvas. The same folder also contains 32 directional preparation frames (`BiomassRefinery_Detailed_Preparation_00_north.png` through `BiomassRefinery_Detailed_Preparation_07_west.png`), drawn only during active manual preparation. Missing assets log once per texture
 and omit that overlay frame, retaining the underlying chassis.
 
 Old active saves without a timestamp resume at the mixing phase. Old idle saves
