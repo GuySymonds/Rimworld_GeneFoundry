@@ -140,6 +140,8 @@ Expect-Rejection 'release without source publication ID' { & $preflightRelease }
 Expect-Rejection 'release with empty source publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
 Set-Content -LiteralPath $sourcePublication -Value 'not-an-id'
 Expect-Rejection 'release with malformed source publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $sourcePublication -Value '18446744073709551616'
+Expect-Rejection 'release with overflowing source publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
 Set-Content -LiteralPath $sourcePublication -Value '123456789'
 Set-Content -LiteralPath $targetPublication -Value '987654321'
 Expect-Rejection 'release over a different Workshop item' { & $preflightRelease } 'publication IDs disagree'
@@ -147,10 +149,18 @@ Expect-Rejection 'release over a different Workshop item' { & $preflightRelease 
 Expect-Rejection 'release with empty destination publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
 Set-Content -LiteralPath $targetPublication -Value 'not-an-id'
 Expect-Rejection 'release with malformed destination publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $targetPublication -Value '18446744073709551616'
+Expect-Rejection 'release with overflowing destination publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
 if ((Get-Content -LiteralPath $preflightMarker -Raw).Trim() -ne 'Preserve staging') {
     throw 'Rejected release changed staging before publication validation.'
 }
 Write-Host 'PASS: actual release entry point rejects publication problems before building or cleanup.'
+Remove-Item -LiteralPath $targetPublication
+Set-Content -LiteralPath $sourcePublication -Value '18446744073709551615'
+$boundaryId = Assert-WorkshopPublicationIdentity -Source (Split-Path $preflightSource -Parent) -Destination (Split-Path $preflightPackage -Parent)
+if ($boundaryId -ne '18446744073709551615') { throw 'Valid UInt64 publication ID was rejected.' }
+Write-Host 'PASS: full UInt64 publication ID range is validated without overflow.'
+
 
 # A correctly built package must still reject missing, malformed or changed IDs.
 $publicationBackup = [IO.File]::ReadAllBytes($id)
@@ -159,6 +169,8 @@ try {
     Expect-Rejection 'missing package publication ID' { & $validator -PackagePath $target } 'Missing About/PublishedFileId.txt'
     Set-Content -LiteralPath $id -Value 'not-an-id'
     Expect-Rejection 'malformed package publication ID' { & $validator -PackagePath $target } 'Invalid Workshop publication ID'
+    Set-Content -LiteralPath $id -Value '18446744073709551616'
+    Expect-Rejection 'overflowing package publication ID' { & $validator -PackagePath $target } 'Invalid Workshop publication ID'
     $differentId = if ((Get-Content -LiteralPath (Join-Path $source 'About/PublishedFileId.txt') -Raw).Trim() -eq '123456789') { '987654321' } else { '123456789' }
     Set-Content -LiteralPath $id -Value $differentId
     Expect-Rejection 'package publication ID differs from source' { & $validator -PackagePath $target } 'publication IDs disagree'

@@ -30,10 +30,15 @@ function Assert-WorkshopPublicationIdentity([string]$Source, [string]$Destinatio
         throw "Missing Workshop publication ID: $sourceId"
     }
     $expected = [IO.File]::ReadAllText($sourceId).Trim()
-    if ($expected -notmatch '^[1-9][0-9]*$') { throw "Invalid Workshop publication ID: $sourceId" }
+    [UInt64]$parsedId = 0
+    if ($expected -notmatch '^[1-9][0-9]*$' -or -not [UInt64]::TryParse($expected, [ref]$parsedId)) {
+        throw "Invalid Workshop publication ID: $sourceId"
+    }
     if (Test-Path -LiteralPath $targetId) {
         $installed = [IO.File]::ReadAllText($targetId).Trim()
-        if ($installed -notmatch '^[1-9][0-9]*$') { throw "Invalid Workshop publication ID: $targetId" }
+        if ($installed -notmatch '^[1-9][0-9]*$' -or -not [UInt64]::TryParse($installed, [ref]$parsedId)) {
+            throw "Invalid Workshop publication ID: $targetId"
+        }
         if ($installed -ne $expected) {
             throw 'Source and destination Workshop publication IDs disagree. Resolve this before copying.'
         }

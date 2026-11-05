@@ -1,19 +1,15 @@
 # Release notes
 
-## 1.1.0 — In development
+## 1.1.0 — 5 November 2026
 
-- Track the public Workshop identity and require a matching publication ID in distributions; reject identity problems before building or cleaning staging.
-
-- Correct the Hopper description to show the existing 45-biomass refinery requirement; gameplay quantities are unchanged.
-
-- Skip background corpse-presentation pawn scans when every Vat direction uses Simple graphics; retain Detailed fallback and save compatibility.
-- Add the default-enabled “Enable AI Slop” graphics option: disable it for static Simple machine artwork, with per-direction Detailed fallback where Simple art is absent. Restart required; released saves and settings retain their behavior.
-- Include authored Simple Gene Fabricator artwork for all four orientations, using the existing graphics toggle without idle or processing overlays in Simple mode.
-- Include authored Simple Biomass Refinery and Hopper artwork for all four orientations. The Hopper follows the same restart-required graphics toggle and per-direction fallback.
-- Standardise runtime texture names without changing PNG data, Detailed animations or gameplay.
-
-- Declare RimWorld 1.7 support alongside 1.6; Biotech remains required.
-- Deploy Debug and Release builds to the same GeneFoundry folder, using version metadata instead of a duplicate development copy.
+- Add the default-enabled **Enable AI Slop** graphics option. Disable it for static Simple artwork for the Gene Vat, Biomass Refinery, Gene Fabricator and Biomass Hopper, with four authored orientations each. Restart RimWorld after changing it.
+- Retain complete Detailed artwork and animations for each direction whose optional Simple image is missing. Simple directions omit machine animations and decorative work effects; production behavior, draw sizes and interaction cells remain unchanged.
+- Skip background corpse-presentation pawn scans when all four Vat directions use Simple graphics. Detailed fallback retains the existing presentation.
+- Correct Simple Hopper east/west orientation and its description of the existing 45-biomass refinery requirement; gameplay quantities are unchanged.
+- Standardise runtime texture names while preserving original PNG data, Detailed animation sequences and timing. Editable artwork and source screenshots/GIFs remain outside the runtime package.
+- Declare RimWorld 1.7 support alongside 1.6; Biotech remains required. Preserve released-save identities, job progress, ownership and existing settings; old settings default to Detailed graphics.
+- Deploy Debug and Release builds into the same GeneFoundry folder, using version metadata instead of a duplicate development copy.
+- Track the public Workshop identity and include it in distributions. Release packaging checks valid, matching publication IDs before building or cleaning staging, preventing accidental updates to a different Workshop item.
 
 ## 1.0.0 — 4 November 2026
 

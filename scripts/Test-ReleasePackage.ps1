@@ -69,8 +69,8 @@ $expected = @{}
 foreach ($file in Get-ChildItem -LiteralPath $source -Recurse -File) {
     $relative = $file.FullName.Substring($source.Length + 1).Replace('\', '/')
     Require ($relative -match '^(About/(About\.xml|Preview\.png|ModIcon\.png|PublishedFileId\.txt)|LICENSE|Defs/.+\.xml|Languages/.+\.xml|Patches/.+\.xml|Textures/.+\.png)$') "Development/unexpected file in Mod/: $relative"
-    if ($relative -eq 'About/PublishedFileId.txt') { continue }
     $expected[$relative] = $true
+    if ($relative -eq 'About/PublishedFileId.txt') { continue }
     $target = Join-Path $package $relative
     Require (Test-Path -LiteralPath $target -PathType Leaf) "Missing runtime file: $relative"
     if ($relative.StartsWith('Textures/')) {
@@ -92,10 +92,7 @@ foreach ($file in Get-ChildItem -LiteralPath $source -Recurse -File) {
 $expected['Assemblies/GeneFoundry.dll'] = $true
 foreach ($file in Get-ChildItem -LiteralPath $package -Recurse -File -Force) {
     $relative = $file.FullName.Substring($package.Length + 1).Replace('\', '/')
-    if ($relative -eq 'About/PublishedFileId.txt') {
-        Require ((Get-Content -LiteralPath $file.FullName -Raw).Trim() -match '^[1-9][0-9]*$') 'Invalid Workshop publication ID.'
-    }
-    else { Require ($expected.ContainsKey($relative)) "Unexpected file: $relative" }
+    Require ($expected.ContainsKey($relative)) "Unexpected file: $relative"
 }
 foreach ($directory in Get-ChildItem -LiteralPath $package -Directory -Force) {
     Require ($directory.Name -in @('About', 'Assemblies', 'Defs', 'Languages', 'Textures', 'Patches')) "Unexpected directory: $($directory.Name)"
@@ -170,4 +167,4 @@ foreach ($name in $refineryNames) {
     Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery overlay: $relative"
     Assert-SameCanvas $relative 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/BiomassRefinery_Detailed_Clean.png'
 }
-Write-Host "Validated GeneFoundry v${version}: $($expected.Count + 1) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."
+Write-Host "Validated GeneFoundry v${version}: $($expected.Count) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."
