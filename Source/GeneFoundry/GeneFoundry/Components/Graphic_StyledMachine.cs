@@ -43,6 +43,8 @@ namespace GeneFoundry.Components
                 req.color, req.colorTwo).MatSingle;
         }
 
+        internal bool UsesOnlySimpleGraphics => UsesSimple(Rot4.North) && UsesSimple(Rot4.East) &&
+            UsesSimple(Rot4.South) && UsesSimple(Rot4.West);
         internal bool UsesSimple(Rot4 direction) => !ReferenceEquals(simpleMaterials[direction.AsInt], null);
         internal static bool UsesSimple(Thing thing) => thing != null &&
             thing.Graphic is Graphic_StyledMachine graphic && graphic.UsesSimple(thing.Rotation);

@@ -94,8 +94,22 @@ namespace GeneFoundry.Recipes
         private static bool bubblesLoaded;
         private static Mesh bubbleMesh;
 
+        // Graphics are fixed for this session. Recompute after loading each map;
+        // this is transient presentation state, never part of the save contract.
+        private bool? detailedPresentationRequired;
+        protected virtual Graphic VatGraphic =>
+            DefDatabase<ThingDef>.GetNamedSilentFail("GF_GeneVat")?.graphicData?.Graphic;
+
         public MapComponent_CorpseLiquidationVisuals(Map map) : base(map) { }
-        public override void MapComponentTick() => Synchronize(map.mapPawns.AllPawnsSpawned
+        public override void MapComponentTick()
+        {
+            if (!detailedPresentationRequired.HasValue)
+                detailedPresentationRequired = !(VatGraphic is Graphic_StyledMachine graphic) ||
+                    !graphic.UsesOnlySimpleGraphics;
+            if (!detailedPresentationRequired.Value) return;
+            ScanProcessingPawns();
+        }
+        protected virtual void ScanProcessingPawns() => Synchronize(map.mapPawns.AllPawnsSpawned
             .Select(p => p.jobs?.curDriver).OfType<ICorpseLiquidationPresentation>(), Find.TickManager.TicksGame);
         internal void Synchronize(IEnumerable<ICorpseLiquidationPresentation> sources, int tick = 0)
         {

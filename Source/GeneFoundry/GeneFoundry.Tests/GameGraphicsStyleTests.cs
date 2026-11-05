@@ -118,6 +118,11 @@ namespace GeneFoundry.Tests
         private class CorpsePresentation : MapComponent_CorpseLiquidationVisuals
         {
             public readonly HashSet<Corpse> hidden = new HashSet<Corpse>();
+            public Graphic vatGraphic;
+            public int graphicResolutions, pawnScans;
+            public IEnumerable<ICorpseLiquidationPresentation> sources = new ICorpseLiquidationPresentation[0];
+            protected override Graphic VatGraphic { get { graphicResolutions++; return vatGraphic; } }
+            protected override void ScanProcessingPawns() { pawnScans++; Synchronize(sources, 100); }
             public CorpsePresentation() : base(null) { }
             protected override bool IsVisibleCorpse(Corpse corpse) => corpse != null;
             protected override void SuppressDrawing(Corpse corpse) => hidden.Add(corpse);
@@ -146,6 +151,64 @@ namespace GeneFoundry.Tests
             presentation.Synchronize(new[] { simple, fallback }, 145);
             Assert.Empty(presentation.hidden);
             Assert.Equal(-1, presentation.BubbleFrameFor(fallback.LiquidatingCorpse, 145));
+        }
+
+        [Theory]
+        [InlineData(true)] [InlineData(false)]
+        public void PawnScanIsSkippedOnlyWhenEveryVatDirectionActuallyUsesSimple(bool detailed)
+        {
+            string[] directions = { "north", "east", "south", "west" };
+            for (int mask = 0; mask < 16; mask++)
+            {
+                int available = mask;
+                var graphic = new Vat { load = path => {
+                    for (int direction = 0; direction < 4; direction++)
+                        if ((available & (1 << direction)) != 0 && path.EndsWith("_" + directions[direction], StringComparison.Ordinal))
+                            return Material();
+                    return null;
+                } };
+                graphic.ApplySimpleGraphics(new GraphicRequest { path = "GeneFoundry/Buildings/GeneVat_Detailed" }, detailed);
+                var presentation = new CorpsePresentation { vatGraphic = graphic };
+                bool scanning = detailed || mask != 15;
+                int fallback = 0;
+                while (!detailed && fallback < 3 && (mask & (1 << fallback)) != 0) fallback++;
+                var source = new CorpseSource {
+                    LiquidatingCorpse = (Corpse)RuntimeHelpers.GetUninitializedObject(typeof(Corpse)),
+                    LiquidationVat = new Machine { graphic = graphic, Rotation = new Rot4(fallback) }
+                };
+                presentation.sources = new[] { source };
+                presentation.MapComponentTick();
+                presentation.MapComponentTick();
+                Assert.Equal(1, presentation.graphicResolutions);
+                Assert.Equal(scanning ? 2 : 0, presentation.pawnScans);
+                Assert.Equal(scanning, presentation.hidden.Contains(source.LiquidatingCorpse));
+                Assert.Equal(scanning ? 7 : -1, presentation.BubbleFrameFor(source.LiquidatingCorpse, 145));
+                presentation.MapRemoved();
+                Assert.Empty(presentation.hidden);
+            }
+        }
+
+        [Fact]
+        public void MissingOrUnrecognizedVatGraphicsKeepScanningAndNewMapsRecomputeTheGate()
+        {
+            foreach (Graphic graphic in new Graphic[] { null, new Graphic_Multi() })
+            {
+                var map = new CorpsePresentation { vatGraphic = graphic };
+                map.MapComponentTick();
+                Assert.Equal(1, map.pawnScans);
+            }
+            var simple = new Vat { load = path => Material() };
+            simple.ApplySimpleGraphics(new GraphicRequest { path = "GeneFoundry/Buildings/GeneVat_Detailed" }, false);
+            var beforeReload = new CorpsePresentation { vatGraphic = simple };
+            beforeReload.MapComponentTick();
+            Assert.Equal(0, beforeReload.pawnScans);
+            // A new map component (also used on save loading) starts without a
+            // persisted gate, so a newly missing optional direction stays Detailed.
+            var fallback = new Vat { load = path => null };
+            fallback.ApplySimpleGraphics(new GraphicRequest { path = "GeneFoundry/Buildings/GeneVat_Detailed" }, false);
+            var afterReload = new CorpsePresentation { vatGraphic = fallback };
+            afterReload.MapComponentTick();
+            Assert.Equal(1, afterReload.pawnScans);
         }
 
         [Fact]

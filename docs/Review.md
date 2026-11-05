@@ -1,5 +1,13 @@
 # Solution review — 4 November 2026
 
+## Simple-only Vat pawn-scan early exit — 5 November 2026
+
+The corpse-presentation map component now resolves the existing Vat graphics once per map and caches whether Detailed presentation is required. When all four directions actually use Simple materials, MapComponentTick returns before accessing the pawn list or creating the LINQ job query. Any missing Simple direction or unknown/missing Vat graphic conservatively retains the original pawn scan and Detailed corpse/bubble presentation. This adds one transient nullable boolean per map and reuses the shared directional material selector; no scheduler, event system or per-building registry was added.
+
+The cache is not Scribed and is recomputed for each new/loaded map component. All 70 released Scribe calls remain unchanged. New regressions exercise every optional-direction availability combination in both modes, verify zero scan calls on the all-Simple path, one graphics resolution across repeated ticks, actual Detailed fallback registration/bubble clocks, unknown-graphic fallback and recomputation for new map components. Saved settings, job/progress, ownership and completion regressions remain passing.
+
+Verified 378 portable tests and 525 managed tests against the installed game assemblies. Production Release build passed with deployment disabled and zero warnings/errors; package validation passed for 199 runtime files (173 PNGs), all release workflow safety regressions passed, 13 local documentation links/anchors were checked, and `git diff --check` passed. This verifies scan avoidance through managed call counts and source inspection, not live Unity frame-time measurements. Live rendering and a full released-colony upgrade remain under [artwork acceptance](Testing.md#artwork). Unrelated source artwork was left untouched; no installed-mod deployment, publication or merge into main was performed.
+
 ## Simple Fabricator artwork — 5 November 2026
 
 Added the four supplied `GeneFabricator_Simple_<direction>.png` images unchanged. The existing shared loader already selects these exact paths through the restart-required graphics setting, with Detailed as the default and per-direction fallback when Simple artwork is missing. Renderer inspection confirms Simple directions skip Detailed idle/processing overlay loading and return before overlay drawing. No runtime code, definitions, settings schema, saved identifiers, production state or draw geometry changed; the existing Fabricator draw size remains `(5.4,2.4)`.

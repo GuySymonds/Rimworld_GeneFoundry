@@ -8,6 +8,8 @@ In **Options > Mod Settings > GeneFoundry > Graphics**, **Enable AI Slop** selec
 
 Selection is independent for every machine and direction: a missing optional Simple image quietly uses that direction's Detailed base, animations and overlays. Present Simple images suppress the machine's animation layers, decorative bubbles and vanilla recipe visual work effects; work sounds remain unchanged. Simple vats use ordinary RimWorld corpse/ingredient drawing at their existing positions, without custom basin fitting or staged corpse-decay visuals. Actual rot-stink gas, processing, unfinished items, saved progress and ingredient charging remain unchanged. Detailed rendering retains its existing shaders, meshes, dimensions, offsets and timing.
 
+When all four Vat directions resolve to Simple graphics, the corpse-presentation map component skips its per-tick pawn scan entirely. This decision is cached once per map from the actual selected graphics, not merely the checkbox. Any Detailed fallback direction or unknown Vat graphic retains the existing scan. The cache is transient and recomputed after loading; no saved fields or progress are changed.
+
 All paths below are relative to `Mod/Textures/GeneFoundry/`. Names are case-sensitive: use PascalCase asset/style/state components separated by underscores, two-digit frame numbers, lowercase `north`, `east`, `south`, `west`, and lowercase `.png`. Omit inapplicable components. Non-directional overlays retain their original geometry rather than gaining artificial directional frames.
 
 | Folder | Filename pattern | Frames |
