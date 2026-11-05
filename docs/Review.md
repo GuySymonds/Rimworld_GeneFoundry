@@ -1,5 +1,15 @@
 # Solution review — 4 November 2026
 
+## Graphics styles and runtime texture naming — 5 November 2026
+
+Added the default-enabled, restart-required Enable AI Slop setting using the existing settings infrastructure. Available Simple artwork replaces only its machine/direction; missing optional directions quietly retain Detailed materials, animation and overlays. Simple directions suppress machine animations, bubbles and native recipe visual work effects while retaining work sounds, ordinary corpse/ingredient drawing and actual rot-stink gameplay. Existing draw sizes and positioning remain unchanged, including the supplied square Simple Vat images. A shared Graphic_StyledMachine and Graphic_BiomassRefinery extend native Graphic_Multi; no external dependency or positioning configuration was introduced.
+
+Renamed 156 runtime PNGs using the [style and naming reference](GeneVatVisuals.md#graphics-styles-and-texture-names). Compared Git blob hashes for all 161 PNGs against pre-change branch HEAD: the complete multiset is identical, including transparency and Simple artwork. Compared every definition XML tree with that baseline after excluding only graphic paths/classes: no gameplay definition changes. Source artwork, definition/package IDs, persisted types and existing Scribe keys are retained. External retexture-path compatibility was explicitly excluded by the user.
+
+Verified 373 portable tests and 515 managed tests against the installed game assemblies. New managed regressions cover all sixteen direction-availability combinations for each machine in both settings, native material/preview selection, Simple Vat/refinery presentation guards, ordinary corpse drawing versus Detailed fallback, native visual work-effect suppression, both saved graphics values and all released settings with the new key absent. Existing job, output, ownership and progress Scribe regressions passed. Headless tests substitute Unity materials and do not render artwork. Production Release build passed with deployment disabled and zero warnings/errors; release packaging validated 187 runtime files and all release workflow safety regressions passed. Testhost connectivity required execution outside the sandbox.
+
+Live Unity rendering, a complete released-colony save/load upgrade, settings UI/tooltip layout and compatibility on both game versions remain manual acceptance work in [Testing](Testing.md#artwork). No installed-mod deployment, Steam publication or merge into main was performed.
+
 ## v1.1.0 development metadata and deployment — 5 November 2026
 
 Debug and Release now deploy to the same local GeneFoundry directory; version metadata identifies updates. Mod and assembly versions are 1.1.0, with RimWorld 1.6 and 1.7 declared supported. Updated listing, release guidance, metadata checks and deployment regressions accordingly.

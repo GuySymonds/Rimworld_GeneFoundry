@@ -34,11 +34,11 @@ namespace GeneFoundry.Tests
         public void EveryDirectionHasEightFramesMatchingItsBaseCanvas()
         {
             string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
-            Assert.Equal(32, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "vat_*_*.png").Length);
+            Assert.Equal(32, Directory.GetFiles(Path.Combine(fixtures, "Frames"), "GeneVat_Detailed_Transition_*_*.png").Length);
             foreach (string direction in new[] { "north", "east", "south", "west" })
             for (int i = 0; i < 8; i++)
             {
-                string name = $"vat_{i:00}_{direction}.png";
+                string name = $"GeneVat_Detailed_Transition_{i:00}_{direction}.png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Frames", name));
                 bool horizontal = direction == "east" || direction == "west";
                 Assert.Equal(horizontal ? 1448 : 1086, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
@@ -54,7 +54,7 @@ namespace GeneFoundry.Tests
             Assert.Equal(8, Directory.GetFiles(Path.Combine(fixtures, "Bubbles"), "*.png").Length);
             for (int i = 0; i < 8; i++)
             {
-                string name = i.ToString("00") + ".png";
+                string name = "BubbleMass_" + i.ToString("00") + ".png";
                 byte[] png = File.ReadAllBytes(Path.Combine(fixtures, "Bubbles", name));
                 // PNG IHDR uses big-endian dimensions; colour type 6 is RGBA.
                 Assert.Equal(500, System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16,4)));
@@ -75,7 +75,7 @@ namespace GeneFoundry.Tests
             Assert.Equal("RealtimeOnly", (string)vat.Element("drawerType"));
             Assert.Equal("BuildingOnTop", (string)vat.Element("altitudeLayer"));
             Assert.Equal("GeneFoundry.Recipes.Graphic_GeneVat", (string)vat.Element("graphicData").Element("graphicClass"));
-            Assert.Equal("GeneFoundry/Buildings/GeneVat", (string)vat.Element("graphicData").Element("texPath"));
+            Assert.Equal("GeneFoundry/Buildings/GeneVat_Detailed", (string)vat.Element("graphicData").Element("texPath"));
             Assert.Equal("(3,3.6)", (string)vat.Element("graphicData").Element("drawSize"));
             Assert.Equal("true", (string)vat.Element("rotatable"));
             Assert.Equal("false", (string)vat.Element("graphicData").Element("drawRotated"));

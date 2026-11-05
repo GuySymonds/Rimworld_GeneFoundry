@@ -22,7 +22,7 @@ namespace GeneFoundry.Tests
         [Fact]
         public void SharedGraphicAndAnimationUseEveryBuildingRotation()
         {
-            Assert.Equal(typeof(Graphic_Multi), typeof(Graphic_GeneVat).BaseType);
+            Assert.Equal(typeof(Graphic_StyledMachine), typeof(Graphic_GeneVat).BaseType);
             string source = System.IO.File.ReadAllText(System.IO.Path.Combine(System.AppContext.BaseDirectory,
                 "Fixtures/Source/Recipes/Graphic_GeneVat.cs"));
             Assert.DoesNotContain("rot != Rot4.North", source);
@@ -126,7 +126,7 @@ namespace GeneFoundry.Tests
         public void FrameSelectionKeepsTheSameClockButUsesTheDirection(int direction, string suffix)
         {
             for (int frame = 0; frame < 8; frame++)
-                Assert.Equal($"GeneFoundry/Buildings/GeneVatFrames/vat_{frame:00}_{suffix}",
+                Assert.Equal($"GeneFoundry/Buildings/GeneVatFrames/GeneVat_Detailed_Transition_{frame:00}_{suffix}",
                     Graphic_GeneVat.FramePath(frame, new Rot4(direction)));
         }
 

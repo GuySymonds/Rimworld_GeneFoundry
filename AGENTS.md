@@ -20,7 +20,7 @@ Deliver the smallest complete, correct change. Inspect existing code before addi
 - `Source/GeneFoundry/GeneFoundry.Tests/` contains .NET 10 xUnit tests. Name test files `<Subject>Tests.cs`; game API tests use the `Game` prefix and `RIMWORLD_TESTS` guard.
 - C# filenames use PascalCase; retain RimWorld type prefixes such as `Comp`, `CompProperties_`, `JobDriver_`, `WorkGiver_`, and `Graphic_`. Partial-class files may use a descriptive feature name (`FabricationState.cs`, etc.); do not split every helper into a new file just for naming purity.
 - Definition XML filenames describe their subject in PascalCase, inside the appropriate RimWorld definition-type folder. Definitions retain their established `GF_` names. Package ID, persisted type names, Scribe keys, and definition IDs are compatibility contracts, not cleanup targets.
-- Use `Biomass`, never `BioMass`, for new paths and names. Runtime animation assets retain the sequence and direction patterns consumed by their loader; do not impose one animation pattern on all machines. Update loaders, fixtures, validators and docs together when moving assets.
+- Use `Biomass`, never `BioMass`, for new paths and names. Runtime PNGs use PascalCase components separated by underscores, lowercase directional suffixes and `.png`, and two-digit animation frames. Follow the [texture naming reference](docs/GeneVatVisuals.md#graphics-styles-and-texture-names); retain each machine's sequence, timing and directional rendering. Update loaders, fixtures, validators and docs together when moving assets.
 - `Source/Textures/` holds editable artwork and source exports; `Mod/Textures/` holds runtime PNGs. Source projects may retain descriptive artist filenames; no automated export is implied.
 - `scripts/` holds PowerShell tooling. Executable scripts use Verb-Noun names; `ModContent.ps1` is the shared helper. Dot-source helpers; do not turn them into entry points.
 - `docs/` holds technical notes in PascalCase Markdown files; `RELEASE.md` is the release checklist and `workshop-description.txt` is Steam BBCode. Root `README.md`, `CHANGELOG.md`, `LICENSE`, and `AGENTS.md` are conventional exceptions.
@@ -30,7 +30,7 @@ Deliver the smallest complete, correct change. Inspect existing code before addi
 
 - Read the approved policies in [Biomass.md](docs/Biomass.md), [Research.md](docs/Research.md), [Fabrication.md](docs/Fabrication.md) and [ProcessingEnvironment.md](docs/ProcessingEnvironment.md) before changing related behavior. Keep numeric defaults and detailed rules in those documents, rather than copying them here.
 - Prefer vanilla systems over custom frameworks. Do not silently change approved balance/storage policies or add settings for them.
-- Preserve exactly-once ingredient charging and output, saved progress, ownership and completion receipts. Normal save/load of current jobs and settings is required. Migration of older development saves is not a release requirement, but do not casually rename persisted contracts.
+- Preserve exactly-once ingredient charging and output, saved progress, ownership and completion receipts. Normal save/load of current jobs and settings is required. The mod is released: preserve backward compatibility with released saves and settings, including existing jobs and progress. Do not rename persisted contracts.
 
 ## Verification and documentation
 

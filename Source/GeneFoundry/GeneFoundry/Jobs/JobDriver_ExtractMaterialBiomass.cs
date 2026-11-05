@@ -20,6 +20,33 @@ namespace GeneFoundry.Jobs
 
         public bool ProcessingBiomass => HaveCurToil && CurToil.debugName == nameof(Toils_Recipe.DoRecipeWork);
 
+        // Identify vanilla's visual-only WithEffect callback through its public
+        // builder, rather than relying on compiler-generated names or list indices
+        // on the actual recipe toil. Keep sounds, progress, work and cleanup intact.
+        private static readonly System.Reflection.MethodInfo WorkEffectTick = FindWorkEffectTick();
+        private static System.Reflection.MethodInfo FindWorkEffectTick()
+        {
+            Toil probe = ToilMaker.MakeToil("GeneFoundryWorkEffectSignature");
+            probe.WithEffect(() => null, TargetIndex.A);
+            var method = probe.preTickActions[0].Method;
+            probe.Clear();
+            return method;
+        }
+
+        internal static void ConfigureWorkEffects(Toil toil)
+        {
+            if (toil.preTickActions == null) return;
+            for (int index = 0; index < toil.preTickActions.Count; index++)
+            {
+                var effect = toil.preTickActions[index];
+                if (effect.Method != WorkEffectTick) continue;
+                toil.preTickActions[index] = () =>
+                {
+                    if (!Graphic_StyledMachine.UsesSimple(toil.actor.CurJob.targetA.Thing)) effect();
+                };
+            }
+        }
+
         protected override IEnumerable<Toil> MakeNewToils()
         {
             foreach (Toil toil in base.MakeNewToils())
@@ -29,6 +56,7 @@ namespace GeneFoundry.Jobs
                 // Preserve vanilla hauling, interruptions, completion and output storage.
                 if (toil.debugName == nameof(Toils_Recipe.DoRecipeWork))
                 {
+                    ConfigureWorkEffects(toil);
                     toil.AddPreTickIntervalAction(delta => GeneVatSkills.Learn(pawn, delta));
                     toil.AddPreTickIntervalAction(delta => job.targetA.Thing.TryGetComp<CompGeneVatRotStink>()?.NotifyExtraction(pawn, delta));
                     toil.AddPreTickIntervalAction(delta => job.targetA.Thing.TryGetComp<CompGeneVatAnimation>()?.NotifyProcessing(pawn));

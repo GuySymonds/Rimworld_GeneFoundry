@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GeneFoundry.Components;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -102,7 +103,8 @@ namespace GeneFoundry.Recipes
             foreach (var source in sources)
             {
                 Corpse corpse = source.LiquidatingCorpse;
-                if (corpse != null && IsVisibleCorpse(corpse)) wanted[corpse] = source;
+                if (corpse != null && IsVisibleCorpse(corpse) &&
+                    !Graphic_StyledMachine.UsesSimple(source.LiquidationVat)) wanted[corpse] = source;
             }
             retired.Clear();
             foreach (var corpse in active.Keys)
@@ -135,7 +137,8 @@ namespace GeneFoundry.Recipes
                 if (!IsVisibleCorpse(pair.Key) || pair.Key.Position.Fogged(map)) continue;
                 // Interruptions/power changes can happen while paused, before the next
                 // synchronization tick. Draw normally until registration is restored.
-                if (pair.Value.source.LiquidatingCorpse != pair.Key || pair.Value.source.LiquidationVat == null)
+                if (pair.Value.source.LiquidatingCorpse != pair.Key || pair.Value.source.LiquidationVat == null ||
+                    Graphic_StyledMachine.UsesSimple(pair.Value.source.LiquidationVat))
                     pair.Key.DrawNowAt(pair.Key.DrawPos);
                 else DrawCorpse(pair.Key, pair.Value);
             }
@@ -238,7 +241,7 @@ namespace GeneFoundry.Recipes
                 bubbleMaterials = new Material[8];
                 for (int i = 0; i < 8; i++)
                 {
-                    string path = "GeneFoundry/Effects/BubbleMass/" + i.ToString("00");
+                    string path = "GeneFoundry/Effects/BubbleMass/BubbleMass_" + i.ToString("00");
                     Texture2D texture = ContentFinder<Texture2D>.Get(path, false);
                     if (texture == null)
                     {

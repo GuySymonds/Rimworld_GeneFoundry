@@ -154,11 +154,11 @@ $stray = Join-Path $target 'Assemblies/GeneFoundry.pdb'
 Set-Content -LiteralPath $stray -Value 'debug symbols'
 Expect-Rejection 'debug symbols' { & $validator -PackagePath $target }
 Remove-Item -LiteralPath $stray
-$texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat_north.png'
+$texture = Join-Path $target 'Textures/GeneFoundry/Buildings/GeneVat_Detailed_north.png'
 $textureBackup = Join-Path $fixture 'texture-backup.png'
 Copy-Item -LiteralPath $texture -Destination $textureBackup
 try {
-    Copy-Item -LiteralPath (Join-Path $source 'Textures/GeneFoundry/Buildings/GeneVat_north.png') -Destination $texture -Force
+    Copy-Item -LiteralPath (Join-Path $source 'Textures/GeneFoundry/Buildings/GeneVat_Detailed_north.png') -Destination $texture -Force
     Expect-Rejection 'full-resolution release texture' { & $validator -PackagePath $target } 'Wrong release texture dimensions'
     [IO.File]::WriteAllText($texture, 'invalid PNG')
     Expect-Rejection 'corrupt release texture' { & $validator -PackagePath $target }

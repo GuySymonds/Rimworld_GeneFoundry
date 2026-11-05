@@ -112,12 +112,12 @@ foreach ($file in $definitions) {
         $path = Join-Path $package "Textures/$relative"
         $graphic = $texture.ParentNode.graphicClass
         if ($graphic -eq 'GeneFoundry.Recipes.Graphic_GeneVat') {
-            # Native Graphic_Multi falls back to north for south and mirrors east for west.
-            foreach ($direction in @('north', 'east')) {
+            # Every Detailed orientation is required, even when Simple artwork is available.
+            foreach ($direction in @('north', 'east', 'south', 'west')) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional vat texture: ${relative}_${direction}"
             }
         }
-        elseif ($graphic -in @('Graphic_Multi', 'GeneFoundry.Fabrication.Graphic_GeneFabricator')) {
+        elseif ($graphic -in @('Graphic_Multi', 'GeneFoundry.Components.Graphic_BiomassRefinery', 'GeneFoundry.Fabrication.Graphic_GeneFabricator')) {
             foreach ($direction in @('north', 'east', 'south', 'west')) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional texture: ${relative}_${direction}"
             }
@@ -135,10 +135,10 @@ foreach ($file in Get-ChildItem -LiteralPath (Join-Path $package 'Languages') -F
 }
 for ($frame = 0; $frame -lt 8; $frame++) {
     foreach ($direction in @('north', 'east', 'south', 'west')) {
-        $relative = 'Textures/GeneFoundry/Buildings/GeneVatFrames/vat_{0:00}_{1}.png' -f $frame, $direction
+        $relative = 'Textures/GeneFoundry/Buildings/GeneVatFrames/GeneVat_Detailed_Transition_{0:00}_{1}.png' -f $frame, $direction
         $framePath = Join-Path $package $relative
         Require (Test-Path -LiteralPath $framePath) "Missing animation frame: $relative"
-        $basePath = Join-Path $package "Textures/GeneFoundry/Buildings/GeneVat_$direction.png"
+        $basePath = Join-Path $package "Textures/GeneFoundry/Buildings/GeneVat_Detailed_$direction.png"
         Require (Test-Path -LiteralPath $basePath) "Missing directional base: $direction"
         $frameImage = [Drawing.Image]::FromFile($framePath)
         $baseImage = [Drawing.Image]::FromFile($basePath)
@@ -147,26 +147,26 @@ for ($frame = 0; $frame -lt 8; $frame++) {
         }
         finally { $frameImage.Dispose(); $baseImage.Dispose() }
     }
-    $bubble = 'Textures/GeneFoundry/Effects/BubbleMass/{0:00}.png' -f $frame
+    $bubble = 'Textures/GeneFoundry/Effects/BubbleMass/BubbleMass_{0:00}.png' -f $frame
     Require (Test-Path -LiteralPath (Join-Path $package $bubble)) "Missing animation frame: $bubble"
 }
 foreach ($direction in @('north', 'east', 'south', 'west')) {
-    $fabricatorFiles = @("GeneFabricationDefault_$direction") + @(0..7 | ForEach-Object { "GeneFabrication_Frame${_}_$direction" })
+    $fabricatorFiles = @("GeneFabricator_Detailed_Idle_$direction") + @(0..7 | ForEach-Object { ('GeneFabricator_Detailed_Processing_{0:00}_{1}' -f $_, $direction) })
     foreach ($name in $fabricatorFiles) {
         $relative = "Textures/GeneFoundry/Buildings/GeneFabricatorFrames/$name.png"
         Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing fabricator frame: $relative"
-        Assert-SameCanvas $relative "Textures/GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabricationDefault_$direction.png"
+        Assert-SameCanvas $relative "Textures/GeneFoundry/Buildings/GeneFabricatorFrames/GeneFabricator_Detailed_Idle_$direction.png"
     }
     foreach ($frame in 0..7) {
-        $relative = 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/prep{0:00}_{1}.png' -f $frame, $direction
+        $relative = 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/BiomassRefinery_Detailed_Preparation_{0:00}_{1}.png' -f $frame, $direction
         Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery preparation frame: $relative"
-        Assert-SameCanvas $relative "Textures/GeneFoundry/Buildings/BiomassRefinery_$direction.png"
+        Assert-SameCanvas $relative "Textures/GeneFoundry/Buildings/BiomassRefinery_Detailed_$direction.png"
     }
 }
-$refineryNames = @('CleanVat', 'DirtyVat') + @(0..7 | ForEach-Object { 'VatFilling{0:00}' -f $_ }) + @(0..15 | ForEach-Object { 'VatProcess{0:00}' -f $_ })
+$refineryNames = @('BiomassRefinery_Detailed_Clean', 'BiomassRefinery_Detailed_Dirty') + @(0..7 | ForEach-Object { 'BiomassRefinery_Detailed_Filling_{0:00}' -f $_ }) + @(0..15 | ForEach-Object { 'BiomassRefinery_Detailed_Processing_{0:00}' -f $_ })
 foreach ($name in $refineryNames) {
     $relative = "Textures/GeneFoundry/Buildings/BiomassRefineryFrames/$name.png"
     Require (Test-Path -LiteralPath (Join-Path $package $relative)) "Missing refinery overlay: $relative"
-    Assert-SameCanvas $relative 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/CleanVat.png'
+    Assert-SameCanvas $relative 'Textures/GeneFoundry/Buildings/BiomassRefineryFrames/BiomassRefinery_Detailed_Clean.png'
 }
 Write-Host "Validated GeneFoundry v${version}: $($expected.Count) runtime files, $($definitions.Count) definition files, assembly, metadata, textures and artwork."

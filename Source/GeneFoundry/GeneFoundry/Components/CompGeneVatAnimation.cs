@@ -29,7 +29,8 @@ namespace GeneFoundry.Components
             if (worker == null || worker.Destroyed || !worker.Spawned || worker.Map != parent.Map ||
                 worker.Drafted || worker.jobs?.curDriver != driver ||
                 !(driver is IGeneVatProcessing processing) || !processing.ProcessingBiomass ||
-                !(parent is Building_WorkTable table) || !table.Spawned || !table.UsableForBillsAfterFueling())
+                !(parent is Building_WorkTable table) || !table.Spawned || !table.UsableForBillsAfterFueling() ||
+                Graphic_StyledMachine.UsesSimple(parent))
                 return -1;
             return GeneVatAnimationTiming.FrameAt(tick - startedAt);
         }
@@ -73,6 +74,11 @@ namespace GeneFoundry.Components
 
         public void NotifyProcessing(Pawn pawn)
         {
+            if (Graphic_StyledMachine.UsesSimple(parent))
+            {
+                RestoreIngredients();
+                return;
+            }
             int now = Find.TickManager.TicksGame;
             if (worker != pawn || driver != pawn.jobs.curDriver || FrameAt(now) < 0)
                 startedAt = now;
