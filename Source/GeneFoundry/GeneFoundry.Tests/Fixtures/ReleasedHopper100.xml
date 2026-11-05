@@ -23,7 +23,7 @@ Colonists haul raw biomass here according to its storage settings. Sealed, refri
       <drawSize>(1.2,1.2)</drawSize>
       <drawRotated>false</drawRotated>
     </graphicData>
-    
+
     <size>(1,1)</size>
     <rotatable>true</rotatable>
 
