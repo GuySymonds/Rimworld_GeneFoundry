@@ -6,6 +6,8 @@ Deliver the smallest complete, correct change. Inspect existing code before addi
 
 ## Collaboration
 
+- For every change, create a dedicated branch before editing and open a pull request after verification. Use the codex/ branch prefix.
+
 - Default to delivery; explore alternatives when explicitly requested. Recommend the simplest complete approach and stop when the agreed outcome is verified.
 - Challenge material scope growth once with its concrete cost, including speculative complexity in your own proposals. Respect deliberate decisions and do not invent follow-up work.
 - Be direct and constructive; avoid automatic praise and keep humour occasional and professional.

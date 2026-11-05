@@ -1,5 +1,11 @@
 # Solution review — 4 November 2026
 
+## v1.1.0 development metadata and deployment — 5 November 2026
+
+Debug and Release now deploy to the same local GeneFoundry directory; version metadata identifies updates. Mod and assembly versions are 1.1.0, with RimWorld 1.6 and 1.7 declared supported. Updated listing, release guidance, metadata checks and deployment regressions accordingly.
+
+Verified 370 portable tests and 505 managed game tests against the installed Managed assemblies, a production build with deployment disabled, release package validation and the complete release workflow safety regressions (including the shared Debug/Release deployment target). Sandboxed testhost connections timed out; the successful test runs used execution outside the sandbox. No installed-mod deployment, Workshop upload or live RimWorld verification was performed. Declaring 1.7 support does not constitute a live compatibility check; follow [runtime acceptance](Testing.md#runtime-acceptance) on both supported versions before publishing.
+
 ## v1.0.0 release documentation — 4 November 2026
 
 Consolidated the former Unreleased notes and initial 1.0.0 draft into one dated first-public-release entry, replacing obsolete refinery quantities and timings with the current defaults. README, release guidance and Workshop listing now identify v1.0.0. About.xml and assembly versions already matched 1.0.0 and required no edits.

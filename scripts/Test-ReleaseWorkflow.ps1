@@ -126,18 +126,16 @@ Write-Host 'PASS: publication ID and sibling preserved; obsolete definition remo
 $previousModDir = $env:GENEFOUNDRY_MOD_DIR
 try {
     $env:GENEFOUNDRY_MOD_DIR = Join-Path $fixture 'Deployment/GeneFoundry'
-    $devTarget = $env:GENEFOUNDRY_MOD_DIR + '_dev'
     $deploy = Join-Path $PSScriptRoot 'Deploy-Mod.ps1'
     & $deploy -Dll $dll -Configuration Debug
-    if ((Get-TextureHashes $devTarget) -ne $sourceHashes) { throw 'Debug deployment changed texture content.' }
-    if (-not (Test-Path -LiteralPath (Join-Path $devTarget 'Assemblies/GeneFoundry.dll')) -or
-        (Test-Path -LiteralPath $env:GENEFOUNDRY_MOD_DIR)) { throw 'Debug deployment targeted the release folder.' }
-    New-Item -ItemType Directory -Path $env:GENEFOUNDRY_MOD_DIR -Force | Out-Null
-    $devMarker = Join-Path $devTarget 'debug-only.txt'
-    Set-Content -LiteralPath $devMarker -Value 'Keep during Release deployment'
+    if ((Get-TextureHashes $env:GENEFOUNDRY_MOD_DIR) -ne $sourceHashes) { throw 'Debug deployment changed texture content.' }
+    if (-not (Test-Path -LiteralPath (Join-Path $env:GENEFOUNDRY_MOD_DIR 'Assemblies/GeneFoundry.dll')) -or
+        (Test-Path -LiteralPath ($env:GENEFOUNDRY_MOD_DIR + '_dev'))) { throw 'Debug deployment must use the shared mod folder.' }
+    $staleMarker = Join-Path $env:GENEFOUNDRY_MOD_DIR 'debug-only.txt'
+    Set-Content -LiteralPath $staleMarker -Value 'Remove during Release deployment'
     & $deploy -Dll $dll -Configuration Release
     if (-not (Test-Path -LiteralPath (Join-Path $env:GENEFOUNDRY_MOD_DIR 'Assemblies/GeneFoundry.dll')) -or
-        -not (Test-Path -LiteralPath $devMarker)) { throw 'Release deployment touched the debug folder.' }
+        (Test-Path -LiteralPath $staleMarker)) { throw 'Release deployment did not refresh the shared folder.' }
     Remove-Item -LiteralPath (Join-Path $env:GENEFOUNDRY_MOD_DIR 'About/About.xml')
     Expect-Rejection 'nonempty deployment without metadata' { & $deploy -Dll $dll -Configuration Release }
     if (-not (Test-Path -LiteralPath (Join-Path $env:GENEFOUNDRY_MOD_DIR 'Assemblies/GeneFoundry.dll'))) {
@@ -148,7 +146,7 @@ try {
     (Get-Content -LiteralPath $wrongMetadata -Raw).Replace('GBF.GeneticBiomassFabrication', 'Other.Mod') |
         Set-Content -LiteralPath $wrongMetadata
     Expect-Rejection 'deployment over another package' { & $deploy -Dll $dll -Configuration Release }
-    Write-Host 'PASS: missing Debug target, empty Release target, configuration isolation and deployment guards.'
+    Write-Host 'PASS: shared Debug/Release target, stale-file removal and deployment guards.'
 }
 finally { $env:GENEFOUNDRY_MOD_DIR = $previousModDir }
 
@@ -173,7 +171,7 @@ $about = Join-Path $target 'About/About.xml'
 $original = [IO.File]::ReadAllBytes($about)
 try {
     [xml]$metadata = Get-Content -LiteralPath $about -Raw
-    $metadata.ModMetaData.supportedVersions.li = '1.5'
+    $metadata.ModMetaData.supportedVersions.SelectSingleNode('li').InnerText = '1.5'
     $metadata.Save($about)
     Expect-Rejection 'untested game version' { & $validator -PackagePath $target }
     [IO.File]::WriteAllBytes($about, $original)

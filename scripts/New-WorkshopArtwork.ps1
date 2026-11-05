@@ -56,7 +56,7 @@ try {
     $grid.Dispose()
     $accent = Brush '#ACD85B'
     $g.FillRectangle($accent, 28, 20, 3, 12)
-    Text $g 'RIMWORLD 1.6  /  BIOTECH' 39 17 11 '#B9C5B6' 'Bold'
+    Text $g 'RIMWORLD 1.6 + 1.7  /  BIOTECH' 39 17 11 '#B9C5B6' 'Bold'
     Text $g 'GENEFOUNDRY' 26 38 48 '#080E0F' 'Bold'
     Text $g 'GENEFOUNDRY' 25 36 48 '#F3F0E4' 'Bold'
     Text $g 'ORGANIC MATTER. GENETIC POSSIBILITIES.' 30 98 12 '#ACD85B' 'Bold'

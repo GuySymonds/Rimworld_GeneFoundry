@@ -1,5 +1,5 @@
 [h1]GeneFoundry[/h1]
-[b]Version 1.0.0 — first public release[/b]
+[b]Version 1.1.0 — in development[/b]
 Turn organic matter into genetic possibilities. GeneFoundry adds an industrial production chain for manufacturing your own genepacks, with meaningful research, material and operator requirements.
 
 [h2]Extract. Refine. Fabricate.[/h2]
@@ -20,7 +20,7 @@ Refinery preparation takes 90 minutes at weighted skill 5 and 30 minutes at 20, 
 
 [h2]Requirements[/h2]
 [list]
-[*]RimWorld 1.6
+[*]RimWorld 1.6 or 1.7
 [*]Biotech DLC
 [*]Load after Core and Biotech. No Harmony requirement.
 [/list]

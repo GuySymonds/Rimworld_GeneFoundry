@@ -1,5 +1,10 @@
 # Release notes
 
+## 1.1.0 — In development
+
+- Declare RimWorld 1.7 support alongside 1.6; Biotech remains required.
+- Deploy Debug and Release builds to the same GeneFoundry folder, using version metadata instead of a duplicate development copy.
+
 ## 1.0.0 — 4 November 2026
 
 First public release for RimWorld 1.6 with Biotech.

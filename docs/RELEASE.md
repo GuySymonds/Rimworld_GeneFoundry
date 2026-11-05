@@ -1,6 +1,6 @@
 # GeneFoundry release and Workshop publishing
 
-Current release: **v1.0.0**, dated 4 November 2026. See the [release notes](../CHANGELOG.md#100--4-november-2026).
+Current development version: **v1.1.0**. See the [update notes](../CHANGELOG.md#110--in-development). The latest public release is v1.0.0, dated 4 November 2026.
 
 ## Build and package
 
@@ -54,7 +54,7 @@ Keep version management explicit:
 
 1. Update `AssemblyVersion` and `AssemblyFileVersion` in `Source/GeneFoundry/GeneFoundry/Properties/AssemblyInfo.cs` to `major.minor.patch.0`, and `AssemblyInformationalVersion` to `major.minor.patch`.
 2. Set `Mod/About/About.xml`'s `modVersion` to the same `major.minor.patch`.
-3. Update CHANGELOG and Workshop change notes. Keep `supportedVersions` at `1.6` unless another game version has actually been tested.
+3. Update CHANGELOG and Workshop change notes. Declared supported versions are `1.6` and `1.7`; verify runtime acceptance on both before publishing.
 4. Run the tests and packaging command. The validator compares the compiled assembly/file/informational versions with About.xml. Startup logging derives its version from the assembly; there is no separate log version to update.
 
 Do not change the established `GBF.GeneticBiomassFabrication` package ID when updating the display name or release version. This identity came from the existing local mod metadata.
@@ -79,7 +79,7 @@ For later updates, retain the same publication ID and package ID, rebuild/valida
 
 ## Development deployment
 
-Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to the local `RimWorld/Mods/GeneFoundry` path. Release builds deploy there; Debug builds deploy to the sibling `GeneFoundry_dev` folder. Missing or empty targets are created automatically. Nonempty targets must contain About.xml with the established package ID. Both copies retain the same package ID: enable only one in RimWorld. After changing the user environment variable, restart Visual Studio so it inherits the new value. `scripts/Deploy-Mod.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
+Source/Textures is the working artwork directory; export finished PNGs manually into Mod/Textures. Builds leave final textures untouched and deploy from Mod/ after every Build/Rebuild, even when compilation is already up to date. Source artwork and XCF projects are never copied. Set `GENEFOUNDRY_MOD_DIR` to the local `RimWorld/Mods/GeneFoundry` path. Both Release and Debug builds deploy to that same folder. The mod and assembly version identifiers distinguish updates. Missing or empty targets are created automatically. Nonempty targets must contain About.xml with the established package ID. Remove any legacy development copy from the game Mods directory so only one local copy uses the package ID. After changing the user environment variable, restart Visual Studio so it inherits the new value. `scripts/Deploy-Mod.ps1` now reads runtime assets exclusively from `Mod/`, deletes stale local contents and copies About/artwork, LICENSE and all runtime folders fresh, preserving only About/PublishedFileId.txt. It can also be invoked explicitly:
 
 ```powershell
 $env:GENEFOUNDRY_MOD_DIR = 'C:\Path To\RimWorld\Mods\GeneFoundry'

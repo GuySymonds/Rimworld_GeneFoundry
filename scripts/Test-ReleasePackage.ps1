@@ -33,7 +33,7 @@ Require ($meta.name -eq 'GeneFoundry') 'Unexpected mod name.'
 Require ($meta.author -eq 'Guy Symonds') 'Unexpected author.'
 Require ($meta.packageId -eq 'GBF.GeneticBiomassFabrication') 'Established package ID changed.'
 Require ($meta.url -eq 'https://github.com/GuySymonds/Rimworld_GeneFoundry') 'Repository URL missing.'
-Require (@($meta.supportedVersions.li).Count -eq 1 -and $meta.supportedVersions.li -eq '1.6') 'Only RimWorld 1.6 is supported.'
+Require ((@($meta.supportedVersions.li) -join ',') -eq '1.6,1.7') 'Expected RimWorld 1.6 and 1.7 support.'
 Require (@($meta.modDependencies.li | Where-Object { $_.packageId -eq 'Ludeon.RimWorld.Biotech' -and $_.displayName -eq 'Biotech' }).Count -eq 1) 'Biotech dependency missing.'
 Require (-not [string]::IsNullOrWhiteSpace($meta.description)) 'Description missing.'
 $version = [string]$meta.modVersion

@@ -15,7 +15,6 @@ $mod = Assert-PlainModDirectory $mod
 if ((Split-Path $mod -Leaf) -ne 'GeneFoundry') {
     throw 'GENEFOUNDRY_MOD_DIR must point to the local Mods/GeneFoundry directory.'
 }
-if ($Configuration -eq 'Debug') { $mod = Assert-PlainModDirectory ($mod + '_dev') }
 $metadata = Join-Path $mod 'About/About.xml'
 [xml]$expected = Get-Content -LiteralPath (Join-Path $source 'About/About.xml') -Raw
 if (Test-Path -LiteralPath $metadata -PathType Leaf) {

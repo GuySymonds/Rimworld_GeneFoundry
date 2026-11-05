@@ -25,7 +25,7 @@ The [4 November 2026 baseline scan](https://github.com/GuySymonds/Rimworld_GeneF
 
 Keep the lightweight hosted scan alongside the explicit managed-game tests and package checks below. Full build-backed CodeQL analysis would require a trusted environment with the game references; it is not provided by this workflow. See [GitHub's C# build-mode documentation](https://docs.github.com/en/code-security/reference/code-scanning/codeql/build-options-for-compiled-languages).
 
-The other badges identify the declared RimWorld 1.6 target, required Biotech DLC and MIT license. They are metadata, not test results. Do not add a release/download badge until there is a corresponding published artifact. Do not claim coverage percentages without collecting and publishing measured coverage.
+The other badges identify the declared RimWorld 1.6 and 1.7 targets, required Biotech DLC and MIT license. They are metadata, not test results. Do not add a release/download badge until there is a corresponding published artifact. Do not claim coverage percentages without collecting and publishing measured coverage.
 
 ## Game and package validation
 

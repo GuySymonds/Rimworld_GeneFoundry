@@ -13,14 +13,14 @@ namespace GeneFoundry.Tests
         private static XElement Metadata => XDocument.Load(Fixture("About/About.xml")).Root;
 
         [Fact]
-        public void MetadataRetainsIdentityAndRequiresOnlyTestedGameAndBiotech()
+        public void MetadataRetainsIdentityAndRequiresSupportedGamesAndBiotech()
         {
             var metadata = Metadata;
             Assert.Equal("ModMetaData", metadata.Name.LocalName);
             Assert.Equal("GeneFoundry", (string)metadata.Element("name"));
             Assert.Equal("Guy Symonds", (string)metadata.Element("author"));
             Assert.Equal("GBF.GeneticBiomassFabrication", (string)metadata.Element("packageId"));
-            Assert.Equal("1.6", Assert.Single(metadata.Element("supportedVersions").Elements()).Value);
+            Assert.Equal(new[] { "1.6", "1.7" }, metadata.Element("supportedVersions").Elements().Select(element => element.Value));
             var dependency = Assert.Single(metadata.Element("modDependencies").Elements());
             Assert.Equal("Ludeon.RimWorld.Biotech", (string)dependency.Element("packageId"));
             Assert.Equal("Biotech", (string)dependency.Element("displayName"));

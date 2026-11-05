@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("GeneFoundry")]
-[assembly: AssemblyDescription("Industrial biotechnology and custom genepack fabrication for RimWorld 1.6.")]
+[assembly: AssemblyDescription("Industrial biotechnology and custom genepack fabrication for RimWorld 1.6 and 1.7.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Guy Symonds")]
 [assembly: AssemblyProduct("GeneFoundry")]
@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 
-[assembly: AssemblyInformationalVersion("1.0.0")]
+[assembly: AssemblyInformationalVersion("1.1.0")]
