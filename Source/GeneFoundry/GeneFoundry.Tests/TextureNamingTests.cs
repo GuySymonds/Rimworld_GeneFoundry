@@ -65,6 +65,7 @@ namespace GeneFoundry.Tests
         [InlineData("GeneVat", 832, 832)]
         [InlineData("BiomassRefinery", 832, 576)]
         [InlineData("BiomassHopper", 256, 256)]
+        [InlineData("GeneFabricator", 1344, 576)]
         public void ShippedSimpleArtworkIncludesEveryAuthoredOrientation(string machine, int width, int height)
         {
             var paths = Paths;

@@ -1,5 +1,13 @@
 # Solution review — 4 November 2026
 
+## Simple Fabricator artwork — 5 November 2026
+
+Added the four supplied `GeneFabricator_Simple_<direction>.png` images unchanged. The existing shared loader already selects these exact paths through the restart-required graphics setting, with Detailed as the default and per-direction fallback when Simple artwork is missing. Renderer inspection confirms Simple directions skip Detailed idle/processing overlay loading and return before overlay drawing. No runtime code, definitions, settings schema, saved identifiers, production state or draw geometry changed; the existing Fabricator draw size remains `(5.4,2.4)`.
+
+Extended the shipped-artwork regression to require all four authored Fabricator orientations, exact case, PNG format, RGBA and directional canvas dimensions (1344x576 north/south; 576x1344 east/west). Hash checks confirm the PNG bytes match the supplied files. Verified 378 portable tests and 522 managed tests, including directional selection/fallback, released-settings loading and saved fabrication progress/ownership/completion regressions. Production Release build passed with deployment disabled and zero warnings/errors. Package validation passed for 199 runtime files (173 PNGs); all release workflow safety regressions, three local documentation link/anchor checks and `git diff --check` passed.
+
+Live Unity rendering, settings UI/restart behavior and a full released-colony upgrade remain manual checks under [artwork acceptance](Testing.md#artwork). Editable/source artwork was left untouched. No installed-mod deployment, publication or merge into main was performed.
+
 ## Hopper graphics toggle — 5 November 2026
 
 Added the four supplied Simple Hopper images and a minimal Graphic_BiomassHopper subclass using the existing session-frozen graphics selector. Detailed remains the default; Simple is selected independently for each authored direction, with quiet Detailed fallback for missing optional images. Renamed the original four Hopper bases to `BiomassHopper_Detailed_<direction>.png`; all eight Hopper PNGs retain their original bytes. No new setting or positioning configuration was added.

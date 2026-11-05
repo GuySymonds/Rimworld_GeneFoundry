@@ -3,6 +3,7 @@
 ## 1.1.0 — In development
 
 - Add the default-enabled “Enable AI Slop” graphics option: disable it for static Simple machine artwork, with per-direction Detailed fallback where Simple art is absent. Restart required; released saves and settings retain their behavior.
+- Include authored Simple Gene Fabricator artwork for all four orientations, using the existing graphics toggle without idle or processing overlays in Simple mode.
 - Include authored Simple Biomass Refinery and Hopper artwork for all four orientations. The Hopper follows the same restart-required graphics toggle and per-direction fallback.
 - Standardise runtime texture names without changing PNG data, Detailed animations or gameplay.
 

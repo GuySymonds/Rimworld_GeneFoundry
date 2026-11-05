@@ -26,7 +26,7 @@ All paths below are relative to `Mod/Textures/GeneFoundry/`. Names are case-sens
 | `Buildings/` | `BiomassHopper_Detailed_<direction>.png`, `BiomassHopper_Simple_<direction>.png` | Four bases per style |
 | Root | `UnfinishedGenePack.png` | No style variants |
 
-Simple Vat, Refinery and Hopper artwork is supplied in all four directions. The Fabricator currently falls back to Detailed artwork.
+Simple Vat, Refinery, Fabricator and Hopper artwork is supplied in all four directions. Each uses the same toggle and retains per-direction Detailed fallback if an optional Simple image is removed.
 
 To add Simple artwork, export a complete transparent directional PNG into `Buildings/` using `GeneVat`, `BiomassRefinery`, `BiomassHopper` or `GeneFabricator` as `<machine>`. Do not create placeholders for missing directions. Restart after adding images; no C# changes are needed. Each authored direction is used directly without extra rotation or mirroring. All styles use the existing draw sizes: Vat `(3,3.6)`, Refinery `(3.2,2.2)`, Fabricator `(5.4,2.4)`, Hopper `(1.2,1.2)`; east/west use the native horizontal mesh dimensions. Compose transparent margins for those canvases. Footprints, interaction cells, altitude and draw offsets are unchanged. The supplied square Simple Vat canvases deliberately use the existing Vat draw size. Source artwork under `Source/Textures/` retains its artist filenames.
 
