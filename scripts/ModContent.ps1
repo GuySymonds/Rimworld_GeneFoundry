@@ -22,6 +22,30 @@ function Assert-PlainModDirectory([string]$Path) {
     return $full
 }
 
+# The tracked source ID is authoritative; validate before any destination cleanup.
+function Assert-WorkshopPublicationIdentity([string]$Source, [string]$Destination) {
+    $sourceId = Join-Path $Source 'About/PublishedFileId.txt'
+    $targetId = Join-Path $Destination 'About/PublishedFileId.txt'
+    if (-not (Test-Path -LiteralPath $sourceId -PathType Leaf)) {
+        throw "Missing Workshop publication ID: $sourceId"
+    }
+    $expected = [IO.File]::ReadAllText($sourceId).Trim()
+    [UInt64]$parsedId = 0
+    if ($expected -notmatch '^[1-9][0-9]*$' -or -not [UInt64]::TryParse($expected, [ref]$parsedId)) {
+        throw "Invalid Workshop publication ID: $sourceId"
+    }
+    if (Test-Path -LiteralPath $targetId) {
+        $installed = [IO.File]::ReadAllText($targetId).Trim()
+        if ($installed -notmatch '^[1-9][0-9]*$' -or -not [UInt64]::TryParse($installed, [ref]$parsedId)) {
+            throw "Invalid Workshop publication ID: $targetId"
+        }
+        if ($installed -ne $expected) {
+            throw 'Source and destination Workshop publication IDs disagree. Resolve this before copying.'
+        }
+    }
+    return $expected
+}
+
 function Sync-GeneFoundryContent([string]$Source, [string]$Destination, [string]$Dll) {
     $sourceRoot = Assert-PlainModDirectory $Source
     $targetRoot = Assert-PlainModDirectory $Destination
@@ -47,17 +71,7 @@ function Sync-GeneFoundryContent([string]$Source, [string]$Destination, [string]
         [StringComparison]::OrdinalIgnoreCase)) {
         throw 'The input DLL cannot be inside the destination being refreshed.'
     }
-    $sourceId = Join-Path $sourceRoot 'About/PublishedFileId.txt'
-    $targetId = Join-Path $targetRoot 'About/PublishedFileId.txt'
-    foreach ($id in @($sourceId, $targetId)) {
-        if ((Test-Path -LiteralPath $id) -and (Get-Content -LiteralPath $id -Raw).Trim() -notmatch '^[1-9][0-9]*$') {
-            throw "Invalid Workshop publication ID: $id"
-        }
-    }
-    if ((Test-Path -LiteralPath $sourceId) -and (Test-Path -LiteralPath $targetId) -and
-        (Get-Content -LiteralPath $sourceId -Raw).Trim() -ne (Get-Content -LiteralPath $targetId -Raw).Trim()) {
-        throw 'Source and destination Workshop publication IDs disagree. Resolve this before copying.'
-    }
+    Assert-WorkshopPublicationIdentity -Source $sourceRoot -Destination $targetRoot | Out-Null
     New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
     # Fresh deployment: remove every stale local file, except the Workshop identity.
     foreach ($item in Get-ChildItem -LiteralPath $targetRoot -Force) {

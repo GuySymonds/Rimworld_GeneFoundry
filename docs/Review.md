@@ -1,4 +1,22 @@
-# Solution review — 4 November 2026
+# Solution review
+
+## PR #14 final 1.1.0 review and release notes — 5 November 2026
+
+Reviewed publication identity validation, destination path checks, staging cleanup and packaging failure order. Fixed acceptance of digit strings outside Steam's unsigned 64-bit ID range; source and existing destination IDs now require a valid nonzero UInt64 as well as canonical decimal syntax. Added actual release-entry-point regressions for overflowing source/destination IDs, package overflow rejection and successful parsing at UInt64.MaxValue. Removed the package validator's duplicate ID regex/read and special file-count adjustment: the required ID now participates in the ordinary exact-file allowlist, with its identity validated once by the shared helper. Cleanup remains solely in the existing bounded copier; no additional cleanup framework was introduced.
+
+Consolidated CHANGELOG into a dated 1.1.0 release entry, updated README/release-guide anchors, removed development wording from the Workshop listing, and prepared paste-ready WorkshopChangeNotes.txt. The release guide identifies this as a prepared release and retains the human runtime/publishing checklist; no publication is claimed. Added the supplied Source/Research.png and Source/Screenshot_03.png unchanged as optional Workshop gallery media, outside the runtime package. Both load as valid PNGs (2553x1094 and 2560x1440 respectively).
+
+Verified 380 portable tests and 527 managed tests against installed game assemblies. The Release build passed with DeployMod=false and zero warnings/errors. Package validation and the complete release workflow safety suite passed for 200 runtime files, including the unchanged tracked Workshop identity. Missing/empty/malformed/overflowing/conflicting IDs are rejected before the build or staging cleanup, and staging sentinels survive each rejection. Verified 49 local documentation links/anchors, dated release metadata, source-media exclusion and git diff --check. Targeted Windows PowerShell 5.1 checks also passed for the tracked ID, UInt64 maximum and overflow rejection. No gameplay code, saved fields or settings changed. Live rendering, a complete released-colony upgrade and both-game-version acceptance remain manual release-checklist items; no installed-mod deployment, Steam upload or merge into main was performed.
+
+## Remaining 1.1 artwork and tracked Workshop identity — 5 November 2026
+
+Compared the Codex 1.1 branch directly with merged main. Remaining content is the corrected Simple Hopper east/west orientation and five source screenshots/GIFs; production C# is identical to main. Integrated main's squash-merge ancestry while preserving those corrections so the new PR diff excludes the already merged implementation.
+
+The user explicitly approved tracking the public Workshop identity. Committed `Mod/About/PublishedFileId.txt`, updated AGENTS and removed its ignore rule. The confirmed ID is pinned by a portable metadata regression. Steam's public GetPublishedFileDetails API returned GeneFoundry, RimWorld app 294100 and a successful result for the supplied identity. No Steam credentials are stored.
+
+Extracted publication validation into the existing shared content helper. Release.ps1 still performs a Release build with DeployMod=false, but now requires a valid tracked source ID and rejects malformed/conflicting destination IDs before building or cleanup. Removed its duplicate staging cleanup; the shared copier validates inputs, refreshes content and copies the ID. Package validation now requires a nonempty ID matching the source. Release documentation describes the tracked public identity and deliberate replacement for forks.
+
+Verified 380 portable tests and 527 managed tests. Release build passed with zero warnings/errors; the generated distribution contains the same ID as the tracked source and validates 200 runtime files (173 PNGs, including the corrected Hopper exports). All release workflow safety regressions passed, including actual Release.ps1 preflight failures for absent/empty/malformed source IDs, empty/malformed/conflicting destination IDs, untouched staging on rejection, and missing/malformed/mismatched package IDs. Empty-file handling was corrected to use ReadAllText after a regression exposed Get-Content's null result. Six release-guide links/anchors and git diff --check passed. Source screenshots/GIFs remain outside the runtime package. No installed-mod deployment, Workshop upload or merge into main was performed; live rendering remains manual acceptance work.
 
 ## PR #13 follow-up correctness and complexity review — 5 November 2026
 

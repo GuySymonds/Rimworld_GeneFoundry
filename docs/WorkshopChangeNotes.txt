@@ -1,0 +1,8 @@
+[b]GeneFoundry 1.1.0 — 5 November 2026[/b]
+[list]
+[*]Added static Simple artwork in all four directions for the Gene Vat, Biomass Refinery, Gene Fabricator and Biomass Hopper. Disable “Enable AI Slop” in Mod Settings, then restart RimWorld to use it. Detailed graphics remain enabled by default.
+[*]Missing optional Simple images fall back to Detailed graphics per direction. Simple mode suppresses machine animation/decorative effects and avoids background corpse-presentation pawn scans when every Vat direction is Simple.
+[*]Corrected Simple Hopper east/west orientation and its description of the existing 45-biomass batch requirement.
+[*]Added declared RimWorld 1.7 support alongside 1.6; Biotech remains required. Existing saves, progress and saved settings retain their established identities and behavior.
+[*]Standardised runtime texture names, unified local development deployment, and included the existing Workshop identity in validated distributions. No gameplay balance changes.
+[/list]

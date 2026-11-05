@@ -6,7 +6,7 @@
 [![Requires Biotech](https://img.shields.io/badge/DLC-Biotech_required-blue)](Mod/About/About.xml)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-GeneFoundry **v1.1.0** turns organic matter into custom genepacks in **RimWorld 1.6 or 1.7 with Biotech**. See the [release notes](CHANGELOG.md#110--in-development).
+GeneFoundry **v1.1.0** turns organic matter into custom genepacks in **RimWorld 1.6 or 1.7 with Biotech**. See the [release notes](CHANGELOG.md#110--5-november-2026).
 
 1. **Extract** raw biomass from meat, plants or organic corpses at the Gene Vat, with optional enzymes and artificial-part salvage.
 2. **Refine** hopper-fed biomass in an automated Biomass Refinery.

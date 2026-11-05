@@ -1,5 +1,5 @@
 [h1]GeneFoundry[/h1]
-[b]Version 1.1.0 — in development[/b]
+[b]Version 1.1.0 — graphics update[/b]
 Turn organic matter into genetic possibilities. GeneFoundry adds an industrial production chain for manufacturing your own genepacks, with meaningful research, material and operator requirements.
 
 [h2]Extract. Refine. Fabricate.[/h2]

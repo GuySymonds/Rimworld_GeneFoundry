@@ -21,11 +21,12 @@ function Assert-SameCanvas([string]$Frame, [string]$Base) {
         if ($baseImage) { $baseImage.Dispose() }
     }
 }
-foreach ($file in @('About/About.xml', 'About/Preview.png', 'Assemblies/GeneFoundry.dll', 'LICENSE')) {
+foreach ($file in @('About/About.xml', 'About/Preview.png', 'About/PublishedFileId.txt', 'Assemblies/GeneFoundry.dll', 'LICENSE')) {
     $path = Join-Path $package $file
     Require (Test-Path -LiteralPath $path -PathType Leaf) "Missing $file"
     Require ((Get-Item -LiteralPath $path).Length -gt 0) "Empty $file"
 }
+Assert-WorkshopPublicationIdentity -Source $source -Destination $package | Out-Null
 [xml]$about = Get-Content -LiteralPath (Join-Path $package 'About/About.xml') -Raw
 $meta = $about.ModMetaData
 Require ($null -ne $meta) 'Expected ModMetaData root.'
@@ -68,8 +69,8 @@ $expected = @{}
 foreach ($file in Get-ChildItem -LiteralPath $source -Recurse -File) {
     $relative = $file.FullName.Substring($source.Length + 1).Replace('\', '/')
     Require ($relative -match '^(About/(About\.xml|Preview\.png|ModIcon\.png|PublishedFileId\.txt)|LICENSE|Defs/.+\.xml|Languages/.+\.xml|Patches/.+\.xml|Textures/.+\.png)$') "Development/unexpected file in Mod/: $relative"
-    if ($relative -eq 'About/PublishedFileId.txt') { continue }
     $expected[$relative] = $true
+    if ($relative -eq 'About/PublishedFileId.txt') { continue }
     $target = Join-Path $package $relative
     Require (Test-Path -LiteralPath $target -PathType Leaf) "Missing runtime file: $relative"
     if ($relative.StartsWith('Textures/')) {
@@ -91,10 +92,7 @@ foreach ($file in Get-ChildItem -LiteralPath $source -Recurse -File) {
 $expected['Assemblies/GeneFoundry.dll'] = $true
 foreach ($file in Get-ChildItem -LiteralPath $package -Recurse -File -Force) {
     $relative = $file.FullName.Substring($package.Length + 1).Replace('\', '/')
-    if ($relative -eq 'About/PublishedFileId.txt') {
-        Require ((Get-Content -LiteralPath $file.FullName -Raw).Trim() -match '^[1-9][0-9]*$') 'Invalid Workshop publication ID.'
-    }
-    else { Require ($expected.ContainsKey($relative)) "Unexpected file: $relative" }
+    Require ($expected.ContainsKey($relative)) "Unexpected file: $relative"
 }
 foreach ($directory in Get-ChildItem -LiteralPath $package -Directory -Force) {
     Require ($directory.Name -in @('About', 'Assemblies', 'Defs', 'Languages', 'Textures', 'Patches')) "Unexpected directory: $($directory.Name)"

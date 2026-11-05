@@ -122,6 +122,61 @@ if ([Convert]::ToBase64String($idBefore) -ne [Convert]::ToBase64String([IO.File]
 if ((Get-Content -LiteralPath $sentinel).Trim() -ne 'Do not change') { throw 'Deployment touched a sibling.' }
 Write-Host 'PASS: publication ID and sibling preserved; obsolete definition removed.'
 
+# Validate publication identity before any build or staging cleanup.
+$preflight = Join-Path $fixture 'PublicationPreflight'
+$preflightScripts = Join-Path $preflight 'scripts'
+$preflightSource = Join-Path $preflight 'Mod/About'
+$preflightPackage = Join-Path $preflight 'dist/GeneFoundry/About'
+New-Item -ItemType Directory -Path $preflightScripts, $preflightSource, $preflightPackage -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Release.ps1'), (Join-Path $PSScriptRoot 'ModContent.ps1'),
+    (Join-Path $PSScriptRoot 'Resize-ReleaseTextures.ps1') -Destination $preflightScripts
+$preflightRelease = Join-Path $preflightScripts 'Release.ps1'
+$sourcePublication = Join-Path $preflightSource 'PublishedFileId.txt'
+$targetPublication = Join-Path $preflightPackage 'PublishedFileId.txt'
+$preflightMarker = Join-Path $preflightPackage 'keep-before-validation.txt'
+Set-Content -LiteralPath $preflightMarker -Value 'Preserve staging'
+Expect-Rejection 'release without source publication ID' { & $preflightRelease } 'Missing Workshop publication ID'
+[IO.File]::WriteAllText($sourcePublication, '')
+Expect-Rejection 'release with empty source publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $sourcePublication -Value 'not-an-id'
+Expect-Rejection 'release with malformed source publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $sourcePublication -Value '18446744073709551616'
+Expect-Rejection 'release with overflowing source publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $sourcePublication -Value '123456789'
+Set-Content -LiteralPath $targetPublication -Value '987654321'
+Expect-Rejection 'release over a different Workshop item' { & $preflightRelease } 'publication IDs disagree'
+[IO.File]::WriteAllText($targetPublication, '')
+Expect-Rejection 'release with empty destination publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $targetPublication -Value 'not-an-id'
+Expect-Rejection 'release with malformed destination publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+Set-Content -LiteralPath $targetPublication -Value '18446744073709551616'
+Expect-Rejection 'release with overflowing destination publication ID' { & $preflightRelease } 'Invalid Workshop publication ID'
+if ((Get-Content -LiteralPath $preflightMarker -Raw).Trim() -ne 'Preserve staging') {
+    throw 'Rejected release changed staging before publication validation.'
+}
+Write-Host 'PASS: actual release entry point rejects publication problems before building or cleanup.'
+Remove-Item -LiteralPath $targetPublication
+Set-Content -LiteralPath $sourcePublication -Value '18446744073709551615'
+$boundaryId = Assert-WorkshopPublicationIdentity -Source (Split-Path $preflightSource -Parent) -Destination (Split-Path $preflightPackage -Parent)
+if ($boundaryId -ne '18446744073709551615') { throw 'Valid UInt64 publication ID was rejected.' }
+Write-Host 'PASS: full UInt64 publication ID range is validated without overflow.'
+
+
+# A correctly built package must still reject missing, malformed or changed IDs.
+$publicationBackup = [IO.File]::ReadAllBytes($id)
+try {
+    Remove-Item -LiteralPath $id
+    Expect-Rejection 'missing package publication ID' { & $validator -PackagePath $target } 'Missing About/PublishedFileId.txt'
+    Set-Content -LiteralPath $id -Value 'not-an-id'
+    Expect-Rejection 'malformed package publication ID' { & $validator -PackagePath $target } 'Invalid Workshop publication ID'
+    Set-Content -LiteralPath $id -Value '18446744073709551616'
+    Expect-Rejection 'overflowing package publication ID' { & $validator -PackagePath $target } 'Invalid Workshop publication ID'
+    $differentId = if ((Get-Content -LiteralPath (Join-Path $source 'About/PublishedFileId.txt') -Raw).Trim() -eq '123456789') { '987654321' } else { '123456789' }
+    Set-Content -LiteralPath $id -Value $differentId
+    Expect-Rejection 'package publication ID differs from source' { & $validator -PackagePath $target } 'publication IDs disagree'
+}
+finally { [IO.File]::WriteAllBytes($id, $publicationBackup) }
+
 # Exercise the actual deployment entry point with isolated configuration targets.
 $previousModDir = $env:GENEFOUNDRY_MOD_DIR
 try {
