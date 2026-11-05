@@ -27,6 +27,11 @@ namespace GeneFoundry.Tests
             public Func<string, Material> load;
             protected override Material LoadSimpleMaterial(GraphicRequest req, string path) => load(path);
         }
+        private class Hopper : Graphic_BiomassHopper
+        {
+            public Func<string, Material> load;
+            protected override Material LoadSimpleMaterial(GraphicRequest req, string path) => load(path);
+        }
         private class Fabricator : Graphic_GeneFabricator
         {
             public Func<string, Material> load;
@@ -44,6 +49,7 @@ namespace GeneFoundry.Tests
             {
                 case "GeneVat": return new Vat { load = load };
                 case "BiomassRefinery": return new Refinery { load = load };
+                case "BiomassHopper": return new Hopper { load = load };
                 default: return new Fabricator { load = load };
             }
         }
@@ -51,6 +57,7 @@ namespace GeneFoundry.Tests
         [Theory]
         [InlineData("GeneVat")]
         [InlineData("BiomassRefinery")]
+        [InlineData("BiomassHopper")]
         [InlineData("GeneFabricator")]
         public void EveryAvailabilityCombinationSelectsExactDirectionalMaterialWithoutMixingMachines(string machine)
         {
@@ -71,14 +78,15 @@ namespace GeneFoundry.Tests
                 // Substitute only the Unity materials, retaining native MatAt/MatSingle dispatch.
                 typeof(Graphic_Multi).GetField("mats", BindingFlags.Instance | BindingFlags.NonPublic)
                     .SetValue(graphic, detailedMaterials);
-                graphic.drawSize = new Vector2(3f, 3.6f);
+                var drawSize = machine == "BiomassHopper" ? new Vector2(1.2f, 1.2f) : new Vector2(3f, 3.6f);
+                graphic.drawSize = drawSize;
                 graphic.data = new GraphicData { drawRotated = false };
                 graphic.ApplySimpleGraphics(new GraphicRequest {
                     path = $"GeneFoundry/Buildings/{machine}_Detailed"
                 }, detailed);
                 Assert.Equal(detailed ? 0 : 4, requests.Count);
                 Assert.False(graphic.ShouldDrawRotated);
-                Assert.Equal(new Vector2(3f, 3.6f), graphic.drawSize);
+                Assert.Equal(drawSize, graphic.drawSize);
                 for (int direction = 0; direction < 4; direction++)
                 {
                     bool simple = !detailed && (mask & (1 << direction)) != 0;

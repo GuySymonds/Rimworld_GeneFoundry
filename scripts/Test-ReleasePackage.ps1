@@ -117,7 +117,7 @@ foreach ($file in $definitions) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional vat texture: ${relative}_${direction}"
             }
         }
-        elseif ($graphic -in @('Graphic_Multi', 'GeneFoundry.Components.Graphic_BiomassRefinery', 'GeneFoundry.Fabrication.Graphic_GeneFabricator')) {
+        elseif ($graphic -in @('Graphic_Multi', 'GeneFoundry.Components.Graphic_BiomassHopper', 'GeneFoundry.Components.Graphic_BiomassRefinery', 'GeneFoundry.Fabrication.Graphic_GeneFabricator')) {
             foreach ($direction in @('north', 'east', 'south', 'west')) {
                 Require (Test-Path -LiteralPath "${path}_${direction}.png") "Missing directional texture: ${relative}_${direction}"
             }

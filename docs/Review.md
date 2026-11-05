@@ -1,5 +1,13 @@
 # Solution review — 4 November 2026
 
+## Hopper graphics toggle — 5 November 2026
+
+Added the four supplied Simple Hopper images and a minimal Graphic_BiomassHopper subclass using the existing session-frozen graphics selector. Detailed remains the default; Simple is selected independently for each authored direction, with quiet Detailed fallback for missing optional images. Renamed the original four Hopper bases to `BiomassHopper_Detailed_<direction>.png`; all eight Hopper PNGs retain their original bytes. No new setting or positioning configuration was added.
+
+A fixed v1.0.0 Hopper definition fixture confirms the definition changes only its texture path and graphic class. Its `GF_BiomassHopper` identity, Building_Storage type, footprint, draw size, placement, connections, storage configuration and spoilage behavior are retained. All 70 released Scribe calls still match the release, including their fields, keys, defaults and options. Settings compatibility regressions remain passing.
+
+Verified 377 portable tests and 521 managed tests, including every availability combination for Hopper directions in both styles and native material/preview dispatch. Production Release build passed with deployment disabled and zero warnings/errors; package validation passed for 195 runtime files (169 PNGs), all release workflow safety regressions passed, 13 documentation links/anchors were checked, and `git diff --check` passed. Editable XCF files were left untouched. Live Hopper rendering, released-colony save/load and checks on both game versions remain under [artwork/runtime acceptance](Testing.md#artwork). No installed-mod deployment, publication or merge into main was performed.
+
 ## PR #13 compatibility review and Simple refinery artwork — 5 November 2026
 
 Reviewed the PR against the released v1.0.0 main tree, with particular attention to settings loading, persisted jobs/progress, graphics initialization/directional meshes and vanilla work-effect callbacks. Compared all 70 released Scribe calls: fields, keys, defaults and options are unchanged; the graphics flag is an additional key defaulting to Detailed. Gameplay definition XML is unchanged except graphics paths/classes. Persisted building/job/settings type names and the package identity are retained. No confirmed save/settings regression requiring a production-code fix was identified.

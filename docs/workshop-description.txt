@@ -12,7 +12,7 @@ Turn organic matter into genetic possibilities. GeneFoundry adds an industrial p
 Raw biomass spoils after six days at normal temperature. Refrigeration slows spoilage; freezing stops it. Sealed biomass hoppers pause spoilage without power and retain existing spoilage when emptied. Refined biomass is shelf-stable, but remains damageable.
 
 [h2]Graphics[/h2]
-The default-enabled “Enable AI Slop” option retains Detailed artwork and animations. Disable it for static Simple Vat and Biomass Refinery graphics; missing directions fall back to Detailed. Restart RimWorld to apply graphics changes.
+The default-enabled “Enable AI Slop” option retains Detailed artwork and animations. Disable it for static Simple Vat, Biomass Refinery and Hopper graphics; missing directions fall back to Detailed. Restart RimWorld to apply graphics changes.
 
 [h2]Research and balance[/h2]
 Extraction recovers 60% of dry mass, or 75% with enzymes: meat is 25% dry mass, all raw plant food 24%, and whole corpses use 2.2 times the dry mass of their recoverable meat. Each refinery batch consumes 45 raw biomass and 1 neutroamine for 10 refined biomass on success.

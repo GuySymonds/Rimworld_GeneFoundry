@@ -23,12 +23,12 @@ All paths below are relative to `Mod/Textures/GeneFoundry/`. Names are case-sens
 | `Buildings/BiomassRefineryFrames/` | `BiomassRefinery_Detailed_Processing_<frame>.png` | 00–15 |
 | `Effects/BubbleMass/` | `BubbleMass_<frame>.png` | 00–07 |
 | `RawBiomass/`, `RefinedBiomass/` | `RawBiomass_A.png` / `RefinedBiomass_A.png` (also `_B`, `_C`) | Stack variants |
-| `Buildings/` | `BiomassHopper_<direction>.png` | Four bases, no style variants |
+| `Buildings/` | `BiomassHopper_Detailed_<direction>.png`, `BiomassHopper_Simple_<direction>.png` | Four bases per style |
 | Root | `UnfinishedGenePack.png` | No style variants |
 
-Simple Vat and Refinery artwork is supplied in all four directions. The Fabricator currently falls back to Detailed artwork.
+Simple Vat, Refinery and Hopper artwork is supplied in all four directions. The Fabricator currently falls back to Detailed artwork.
 
-To add Simple artwork, export a complete transparent directional PNG into `Buildings/` using `GeneVat`, `BiomassRefinery` or `GeneFabricator` as `<machine>`. Do not create placeholders for missing directions. Restart after adding images; no C# changes are needed. Each authored direction is used directly without extra rotation or mirroring. All styles use the existing draw sizes: Vat `(3,3.6)`, Refinery `(3.2,2.2)`, Fabricator `(5.4,2.4)`; east/west use the native horizontal mesh dimensions. Compose transparent margins for those canvases. Footprints, interaction cells, altitude and draw offsets are unchanged. The supplied square Simple Vat canvases deliberately use the existing Vat draw size. Source artwork under `Source/Textures/` retains its artist filenames.
+To add Simple artwork, export a complete transparent directional PNG into `Buildings/` using `GeneVat`, `BiomassRefinery`, `BiomassHopper` or `GeneFabricator` as `<machine>`. Do not create placeholders for missing directions. Restart after adding images; no C# changes are needed. Each authored direction is used directly without extra rotation or mirroring. All styles use the existing draw sizes: Vat `(3,3.6)`, Refinery `(3.2,2.2)`, Fabricator `(5.4,2.4)`, Hopper `(1.2,1.2)`; east/west use the native horizontal mesh dimensions. Compose transparent margins for those canvases. Footprints, interaction cells, altitude and draw offsets are unchanged. The supplied square Simple Vat canvases deliberately use the existing Vat draw size. Source artwork under `Source/Textures/` retains its artist filenames.
 
 The graphics setting adds only the `useDetailedGraphics` settings key (default `true`). Released setting keys, definition IDs, package ID and persisted types are preserved; no save migration is required. Texture paths were renamed; external retexture path compatibility is not provided.
 

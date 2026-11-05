@@ -36,7 +36,7 @@ namespace GeneFoundry.Tests
                 string graphic = (string)texture.Parent.Element("graphicClass");
                 if (graphic == "Graphic_StackCount")
                     Assert.Contains(paths, candidate => candidate.StartsWith(path + "/", StringComparison.Ordinal));
-                else if (graphic == "Graphic_Multi" || graphic == "GeneFoundry.Recipes.Graphic_GeneVat" ||
+                else if (graphic == "Graphic_Multi" || graphic == "GeneFoundry.Components.Graphic_BiomassHopper" || graphic == "GeneFoundry.Recipes.Graphic_GeneVat" ||
                     graphic == "GeneFoundry.Components.Graphic_BiomassRefinery" || graphic == "GeneFoundry.Fabrication.Graphic_GeneFabricator")
                     foreach (string direction in new[] { "north", "east", "south", "west" })
                         Assert.Contains(path + "_" + direction + ".png", paths);
@@ -44,9 +44,27 @@ namespace GeneFoundry.Tests
             }
         }
 
+        [Fact]
+        public void HopperDefinitionRetainsReleasedStorageAndPlacementContracts()
+        {
+            string fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
+            var released = XDocument.Load(Path.Combine(fixtures, "ReleasedHopper100.xml"));
+            var current = XDocument.Load(Path.Combine(fixtures, "Defs/ThingDefs/RawBiomassHopper.xml"));
+            var graphic = current.Descendants("graphicData").Single();
+            Assert.Equal("GeneFoundry.Components.Graphic_BiomassHopper", (string)graphic.Element("graphicClass"));
+            Assert.Equal("GeneFoundry/Buildings/BiomassHopper_Detailed", (string)graphic.Element("texPath"));
+            // Save identity, Building_Storage type, storage filters/priorities,
+            // spoilage behavior, placement, footprint and draw geometry stay released.
+            var oldGraphic = released.Descendants("graphicData").Single();
+            foreach (string field in new[] { "graphicClass", "texPath" })
+                graphic.Element(field).Value = oldGraphic.Element(field).Value;
+            Assert.True(XNode.DeepEquals(released, current));
+        }
+
         [Theory]
         [InlineData("GeneVat", 832, 832)]
         [InlineData("BiomassRefinery", 832, 576)]
+        [InlineData("BiomassHopper", 256, 256)]
         public void ShippedSimpleArtworkIncludesEveryAuthoredOrientation(string machine, int width, int height)
         {
             var paths = Paths;

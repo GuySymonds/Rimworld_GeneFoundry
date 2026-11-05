@@ -62,6 +62,7 @@
     <Content Include="../../../Mod/Textures/GeneFoundry/Buildings/GeneVatFrames/GeneVat_Detailed_Transition_*.png" Link="Fixtures/Frames/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/GeneFoundry/Effects/BubbleMass/*.png" Link="Fixtures/Bubbles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Compile the exact production calculations without loading RimWorld or running deployment. -->
+    <Content Include="Fixtures/ReleasedHopper100.xml" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Fixtures/ReleasedSettings100.xml" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/Textures/**/*.png" Link="Fixtures/Textures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../../Mod/About/*" Exclude="../../../Mod/About/PublishedFileId.txt" Link="Fixtures/About/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

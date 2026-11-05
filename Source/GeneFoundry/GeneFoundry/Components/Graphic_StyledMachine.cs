@@ -48,6 +48,12 @@ namespace GeneFoundry.Components
             thing.Graphic is Graphic_StyledMachine graphic && graphic.UsesSimple(thing.Rotation);
     }
 
+    public class Graphic_BiomassHopper : Graphic_StyledMachine
+    {
+        public override Graphic GetColoredVersion(Shader shader, Color color, Color colorTwo)
+            => GraphicDatabase.Get<Graphic_BiomassHopper>(path, shader, drawSize, color, colorTwo, data);
+    }
+
     public class Graphic_BiomassRefinery : Graphic_StyledMachine
     {
         public override Graphic GetColoredVersion(Shader shader, Color color, Color colorTwo)
