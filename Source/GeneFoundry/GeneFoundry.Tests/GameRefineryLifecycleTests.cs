@@ -207,7 +207,7 @@ namespace GeneFoundry.Tests
             typeof(Building_WorkTable).GetField("powerComp", Private).SetValue(bench, power);
             var refinery = new CompBiomassRefiner { parent = bench };
             typeof(ThingWithComps).GetField("comps", Private).SetValue(bench, new List<ThingComp> { refinery });
-            var bill = new PreparationBill { billStack = bench.billStack };
+            var bill = new PreparationBill { recipe = new RecipeDef(), billStack = bench.billStack };
             var pawn = new Pawn();
             pawn.skills = new Pawn_SkillTracker(pawn);
             pawn.drafter = new Pawn_DraftController(pawn);

@@ -5,8 +5,8 @@ namespace GeneFoundry.Recipes
     // Pure calculations: no game objects, randomness or mutable global settings.
     public static class BiomassCalculations
     {
-        public static float CorpseRotStinkRisk(int cooking, int medicine, int intellectual) =>
-            ((cooking < 10 ? 1 : 0) + (medicine < 10 ? 1 : 0) + (intellectual < 10 ? 1 : 0)) * 0.05f;
+        public static float CorpseRotStinkRisk(int cooking) =>
+            (float)(0.15d * (1d - Progress(cooking, 0, 10)));
 
         public static float LiquidationVisualProgress(int total, int remaining) => total <= 0 ? 0f :
             Math.Max(0f, Math.Min(1f, 1f - remaining / (float)total));
@@ -66,19 +66,19 @@ namespace GeneFoundry.Recipes
             return Math.Max(0d, Math.Min(1d, (level - minimum) / (double)(maximum - minimum)));
         }
 
-        public static double RefinementSkill(int intellectual, int crafting, int medicine) =>
-            Math.Max(5d, Math.Min(20d, 0.60d * intellectual + 0.25d * crafting + 0.15d * medicine));
+        public static double RefinementSkill(int intellectual) =>
+            Math.Max(5d, Math.Min(20d, intellectual));
 
-        public static float RefinementFailureChance(int intellectual, int crafting, int medicine)
+        public static float RefinementFailureChance(int intellectual)
         {
-            double skill = RefinementSkill(intellectual, crafting, medicine);
+            double skill = RefinementSkill(intellectual);
             return (float)(skill <= 10d
                 ? 0.30d - (skill - 5d) * 0.05d
                 : 0.05d * (20d - skill) / 10d);
         }
 
-        public static int RefinementPreparationTicks(int intellectual, int crafting, int medicine) =>
-            (int)Math.Round((90d - 4d * (RefinementSkill(intellectual, crafting, medicine) - 5d)) * 2500d / 60d);
+        public static int RefinementPreparationTicks(int intellectual) =>
+            (int)Math.Round((90d - 4d * (RefinementSkill(intellectual) - 5d)) * 2500d / 60d);
 
         public static int RefinementUsefulProcessors(int durationMinutes, int minimumMinutes, float reductionMinutes)
         {
@@ -88,29 +88,21 @@ namespace GeneFoundry.Recipes
                 (int)Math.Ceiling((duration - minimum) / (double)reductionMinutes - .00001d);
         }
 
-        public const float CookingWeight = 0.4f;
-        public const float MedicineWeight = 0.4f;
-        public const float IntellectualWeight = 0.2f;
         public const float ExtractionXpPerTick = 0.1f;
 
-        public static float ExpertProgress(int cooking, int medicine, int intellectual) =>
-            (float)(0.4d * Progress(cooking, 10, 20) + 0.4d * Progress(medicine, 6, 20) +
-                0.2d * Progress(intellectual, 4, 20));
+        public static float ExpertProgress(int cooking) => (float)Progress(cooking, 10, 20);
 
-        public static float ExtractionSkillSpeed(int cooking, int medicine, int intellectual,
+        public static float ExtractionSkillSpeed(int cooking,
             int expertSpeedPercent = 200) =>
-            1f + ExpertProgress(cooking, medicine, intellectual) *
+            1f + ExpertProgress(cooking) *
                 (Math.Max(150, Math.Min(300, expertSpeedPercent)) / 100f - 1f);
 
-        public static double ExtractionShortfall(int cooking, int medicine, int intellectual) =>
-            0.4d * (1d - Progress(cooking, 0, 10)) +
-            0.4d * (1d - Progress(medicine, 0, 6)) +
-            0.2d * (1d - Progress(intellectual, 0, 4));
+        public static double ExtractionShortfall(int cooking) => 1d - Progress(cooking, 0, 10);
 
-        public static int ExtractionOutput(int baseOutput, int cooking, int medicine, int intellectual, double roll,
+        public static int ExtractionOutput(int baseOutput, int cooking, double roll,
             float environmentPenalty = 0f)
         {
-            double loss = ExtractionShortfall(cooking, medicine, intellectual) *
+            double loss = ExtractionShortfall(cooking) *
                 (0.5d + 0.5d * Math.Max(0d, Math.Min(1d, roll)));
             // Remove float representation noise before flooring whole-item output.
             loss = Math.Min(1d, loss + Math.Round(Math.Max(0f, Math.Min(1f, environmentPenalty)), 6));

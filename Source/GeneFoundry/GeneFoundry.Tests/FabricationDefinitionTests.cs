@@ -22,9 +22,13 @@ namespace GeneFoundry.Tests
             Assert.Equal("(0,0,-1)",(string)bench.Element("interactionCellOffset"));
             Assert.Contains(bench.Element("comps").Elements(),e=>(string)e.Element("compClass")=="CompPowerTrader");
             Assert.Null(bench.Element("recipes"));
+            var recipe = Def("GF_FabricateSelectedGenes");
+            Assert.Equal("Crafting", (string)recipe.Element("requiredGiverWorkType"));
+            Assert.Equal("Crafting", (string)recipe.Element("workSkill"));
+            Assert.Equal("10", Assert.Single(recipe.Element("skillRequirements").Elements()).Value);
             Assert.Equal("GeneFoundry.Fabrication.ITab_GeneFabricationBills", Assert.Single(bench.Element("inspectorTabs").Elements()).Value);
             Assert.Equal("RealtimeOnly", (string)bench.Element("drawerType"));
-            Assert.Equal("Research",(string)Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"Fixtures","Defs","WorkGiverDefs"),"*.xml").SelectMany(p=>XDocument.Load(p).Root.Elements()).Single(e=>(string)e.Element("defName")=="GF_FabricateGenePack").Element("workType"));
+            Assert.Equal("Crafting",(string)Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"Fixtures","Defs","WorkGiverDefs"),"*.xml").SelectMany(p=>XDocument.Load(p).Root.Elements()).Single(e=>(string)e.Element("defName")=="GF_FabricateGenePack").Element("workType"));
         }
         [Fact] public void UnfinishedItemIsOneCustomJobWithExistingArtAndNoVanillaRecipeCasts()
         {

@@ -148,3 +148,7 @@ Both code findings are resolved and covered by 10 managed lifecycle regression c
 - Release workflow regression: passed publication-ID preservation, stale-file cleanup, sibling safety, invalid assets/metadata and unsafe-target rejection using a disposable fixture.
 - All PowerShell scripts parse; `git diff --check` passes. Testhost localhost connections and the disposable release fixture required execution outside the filesystem/network sandbox.
 - Hosted Actions and live RimWorld checks have not run. No installed mod was deployed or Workshop item published.
+
+## 6 November 2026 — Single production skills (1.2.0)
+
+Verified 379 portable tests and 526 managed RimWorld 1.6 API tests, plus a Release production build with `DeployMod=false` (zero warnings/errors). Managed lifecycle and Scribe regressions passed for refinery preparation/processing and paid unfinished fabrication, including accumulated risk and interruption handling. Production skill/XP routing, work types, minimum recipe requirements and independent medical safeguards have focused regressions. The v1.2.0 release package validator and release workflow safety regressions also passed. No live game was launched. Complete [single-skill upgrade acceptance](Testing.md#single-skill-upgrade-acceptance) and [runtime acceptance](Testing.md#runtime-acceptance) before release; full released-save colony scheduling and disabled-skill handling remain live checks.

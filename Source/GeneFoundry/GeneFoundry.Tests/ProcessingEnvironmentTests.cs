@@ -31,7 +31,7 @@ namespace GeneFoundry.Tests
         [InlineData(10000, .1f, 9000)]
         [InlineData(25, .1f, 22)] [InlineData(1, .2f, 1)]
         public void ExtractionEnvironmentAddsWastageWhilePreservingOneBiomass(int baseline, float penalty, int expected) =>
-            Assert.Equal(expected, BiomassCalculations.ExtractionOutput(baseline, 20, 20, 20, .5, penalty));
+            Assert.Equal(expected, BiomassCalculations.ExtractionOutput(baseline, 20, .5, penalty));
 
         [Fact]
         public void FabricationCanExceedBaseSkillRiskAndWeightsConditionsByWork()

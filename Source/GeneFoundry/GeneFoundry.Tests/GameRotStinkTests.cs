@@ -58,8 +58,8 @@ namespace GeneFoundry.Tests
         {
             // Decay is intentionally absent from the production hazard contract.
             Assert.NotNull(Enum.GetName(stage));
-            Assert.Equal(.15f, BiomassCalculations.CorpseRotStinkRisk(3, 3, 2), 5);
-            Assert.Equal(3, typeof(BiomassCalculations).GetMethod("CorpseRotStinkRisk").GetParameters().Length);
+            Assert.Equal(.105f, BiomassCalculations.CorpseRotStinkRisk(3), 5);
+            Assert.Single(typeof(BiomassCalculations).GetMethod("CorpseRotStinkRisk").GetParameters());
         }
 
         [Fact]

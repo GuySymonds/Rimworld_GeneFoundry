@@ -6,7 +6,7 @@
     <defName>GF_GeneFabricator</defName>
     <label>gene fabricator</label>
 
-    <description>A sophisticated genetic engineering workstation used to manufacture custom genepacks from refined biomass. Room dirt adds up to 15 percentage points of failure risk at cleanliness -2. Outdoor or unroofed exposure instead adds 10 points. Dim light adds up to 10 further points at darkness, falling to zero at 30% light at the operator interaction cell. Environmental risk is weighted by work performed under each condition.</description>
+    <description>A sophisticated genetic engineering workstation used to manufacture custom genepacks from refined biomass. Requires Crafting 10 and Crafting work assignment. Crafting alone controls speed and operator failure and receives manufacturing XP. Room dirt adds up to 15 percentage points of failure risk at cleanliness -2. Outdoor or unroofed exposure instead adds 10 points. Dim light adds up to 10 further points at darkness, falling to zero at 30% light at the operator interaction cell. Environmental risk is weighted by work performed under each condition.</description>
 
     <thingClass>GeneFoundry.Fabrication.Building_GeneFabricator</thingClass>
     <tickerType>Rare</tickerType>

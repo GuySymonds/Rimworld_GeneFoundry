@@ -14,37 +14,36 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(0,0,0,1f)]
-        [InlineData(10,6,4,1f)]
-        [InlineData(5,3,2,1f)]
-        [InlineData(20,6,4,1.4f)]
-        [InlineData(10,20,4,1.4f)]
-        [InlineData(10,6,20,1.2f)]
-        [InlineData(20,20,20,2f)]
-        public void IndependentSpeedProgress(int c,int m,int i,float expected) =>
-            Assert.Equal(expected, BiomassCalculations.ExtractionSkillSpeed(c,m,i),5);
+        [InlineData(0,1f)]
+        [InlineData(10,1f)]
+        [InlineData(5,1f)]
+        [InlineData(20,2f)]
+
+
+        public void CookingSpeedProgress(int c,float expected) =>
+            Assert.Equal(expected, BiomassCalculations.ExtractionSkillSpeed(c),5);
 
         [Theory]
         [InlineData(150,1.5f)] [InlineData(200,2f)] [InlineData(300,3f)]
         public void MaximumSpeedSetting(int maximum,float expected)
         {
-            Assert.Equal(expected,BiomassCalculations.ExtractionSkillSpeed(20,20,20,maximum),5);
-            Assert.Equal(1f,BiomassCalculations.ExtractionSkillSpeed(10,6,4,maximum));
+            Assert.Equal(expected,BiomassCalculations.ExtractionSkillSpeed(20,maximum),5);
+            Assert.Equal(1f,BiomassCalculations.ExtractionSkillSpeed(10,maximum));
         }
 
         [Theory]
-        [InlineData(5,6,4,0d,22)] [InlineData(5,6,4,1d,20)]
-        [InlineData(10,6,4,0d,25)] [InlineData(10,6,4,1d,25)]
-        [InlineData(20,20,20,0d,25)] [InlineData(20,20,20,1d,25)]
-        [InlineData(5,20,20,1d,20)]
-        [InlineData(0,0,0,0d,12)] [InlineData(0,0,0,1d,1)]
-        public void OneRollWastageBoundaries(int c,int m,int i,double roll,int expected) =>
-            Assert.Equal(expected,BiomassCalculations.ExtractionOutput(25,c,m,i,roll));
+        [InlineData(5,0d,18)] [InlineData(5,1d,12)]
+        [InlineData(10,0d,25)] [InlineData(10,1d,25)]
+        [InlineData(20,0d,25)] [InlineData(20,1d,25)]
+
+        [InlineData(0,0d,12)] [InlineData(0,1d,1)]
+        public void OneRollWastageBoundaries(int c,double roll,int expected) =>
+            Assert.Equal(expected,BiomassCalculations.ExtractionOutput(25,c,roll));
 
         [Fact]
         public void MinimumOutputAndVanillaCeilingMatchDesiredRecovery()
         {
-            Assert.Equal(1,BiomassCalculations.ExtractionOutput(1,0,0,0,1));
+            Assert.Equal(1,BiomassCalculations.ExtractionOutput(1,0,1));
             foreach (int baseline in new[] {7,9,20,25})
                 for(int output=1;output<=baseline;output++)
                     Assert.Equal(output,(int)Math.Ceiling(baseline * BiomassCalculations.MaterialYieldEfficiency(output/(float)baseline)));
@@ -117,17 +116,17 @@ namespace GeneFoundry.Tests
         {
             Assert.Equal(basic, BiomassCalculations.CorpseYield(meat, 1f));
             Assert.Equal(enzymatic, BiomassCalculations.CorpseYield(meat, 1f, true));
-            Assert.Equal(basic, BiomassCalculations.ExtractionOutput(basic, 10, 6, 4, 1));
-            Assert.Equal(enzymatic, BiomassCalculations.ExtractionOutput(enzymatic, 10, 6, 4, 1));
+            Assert.Equal(basic, BiomassCalculations.ExtractionOutput(basic, 10, 1));
+            Assert.Equal(enzymatic, BiomassCalculations.ExtractionOutput(enzymatic, 10, 1));
         }
 
         [Fact]
         public void DryMassOutputStillReceivesExistingSkillAndEnvironmentWastage()
         {
             int baseline = BiomassCalculations.CorpseYield(140f, 1f);
-            Assert.Equal(41, BiomassCalculations.ExtractionOutput(baseline, 5, 6, 4, 0));
-            Assert.Equal(36, BiomassCalculations.ExtractionOutput(baseline, 5, 6, 4, 1));
-            Assert.Equal(41, BiomassCalculations.ExtractionOutput(baseline, 10, 6, 4, 0, .1f));
+            Assert.Equal(34, BiomassCalculations.ExtractionOutput(baseline, 5, 0));
+            Assert.Equal(23, BiomassCalculations.ExtractionOutput(baseline, 5, 1));
+            Assert.Equal(41, BiomassCalculations.ExtractionOutput(baseline, 10, 0, .1f));
         }
 
         [Fact]
@@ -145,11 +144,11 @@ namespace GeneFoundry.Tests
         {
             Assert.Equal(10, Fabrication.FabricationCalculations.Biomass(new[] { 0 }));
             double fabricationMinutes = Fabrication.FabricationCalculations.Work(1, 0) /
-                Fabrication.FabricationCalculations.Speed(10, 6, 4) * 60d / 2500d;
+                Fabrication.FabricationCalculations.Speed(10) * 60d / 2500d;
             double sharedMinutes = 90d + 360d + fabricationMinutes;
-            Assert.Equal(580d, Math.Round(7 * 500d * 60d / 2500d + sharedMinutes));
-            Assert.Equal(527d, Math.Round(((Work(140f) + 1) / 2) * 60d / 2500d + sharedMinutes));
-            Assert.Equal(602d, Math.Round(((Work(560f) + 1) / 2) * 60d / 2500d + sharedMinutes));
+            Assert.Equal(574d, Math.Round(7 * 500d * 60d / 2500d + sharedMinutes));
+            Assert.Equal(521d, Math.Round(((Work(140f) + 1) / 2) * 60d / 2500d + sharedMinutes));
+            Assert.Equal(597d, Math.Round(((Work(560f) + 1) / 2) * 60d / 2500d + sharedMinutes));
         }
 
         [Theory]

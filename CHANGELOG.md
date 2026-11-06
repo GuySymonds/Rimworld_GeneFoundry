@@ -1,5 +1,11 @@
 # Release notes
 
+## 1.2.0 — 6 November 2026
+
+- Production uses Cooking 3 for extraction, Intellectual 5 for refinement and Crafting 10 for fabrication, with XP awarded only to that skill. Assign Fabricators to Crafting work.
+- Cooking alone controls wastage and rot stink, both reaching zero at level 10. Medical implant recovery keeps separate surgery requirements and Medicine XP.
+- Fabrication uses Crafting 10–20 for its 30%–0% operator risk curve. Existing paid work, ownership and accumulated risk are retained. Ingredient costs, recipe yields and automated refinery processing are unchanged.
+
 ## 1.1.0 — 5 November 2026
 
 - Add the default-enabled **Enable AI Slop** graphics option. Disable it for static Simple artwork for the Gene Vat, Biomass Refinery, Gene Fabricator and Biomass Hopper, with four authored orientations each. Restart RimWorld after changing it.

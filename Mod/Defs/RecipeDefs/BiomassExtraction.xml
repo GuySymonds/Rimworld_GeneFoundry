@@ -65,8 +65,6 @@
 
     <skillRequirements>
       <Cooking>3</Cooking>
-      <Medicine>3</Medicine>
-      <Intellectual>2</Intellectual>
     </skillRequirements>
 
     <workAmount>500</workAmount>
@@ -175,8 +173,6 @@
     <jobString>Extracting raw biomass from plants using enzymes.</jobString>
     <skillRequirements>
       <Cooking>3</Cooking>
-      <Medicine>3</Medicine>
-      <Intellectual>2</Intellectual>
     </skillRequirements>
     <workAmount>500</workAmount>
     <workSpeedStat>GF_BiomassExtractionSpeed</workSpeedStat>

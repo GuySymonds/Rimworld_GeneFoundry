@@ -30,28 +30,21 @@ namespace GeneFoundry.Tests
         public void BiomassPricesIndividualGenesByDescendingCostAndRoundsTotalOnce(int[] complexities,int expected) =>
             Assert.Equal(expected,FabricationCalculations.Biomass(complexities));
         [Theory]
-        [InlineData(10,6,4,true)] [InlineData(9,20,20,false)] [InlineData(20,5,20,false)] [InlineData(20,20,3,false)]
-        public void Qualifications(int i,int m,int c,bool expected) => Assert.Equal(expected,FabricationCalculations.Qualified(i,m,c));
-        [Fact] public void RiskThresholdsAndProgression()
+        [InlineData(9,false)] [InlineData(10,true)] [InlineData(20,true)]
+        public void Qualifications(int crafting,bool expected) => Assert.Equal(expected,FabricationCalculations.Qualified(crafting));
+        [Theory]
+        [InlineData(0,.3f,.5f)] [InlineData(10,.3f,1.5f)]
+        [InlineData(15,.15f,2f)] [InlineData(20,0f,2.5f)] [InlineData(30,0f,2.5f)]
+        public void CraftingControlsPerformance(int crafting,float risk,float speed)
         {
-            Assert.Equal(.30f,FabricationCalculations.Failure(10,6,4),5);
-            Assert.Equal(.15f,FabricationCalculations.Failure(13,9,7),5);
-            Assert.Equal(0,FabricationCalculations.Failure(16,12,10));
-            Assert.Equal(0,FabricationCalculations.Failure(20,20,20));
-            Assert.Equal(.30f,FabricationCalculations.Failure(0,0,0),5);
-            Assert.Equal(.075f,FabricationCalculations.Failure(20,6,20),5);
+            Assert.Equal(risk,FabricationCalculations.Failure(crafting),5);
+            Assert.Equal(speed,FabricationCalculations.Speed(crafting),5);
         }
         [Fact] public void ActualWorkWeightsRiskRatherThanLastWorker()
         {
             Assert.Equal(.27f,FabricationCalculations.WeightedFailure(90*.3f+10*0,100),5);
             Assert.Equal(.03f,FabricationCalculations.WeightedFailure(10*.3f+90*0,100),5);
             Assert.Equal(.30f,FabricationCalculations.WeightedFailure(0,0),5);
-        }
-        [Fact] public void SpeedUsesAllThreeSkillsAndCapsIndependently()
-        {
-            Assert.Equal(1.31f,FabricationCalculations.Speed(10,6,4),5);
-            Assert.True(FabricationCalculations.Speed(16,12,10)>FabricationCalculations.Speed(10,6,4));
-            Assert.Equal(2.5f,FabricationCalculations.Speed(30,30,30),5);
         }
     }
 }

@@ -3,7 +3,7 @@
   <StatDef>
     <defName>GF_BiomassExtractionSpeed</defName>
     <label>biomass extraction speed</label>
-    <description>Extraction skill speed is 100% at or below reference levels Cooking 10, Medicine 6, Intellectual 4. Above reference each skill independently improves speed, weighted 40/40/20, up to 200% by default at level 20. General work speed, sight and manipulation apply separately.</description>
+    <description>Extraction skill speed is 100% at Cooking 10 or below. Cooking alone improves speed above 10, up to 200% by default at Cooking 20. General work speed, sight and manipulation apply separately.</description>
     <category>PawnWork</category>
     <defaultBaseValue>1</defaultBaseValue>
     <minValue>0.01</minValue>
@@ -30,7 +30,7 @@
   <StatDef>
     <defName>GF_BiomassExtractionYield</defName>
     <label>biomass extraction yield</label>
-    <description>Raw recovery is capped at recipe yield. Below-reference skills cause weighted random wastage, rolled once at completion, with at least one biomass recovered. Above-reference skills do not increase yield.</description>
+    <description>Raw recovery is capped at recipe yield. Cooking below 10 causes random wastage, rolled once at completion, with at least one biomass recovered. Cooking above 10 does not increase yield.</description>
     <category>PawnWork</category>
     <defaultBaseValue>1</defaultBaseValue>
     <minValue>0.001</minValue>

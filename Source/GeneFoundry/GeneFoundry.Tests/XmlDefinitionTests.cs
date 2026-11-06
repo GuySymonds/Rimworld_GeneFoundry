@@ -152,8 +152,8 @@ namespace GeneFoundry.Tests
             Assert.Equal(1, (int)Assert.Single(recipe.Element("ingredients").Elements()).Element("count"));
             Assert.Equal("Neutroamine", (string)recipe.Element("ingredients").Descendants("thingDefs").Single().Element("li"));
             Assert.Equal(5, (int)recipe.Element("skillRequirements").Element("Intellectual"));
-            Assert.Equal(3, (int)recipe.Element("skillRequirements").Element("Crafting"));
-            Assert.Equal(2, (int)recipe.Element("skillRequirements").Element("Medicine"));
+            Assert.Single(recipe.Element("skillRequirements").Elements());
+            Assert.Null(recipe.Element("skillRequirements").Element("Medicine"));
             Assert.True((float)Def("GF_BiomassExtractionYield").Element("minValue") < 1f);
         }
 
@@ -241,20 +241,20 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData("GF_ExtractBiomassBasic", false)]
-        [InlineData("GF_ExtractBiomassPlant", false)]
-        [InlineData("GF_ExtractBiomassEnzymatic", true)]
-        [InlineData("GF_ExtractBiomassCorpse", true)]
-        [InlineData("GF_ExtractBiomassPlantEnzymatic", true)]
-        [InlineData("GF_ExtractBiomassCorpseEnzymatic", true)]
-        public void ExtractionRequirementsReflectProcessComplexity(string recipeName, bool advanced)
+        [InlineData("GF_ExtractBiomassBasic")]
+        [InlineData("GF_ExtractBiomassPlant")]
+        [InlineData("GF_ExtractBiomassEnzymatic")]
+        [InlineData("GF_ExtractBiomassCorpse")]
+        [InlineData("GF_ExtractBiomassPlantEnzymatic")]
+        [InlineData("GF_ExtractBiomassCorpseEnzymatic")]
+        public void AllExtractionRequiresOnlyCookingThree(string recipeName)
         {
             XElement skills = Def(recipeName).Element("skillRequirements");
             Assert.NotNull(skills);
             Assert.Equal("3", (string)skills.Element("Cooking"));
-            Assert.Equal(advanced ? "3" : null, (string)skills.Element("Medicine"));
-            Assert.Equal(advanced ? "2" : null, (string)skills.Element("Intellectual"));
-            Assert.Equal(advanced ? 3 : 1, skills.Elements().Count());
+            Assert.Null(skills.Element("Medicine"));
+            Assert.Null(skills.Element("Intellectual"));
+            Assert.Single(skills.Elements());
         }
 
         [Theory]

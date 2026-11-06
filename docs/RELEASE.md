@@ -1,6 +1,6 @@
 # GeneFoundry release and Workshop publishing
 
-Prepared release: **v1.1.0**, dated 5 November 2026. See the [release notes](../CHANGELOG.md#110--5-november-2026). Complete the human release checklist before publishing.
+Prepared release: **v1.2.0**, dated 6 November 2026. See the [release notes](../CHANGELOG.md#120--6-november-2026). Complete the human release checklist before publishing.
 
 ## Build and package
 
@@ -71,7 +71,7 @@ Do not change the established `GBF.GeneticBiomassFabrication` package ID when up
 
 - [ ] Approve the preview, icon, description and release notes.
 - [ ] Copy `dist/GeneFoundry` to a local `RimWorld/Mods/GeneFoundry` folder. Disable any older development copy with the same package ID and any Workshop copy; do not activate duplicates.
-- [ ] Load the actual package with Core, Biotech and GeneFoundry only on each declared game version. Confirm version 1.1.0 and no startup/definition errors, then complete [gameplay and artwork runtime acceptance](Testing.md#runtime-acceptance), including a released-save upgrade and graphics switching across restarts.
+- [ ] Load the actual package with Core, Biotech and GeneFoundry only on each declared game version. Confirm version 1.2.0 and no startup/definition errors, then complete [gameplay and artwork runtime acceptance](Testing.md#runtime-acceptance), including a released-save upgrade and graphics switching across restarts.
 - [ ] With Steam running and the owning account signed in, enable Development mode, open the vanilla Mods menu, select the local mod and use its Advanced/Upload to Steam control. Review the upload dialog, title, description, preview and change notes. Follow any Steam Workshop legal-agreement prompt. Do not use a subscribed copy as the upload source.
 - [ ] Check the Workshop item's supported game version and Biotech requirement, verify the uploaded preview/listing, and choose the intended visibility. Upload privately first if desired; make it public only after approval.
 - [ ] Confirm the staged `About/PublishedFileId.txt` matches the tracked public ID in `Mod/About/PublishedFileId.txt`. It identifies the existing Workshop item and must accompany future updates. This is public identity metadata, not a credential; never change it for an update. Forks publishing a different item must deliberately replace it with their own ID.

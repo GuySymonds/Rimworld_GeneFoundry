@@ -3,7 +3,7 @@
   <name>GeneFoundry</name>
   <author>Guy Symonds</author>
   <packageId>GBF.GeneticBiomassFabrication</packageId>
-  <modVersion>1.1.0</modVersion>
+  <modVersion>1.2.0</modVersion>
   <supportedVersions>
     <li>1.6</li>
     <li>1.7</li>
@@ -24,18 +24,18 @@
 
 GeneFoundry adds a three-stage biotechnology chain: extract raw biomass from meat, plants or organic corpses at the Gene Vat; refine it using hopper-fed, processor-assisted machinery; then manufacture selected single- or multi-gene genepacks at the Gene Fabricator.
 
-Features weighted operator skills, corpse stripping and artificial-part salvage, enzymatic extraction, rot-stink incidents, batch failure influenced by skill and room conditions, and a dedicated gene research tree generated from loaded gene categories. Raw extraction guarantees some recovery; failed refinery batches lose their ingredients.
+Features specialist operators: Cooking for extraction, Intellectual for refinement and Crafting for fabrication, corpse stripping and artificial-part salvage, enzymatic extraction, rot-stink incidents, batch failure influenced by skill and room conditions, and a dedicated gene research tree generated from loaded gene categories. Raw extraction guarantees some recovery; failed refinery batches lose their ingredients.
 
 Example: one Green Skin cosmetic genepack
 After Xenogenetics and Gene fabrication research, use a powered Gene Vat, a Biomass Refinery with an adjacent hopper, and a Gene Fabricator. Green Skin needs 10 refined biomass, no gene sample and no archite capsules. One successful refinery batch supplies it: 45 raw biomass + 1 neutroamine = 10 refined biomass.
 
 At default settings, using BASIC extraction, fresh undamaged corpses, reference extraction skills and normal work speed:
-- Raw meat: 350 meat (seven 50-meat batches) yields 49 raw biomass; about 9 h 40 min to the first pack.
-- Raw vegetables/berries: 350 food (seven 50-food batches) yields 49 raw biomass; about 9 h 40 min to the first pack. Wood is excluded.
-- Human corpse (140 recoverable meat): one yields 46 raw biomass; about 8 h 47 min to the first pack.
-- Elephant corpse (560 recoverable meat): one yields 184 raw biomass; about 10 h 2 min to the first pack, with enough raw biomass left for three more refinery batches.
+- Raw meat: 350 meat (seven 50-meat batches) yields 49 raw biomass; about 9 h 34 min to the first pack.
+- Raw vegetables/berries: 350 food (seven 50-food batches) yields 49 raw biomass; about 9 h 34 min to the first pack. Wood is excluded.
+- Human corpse (140 recoverable meat): one yields 46 raw biomass; about 8 h 41 min to the first pack.
+- Elephant corpse (560 recoverable meat): one yields 184 raw biomass; about 9 h 57 min to the first pack, with enough raw biomass left for three more refinery batches.
 
-These sequential estimates include extraction, 90-minute refinery preparation, 6-hour automated refining with no processors and about 46 minutes of fabrication at minimum qualified skills (Intellectual 10, Medicine 6, Crafting 4). Every processor removes 20 refining minutes; 15 reach the 1-hour minimum, cutting five hours from these estimates. Estimates assume successful batches without wastage and exclude hauling, implant recovery and interruptions; better skills can shorten work and reduce failure. Enzymatic extraction can reduce food requirements to 250 meat or plant food + 5 herbal medicine for the same 45 raw biomass.
+These sequential estimates include extraction, 90-minute refinery preparation, 6-hour automated refining with no processors and 40 minutes of fabrication at minimum Crafting 10. Every processor removes 20 refining minutes; 15 reach the 1-hour minimum, cutting five hours from these estimates. Estimates assume successful batches without wastage and exclude hauling, implant recovery and interruptions; better skills can shorten work and reduce failure. Enzymatic extraction can reduce food requirements to 250 meat or plant food + 5 herbal medicine for the same 45 raw biomass.
 
 Requires RimWorld 1.6 or 1.7 and Biotech. No Harmony dependency. Other game versions and mod combinations are not declared supported.
 
