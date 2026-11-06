@@ -11,6 +11,7 @@ namespace GeneFoundry.WorkGivers
     {
         public override Job JobOnThing(Pawn pawn, Thing thing, bool forced = false)
         {
+            if (!GeneVatSkills.Qualified(pawn)) return null;
             Job vanillaJob = base.JobOnThing(pawn, thing, forced);
             if (vanillaJob == null || vanillaJob.def != JobDefOf.DoBill)
                 return vanillaJob;

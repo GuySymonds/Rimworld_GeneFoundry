@@ -49,6 +49,7 @@ namespace GeneFoundry.Jobs
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
+            this.FailOn(() => !GeneVatSkills.Qualified(pawn));
             foreach (Toil toil in base.MakeNewToils())
             {
                 GeneVatIngredientPlacement.Configure(toil);

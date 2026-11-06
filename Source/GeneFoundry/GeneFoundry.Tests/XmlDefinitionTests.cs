@@ -209,7 +209,7 @@ namespace GeneFoundry.Tests
         }
 
         [Fact]
-        public void ExtractionBillsUseWeightedSpeedAndDisableVanillaSingleSkillXp()
+        public void ExtractionBillsUseCookingSpeedAndDisableDuplicateVanillaXp()
         {
             foreach (string name in new[] { "GF_ExtractBiomassPlant", "GF_ExtractBiomassPlantEnzymatic",
                 "GF_ExtractBiomassBasic", "GF_ExtractBiomassEnzymatic",

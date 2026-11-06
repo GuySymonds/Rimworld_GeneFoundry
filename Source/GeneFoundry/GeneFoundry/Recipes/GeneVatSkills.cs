@@ -5,6 +5,10 @@ namespace GeneFoundry.Recipes
 {
     public static class GeneVatSkills
     {
+        public static bool Qualified(Pawn pawn) => pawn?.skills != null &&
+            !pawn.skills.GetSkill(SkillDefOf.Cooking).TotallyDisabled &&
+            pawn.skills.GetSkill(SkillDefOf.Cooking).Level >= 3;
+
         public static float SkillSpeed(Pawn pawn)
         {
             return BiomassCalculations.ExtractionSkillSpeed(

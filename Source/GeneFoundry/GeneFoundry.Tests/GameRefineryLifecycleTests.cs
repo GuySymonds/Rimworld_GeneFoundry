@@ -17,19 +17,27 @@ namespace GeneFoundry.Tests
     [Collection("GeneFoundry.Tests.GameGeneResearchTests")]
     public class GameRefineryLifecycleTests : IDisposable
     {
+        static GameRefineryLifecycleTests() => GameProductionSkillTests.InitializeSkills();
+
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
         private static T Uninitialized<T>() => (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
         private static FieldInfo BatchField(string name) => typeof(CompBiomassRefiner).GetField(name, Private);
         private readonly Game previousGame = Current.Game;
+        private readonly SkillDef previousIntellectual = SkillDefOf.Intellectual;
 
         public GameRefineryLifecycleTests()
         {
+            SkillDefOf.Intellectual = new SkillDef { defName = "Intellectual" };
             var game = Uninitialized<Game>();
             typeof(Game).GetField("maps", Private).SetValue(game, new List<Map> { Uninitialized<Map>() });
             Current.Game = game;
         }
 
-        public void Dispose() => Current.Game = previousGame;
+        public void Dispose()
+        {
+            Current.Game = previousGame;
+            SkillDefOf.Intellectual = previousIntellectual;
+        }
 
         // Replace only map placement and player notifications. Tick dispatch, saved
         // state, completion risk, power accounting and output receipts stay real.
@@ -190,6 +198,8 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
+        [InlineData("skill disabled")]
+        [InlineData("skill below minimum")]
         [InlineData("power loss")]
         [InlineData("suspended bill")]
         [InlineData("deleted bill")]
@@ -210,6 +220,11 @@ namespace GeneFoundry.Tests
             var bill = new PreparationBill { recipe = new RecipeDef(), billStack = bench.billStack };
             var pawn = new Pawn();
             pawn.skills = new Pawn_SkillTracker(pawn);
+            var skill = new SkillRecord(pawn, SkillDefOf.Intellectual) { Level = 5 };
+            typeof(SkillRecord).GetField("cachedTotallyDisabled", Private).SetValue(skill, BoolUnknown.False);
+            typeof(SkillRecord).GetField("cachedPermanentlyDisabled", Private).SetValue(skill, BoolUnknown.False);
+            typeof(SkillRecord).GetField("aptitudeCached", Private).SetValue(skill, (int?)0);
+            pawn.skills.skills.Add(skill);
             pawn.drafter = new Pawn_DraftController(pawn);
             var catalyst = Uninitialized<Thing>();
             catalyst.stackCount = 1;
@@ -230,6 +245,8 @@ namespace GeneFoundry.Tests
             float xp = pawn.skills.skills.Sum(s => s.xpSinceLastLevel);
             switch (change)
             {
+                case "skill disabled": typeof(SkillRecord).GetField("cachedTotallyDisabled", Private).SetValue(skill, BoolUnknown.True); break;
+                case "skill below minimum": skill.Level = 4; break;
                 case "power loss": typeof(CompPowerTrader).GetField("powerOnInt", Private).SetValue(power, false); break;
                 case "suspended bill": bill.suspended = true; break;
                 case "deleted bill": bench.billStack.AddBill(bill); bench.billStack.Delete(bill); break;

@@ -29,7 +29,7 @@ Features specialist operators: Cooking for extraction, Intellectual for refineme
 Example: one Green Skin cosmetic genepack
 After Xenogenetics and Gene fabrication research, use a powered Gene Vat, a Biomass Refinery with an adjacent hopper, and a Gene Fabricator. Green Skin needs 10 refined biomass, no gene sample and no archite capsules. One successful refinery batch supplies it: 45 raw biomass + 1 neutroamine = 10 refined biomass.
 
-At default settings, using BASIC extraction, fresh undamaged corpses, reference extraction skills and normal work speed:
+At default settings, using BASIC extraction, fresh undamaged corpses, Cooking 10 and normal work speed:
 - Raw meat: 350 meat (seven 50-meat batches) yields 49 raw biomass; about 9 h 34 min to the first pack.
 - Raw vegetables/berries: 350 food (seven 50-food batches) yields 49 raw biomass; about 9 h 34 min to the first pack. Wood is excluded.
 - Human corpse (140 recoverable meat): one yields 46 raw biomass; about 8 h 41 min to the first pack.

@@ -28,7 +28,9 @@ namespace GeneFoundry.Jobs
                .Thing
                ?.TryGetComp<CompBiomassRefiner>();
 
-        internal bool CanContinuePreparation => pawn != null && !pawn.Drafted &&
+        internal bool CanContinuePreparation => pawn?.skills != null && !pawn.Drafted &&
+            !pawn.skills.GetSkill(SkillDefOf.Intellectual).TotallyDisabled &&
+            pawn.skills.GetSkill(SkillDefOf.Intellectual).Level >= 5 &&
             job.bill != null && !job.bill.DeletedOrDereferenced && job.bill.ShouldDoNow() &&
             job.bill.recipe != null && job.bill.recipe.PawnSatisfiesSkillRequirements(pawn) &&
             job.targetA.Thing is Building_WorkTable table && table.Spawned &&

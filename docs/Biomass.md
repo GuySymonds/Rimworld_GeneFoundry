@@ -96,7 +96,7 @@ Open **Options → Mod Settings → GeneFoundry → Raw biomass**. Sliders have 
 | Fresh extraction per 50 material | 24 minutes | 1–120 minutes | Halved to 12 minutes before other modifiers; scales with body size. |
 | Setup time per corpse | 2.4 minutes | 0–15 minutes, 0.1-minute steps | Halved to 1.2 minutes before other modifiers; adds per-body work. |
 | Work unaffected by decay | 30% | 0–100%, 1% steps | At 0%, time scales entirely with recovery. At 100%, decay does not shorten work. |
-| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Skill-speed ceiling at all skills 20; progress starts at each reference. |
+| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Skill-speed ceiling at Cooking 20; progress starts at Cooking 10. |
 
 The view shows current fresh/rotting/desiccated timing percentages. Corpse duration is captured when extraction starts, while meat/crop speed responds during work. Operator wastage applies at completion to all extraction bills. The corpse-specific timing sliders do not affect meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
 
@@ -158,7 +158,7 @@ Green Skin has zero complexity: its unchanged single-gene fabrication cost is 10
 | Human corpse | One fresh body with 140 recoverable meat → 46 raw biomass | 8h41 |
 | Elephant corpse | One fresh body with 560 recoverable meat → 184 raw biomass | 9h57 |
 
-These sequential estimates use reference extraction skills at normal speed, 90 minutes of refinery preparation, 360 automated minutes, and 40 fabrication minutes at minimum Crafting 10. They exclude hauling, stripping/implant recovery, interruptions, wastage and failed batches. Fifteen processors save 300 minutes from each estimate. Better skills can shorten work and reduce failure. The elephant leaves 139 raw biomass after the first batch, enough for three more refinery batches. Enzymatic meat/plants instead need five batches: 250 food plus 5 herbal medicine produces exactly 45 raw biomass.
+These sequential estimates use Cooking 10 at normal speed, 90 minutes of refinery preparation, 360 automated minutes, and 40 fabrication minutes at minimum Crafting 10. They exclude hauling, stripping/implant recovery, interruptions, wastage and failed batches. Fifteen processors save 300 minutes from each estimate. Better skills can shorten work and reduce failure. The elephant leaves 139 raw biomass after the first batch, enough for three more refinery batches. Enzymatic meat/plants instead need five batches: 250 food plus 5 herbal medicine produces exactly 45 raw biomass.
 ## Verification
 
 See [test commands and coverage](Testing.md), [storage and extraction checks](Testing.md#biomass-storage-and-extraction), and [refinery runtime checks](Testing.md#refinery).
