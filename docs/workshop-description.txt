@@ -15,11 +15,12 @@ Raw biomass spoils after six days at normal temperature. Refrigeration slows spo
 The default-enabled “Enable AI Slop” option retains Detailed artwork and animations. Disable it for static Simple Vat, Biomass Refinery, Gene Fabricator and Hopper graphics; missing directions fall back to Detailed. Restart RimWorld to apply graphics changes.
 
 [h2]Research and balance[/h2]
+Specialists: Cooking 3 for extraction, Intellectual 5 for refinement, Crafting 10 for fabrication. Each operation trains its governing skill. Implant recovery retains separate Medicine and surgery qualifications.
 Extraction recovers 60% of dry mass, or 75% with enzymes: meat is 25% dry mass, all raw plant food 24%, and whole corpses use 2.2 times the dry mass of their recoverable meat. Each refinery batch consumes 45 raw biomass and 1 neutroamine for 10 refined biomass on success.
 Multi-gene fabrication prices genes individually by biomass cost, most expensive first: 100%, 90%, 80%, 70%, 60%, then 50% for each remaining gene. Archite capsule costs and work are unchanged.
 A dedicated GeneFoundry research tab starts after Xenogenetics. Gene fabrication unlocks basic extraction and refinement, with Enzymatic extraction as a separate follow-on project. Category research is generated from loaded genes; completed projects stay complete when mods or costs change, while new categories still need research; archite genes retain the Archogenetics gate. Cosmetic genes are available through the fabrication foundation without separate category research. Corpse extraction uses an organic race allow list rather than a list of known robot categories. Loaded genes are subject to the mod's manufacturing and research checks; universal compatibility with other mods is not claimed.
 
-Refinery preparation takes 90 minutes at weighted skill 5 and 30 minutes at 20, with linear progression. Operator failure falls from 30% at 5 to 5% at 10, then 0% at 20. Dirt or outdoor/unroofed exposure adds risk, with dim light adding a further penalty. Automated processing defaults to 6 in-game hours, reduced by 20 minutes per available processor to a 1-hour minimum with 15 processors. Useful extraction, timing, processor and cleanliness settings are available in Mod Settings.
+Refinery preparation takes 90 minutes at Intellectual 5 and 30 minutes at 20, with linear progression. Operator failure falls from 30% at 5 to 5% at 10, then 0% at 20. Dirt or outdoor/unroofed exposure adds risk, with dim light adding a further penalty. Automated processing defaults to 6 in-game hours, reduced by 20 minutes per available processor to a 1-hour minimum with 15 processors. Useful extraction, timing, processor and cleanliness settings are available in Mod Settings.
 
 [h2]Requirements[/h2]
 [list]

@@ -21,27 +21,27 @@ namespace GeneFoundry.Tests
         public void LinearPreparationAndPiecewiseFailure(int level,int minutes,float failure)
         {
             Assert.Equal((int)System.Math.Round(minutes*2500d/60d),
-                BiomassCalculations.RefinementPreparationTicks(level,level,level));
-            Assert.Equal(failure,BiomassCalculations.RefinementFailureChance(level,level,level),6);
+                BiomassCalculations.RefinementPreparationTicks(level));
+            Assert.Equal(failure,BiomassCalculations.RefinementFailureChance(level),6);
         }
         [Theory]
-        [InlineData(5, 5, 5, .30f)]
-        [InlineData(7, 7, 7, .20f)]
-        [InlineData(10, 8, 6, .105f)] // Weighted 8.9: interpolate before the knee.
-        [InlineData(10, 10, 10, .05f)]
-        [InlineData(12, 10, 10, .044f)] // Weighted 11.2: interpolate after the knee.
-        [InlineData(15, 15, 15, .025f)]
-        [InlineData(20, 20, 20, 0f)]
-        [InlineData(-10, -10, -10, .30f)]
-        [InlineData(30, 30, 30, 0f)]
-        public void FailureInterpolatesAtCombinedSkillAndClamps(int i, int c, int m, float expected) =>
-            Assert.Equal(expected, BiomassCalculations.RefinementFailureChance(i, c, m), 6);
+        [InlineData(5, .30f)]
+        [InlineData(7, .20f)]
+        [InlineData(10, .05f)]
+
+        [InlineData(12, .04f)]
+        [InlineData(15, .025f)]
+        [InlineData(20, 0f)]
+        [InlineData(-10, .30f)]
+        [InlineData(30, 0f)]
+        public void FailureInterpolatesAtIntellectualAndClamps(int i, float expected) =>
+            Assert.Equal(expected, BiomassCalculations.RefinementFailureChance(i), 6);
 
         [Theory]
-        [InlineData(5,3,2,5d)] [InlineData(10,8,6,8.9d)]
-        [InlineData(20,3,2,13.05d)] [InlineData(20,20,20,20d)]
-        public void SingleWeightedSkill(int i,int c,int m,double expected) =>
-            Assert.Equal(expected,BiomassCalculations.RefinementSkill(i,c,m),6);
+        [InlineData(5,5d)] [InlineData(10,10d)]
+        [InlineData(20,20d)]
+        public void IntellectualClamps(int i,double expected) =>
+            Assert.Equal(expected,BiomassCalculations.RefinementSkill(i),6);
 
         [Theory]
         [InlineData(5,0,false,.30f)] [InlineData(5,-1,false,.375f)]
@@ -52,7 +52,7 @@ namespace GeneFoundry.Tests
         [InlineData(20,-2,false,.15f)] [InlineData(20,0,true,.10f)]
         public void EnvironmentAddsRiskAtEverySkill(int skill,double cleanliness,bool exposed,float expected) =>
             Assert.Equal(expected,BiomassCalculations.CombinedRefinementFailure(
-                BiomassCalculations.RefinementFailureChance(skill,skill,skill),
+                BiomassCalculations.RefinementFailureChance(skill),
                 BiomassCalculations.RefinementCleanlinessAdjustment(cleanliness,exposed)),6);
     }
 }

@@ -34,9 +34,7 @@ namespace GeneFoundry.Components
             if (extractionTicks < CheckInterval)
                 return;
             float risk = BiomassCalculations.CorpseRotStinkRisk(
-                pawn.skills.GetSkill(SkillDefOf.Cooking).Level,
-                pawn.skills.GetSkill(SkillDefOf.Medicine).Level,
-                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level);
+                pawn.skills.GetSkill(SkillDefOf.Cooking).Level);
             while (extractionTicks >= CheckInterval)
             {
                 extractionTicks -= CheckInterval;

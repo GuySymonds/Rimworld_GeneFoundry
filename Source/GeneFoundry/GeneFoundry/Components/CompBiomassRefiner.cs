@@ -493,9 +493,7 @@ namespace GeneFoundry.Components
         public static float CalculateFailureChance(Pawn pawn)
         {
             return BiomassCalculations.RefinementFailureChance(
-                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
-                pawn.skills.GetSkill(SkillDefOf.Crafting).Level,
-                pawn.skills.GetSkill(SkillDefOf.Medicine).Level);
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level);
         }
 
         private float EnvironmentAdjustment(bool enabled, out float cleanliness, out bool exposed, out float light)
@@ -506,9 +504,7 @@ namespace GeneFoundry.Components
         public static int CalculatePreparationTicks(Pawn pawn)
         {
             return BiomassCalculations.RefinementPreparationTicks(
-                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level,
-                pawn.skills.GetSkill(SkillDefOf.Crafting).Level,
-                pawn.skills.GetSkill(SkillDefOf.Medicine).Level);
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level);
         }
     }
 }

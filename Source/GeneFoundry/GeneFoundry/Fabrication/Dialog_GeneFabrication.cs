@@ -72,13 +72,13 @@ namespace GeneFoundry.Fabrication
             Widgets.Label(new Rect(0, y, rect.width, 76),
                 $"Selected: {selected.Count} genes; complexity: {complexity}\n" +
                 $"Materials: {Building_GeneFabricator.Biomass(selected)} refined biomass + {Building_GeneFabricator.Archites(selected)} archite capsules\n" +
-                $"Estimated time: {work / FabricationCalculations.Speed(10, 6, 4) / 2500f:0.##} game hours at minimum skills");
+                $"Estimated time: {work / FabricationCalculations.Speed(10) / 2500f:0.##} game hours at minimum skills");
             Rect details = new Rect(rect.width - 180, y + 76, 180, 24);
             Widgets.Label(details, "Skills, risk and recovery");
             TooltipHandler.TipRegion(details,
                 "Biomass by gene, most expensive first: 100%, 90%, 80%, 70%, 60%, then 50% each. Total rounded up.\n" +
-                "Minimum: Intellectual 10, Medicine 6, Crafting 4. Weights: 60% / 25% / 15%.\n" +
-                "Base failure: 30% at minimum; 0% at 16 / 12 / 10. Dirt, outdoors and dim light add risk.\n" +
+                "Minimum: Crafting 10. Crafting controls speed and operator failure.\n" +
+                "Base failure: 30% at minimum; 0% at Crafting 20. Dirt, outdoors and dim light add risk.\n" +
                 "Cancellation recovers 75% of committed ingredients, rounded down.");
             Rect buttons = new Rect(0, rect.height - ButSize.y, rect.width, ButSize.y);
             if (!ReadOnly) DoBottomButtons(buttons);

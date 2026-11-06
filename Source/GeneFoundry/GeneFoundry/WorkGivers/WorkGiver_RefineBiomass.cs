@@ -12,6 +12,9 @@ namespace GeneFoundry.WorkGivers
             Thing thing,
             bool forced = false)
         {
+            if (pawn?.skills == null || pawn.skills.GetSkill(SkillDefOf.Intellectual).TotallyDisabled ||
+                pawn.skills.GetSkill(SkillDefOf.Intellectual).Level < 5) return null;
+
             var refinery = thing.TryGetComp<CompBiomassRefiner>();
 
             if (refinery == null || !refinery.CanStartBatch())

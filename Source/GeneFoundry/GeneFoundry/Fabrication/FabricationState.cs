@@ -160,20 +160,16 @@ namespace GeneFoundry.Fabrication
     public static class FabricationSkills
     {
         public static bool Qualified(Pawn p) => p?.skills != null &&
-            !p.skills.GetSkill(SkillDefOf.Intellectual).TotallyDisabled &&
-            !p.skills.GetSkill(SkillDefOf.Medicine).TotallyDisabled &&
             !p.skills.GetSkill(SkillDefOf.Crafting).TotallyDisabled &&
-            FabricationCalculations.Qualified(Level(p, SkillDefOf.Intellectual), Level(p, SkillDefOf.Medicine), Level(p, SkillDefOf.Crafting));
+            FabricationCalculations.Qualified(Level(p, SkillDefOf.Crafting));
         private static int Level(Pawn p, SkillDef s) => p.skills.GetSkill(s).Level;
-        public static float Speed(Pawn p) => FabricationCalculations.Speed(Level(p, SkillDefOf.Intellectual), Level(p, SkillDefOf.Medicine), Level(p, SkillDefOf.Crafting)) *
+        public static float Speed(Pawn p) => FabricationCalculations.Speed(Level(p, SkillDefOf.Crafting)) *
             p.GetStatValue(StatDefOf.WorkSpeedGlobal) * p.health.capacities.GetLevel(PawnCapacityDefOf.Manipulation) * p.health.capacities.GetLevel(PawnCapacityDefOf.Sight);
-        public static float Failure(Pawn p) => FabricationCalculations.Failure(Level(p, SkillDefOf.Intellectual), Level(p, SkillDefOf.Medicine), Level(p, SkillDefOf.Crafting));
+        public static float Failure(Pawn p) => FabricationCalculations.Failure(Level(p, SkillDefOf.Crafting));
         public static void Learn(Pawn p, int ticks)
         {
             float xp = FabricationCalculations.XpPerTick * ticks;
-            p.skills.Learn(SkillDefOf.Intellectual, xp * FabricationCalculations.IntellectualWeight);
-            p.skills.Learn(SkillDefOf.Medicine, xp * FabricationCalculations.MedicineWeight);
-            p.skills.Learn(SkillDefOf.Crafting, xp * FabricationCalculations.CraftingWeight);
+            p.skills.Learn(SkillDefOf.Crafting, xp);
         }
     }
 

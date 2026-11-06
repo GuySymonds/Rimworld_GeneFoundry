@@ -34,7 +34,7 @@ The Gene Vat supports these material extraction bills:
 
 Raw meat has 25% dry mass; all eligible raw plant food has 24%, including corn, rice, potatoes and berries. Basic extraction recovers 60% of potential dry mass; enzymatic extraction recovers 75%. Base output is `max(1, floor(count × dry-mass fraction × recovery))`; operator wastage applies afterward. There are no crop-specific adjustments. Wood is excluded.
 
-Each material recipe requires 500 work units (12 in-game minutes at normal work speed), uses Cooking work assignment and allows mixing eligible ingredient types. Processing uses the weighted biomass extraction speed described below. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
+Each material recipe requires 500 work units (12 in-game minutes at normal work speed), uses Cooking work assignment and allows mixing eligible ingredient types. Processing uses the Cooking-based biomass extraction speed described below. The plant bill uses the vanilla `PlantFoodRaw` category, including modded foods assigned to that category. Use its ingredient filter to protect food reserves. It does not accept meals, meat or arbitrary non-food crops.
 
 Basic and enzymatic corpse extraction bills use a custom job selected through vanilla bill and ingredient selection. They default to animal corpses; other organic corpses require explicit ingredient-filter changes. Both corpse recipes build an explicit allow list of corpse definitions belonging to loaded races with organic flesh. Vanilla mechanoid and drone flesh types remain ineligible even if marked organic. Ingredient and fixed bill filters use this allow list, so unknown mechanical corpse categories are excluded without naming each mod. Runtime processing uses the same eligibility rule. Enzymatic bills separately retain herbal medicine as a required ingredient; new bills still default to animal corpses. Installed artificial parts are removed medically before biomass extraction.
 
@@ -50,15 +50,15 @@ Corpse recipe output is genuinely variable. Their labels say so, and no fixed `p
 
 ## Gene Vat skills
 
-Basic meat and plant extraction require Cooking 3 only. All enzymatic and corpse extraction bills require Cooking 3, Medicine 3 and Intellectual 2. Vanilla bill selection enforces these recipe requirements. Artificial-part recovery additionally enforces the relevant surgery's requirements, which may be higher. This lets basic processing train an operator toward the advanced recipes.
+All extraction recipes require Cooking 3 with Cooking enabled. Artificial-part recovery separately enforces the relevant surgery requirements; a qualified cook cannot bypass required implant recovery.
 
-All six extraction bills use Cooking 40%, Medicine 40% and Intellectual 20%, with reference levels 10/6/4. These are recovery references, not minimum qualifications. Each skill below reference contributes `weight * max(0, reference - level) / reference` to shortfall S. One roll per completed extraction chooses loss uniformly between 0.5S and S; output is `max(1, floor(baseOutput * (1 - loss)))`. Above-reference skills cannot compensate for another skill's shortfall. Cooking 5 / Medicine 6 / Intellectual 4 gives 10-20% loss: a 25-unit batch yields 20-22.
+All six extraction bills use Cooking alone, with reference level 10. Shortfall S is `max(0, 10 - Cooking) / 10`. One roll per completed extraction chooses loss uniformly between 0.5S and S; output is `max(1, floor(baseOutput * (1 - loss)))`. Cooking 5 gives 25–50% loss: a 25-unit batch yields 12–18. Cooking 10 or above has no skill wastage.
 
-Speed stays at 100% when all skills are at or below reference. Above reference, each skill independently progresses from its reference to 20 using the same weights: `1 + weightedProgress * (maximumSpeed - 1)`. Default maximum is 200%. General work speed, sight and manipulation still apply. No skill grants extra yield. Vanilla material bill completion uses a cached loss result while retaining normal ingredient consumption and output handling.
+Speed stays at 100% at Cooking 10 or below. Above 10, progress is `clamp((Cooking - 10) / 10, 0, 1)` and speed is `1 + progress * (maximumSpeed - 1)`. Default maximum is 200% at Cooking 20; the existing configurable maximum remains. General work speed, sight and manipulation still apply. No skill grants extra yield. Vanilla material bill completion uses a cached loss result while retaining normal ingredient consumption and output handling.
 
-Active extraction awards 0.1 total base XP per tick, split using the same weights. Vanilla passion and learning modifiers apply independently, so final earned XP need not retain the exact base proportions. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling, with only the work phase extended to award weighted XP. Vanilla single-skill recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper.
+Active extraction awards 0.1 base Cooking XP per tick, with vanilla passion and learning modifiers. No extraction XP is awarded during hauling. Meat and crop jobs retain vanilla ingredient collection, interruption, bill completion and output handling. Vanilla recipe XP is disabled to avoid awarding Cooking twice. Corpse work uses the same speed stat and XP helper.
 
-Artificial-part recovery is separate: its surgical speed, qualifications, chance of success and Medicine XP do not use the extraction weighting. The 100% work-speed timing examples assume reference 10/6/4 skills, normal capacities and no other work-speed modifiers.
+Artificial-part recovery is separate: its surgical speed, qualifications, chance of success and Medicine XP remain independently governed by Medicine. The 100% work-speed timing examples assume Cooking 10, normal capacities and no other work-speed modifiers.
 
 ## Artificial-part recovery
 
@@ -79,7 +79,7 @@ Corpse base biomass is `max(1, floor(recoverableMeat × 0.25 × 2.2 × efficienc
 | 50 raw meat | 7 | 9 |
 | 50 raw plant food | 7 | 9 |
 
-Fresh processing time starts at `(setup minutes + material / 50 * extraction minutes) / 2`, divided by the operator's weighted biomass extraction speed. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material give 1.2 setup minutes and 12 minutes per 50 material before other modifiers. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
+Fresh processing time starts at `(setup minutes + material / 50 * extraction minutes) / 2`, divided by the operator's Cooking-based biomass extraction speed. Defaults of 2.4 setup minutes and 24 extraction minutes per 50 material give 1.2 setup minutes and 12 minutes per 50 material before other modifiers. Above 50 material, multiply work by `max(0.75, (material / 50)^-0.1)`: larger bodies gain a gradual batch-efficiency benefit, capped at 25% less work.
 
 Decay then multiplies processing time by `handling share + (1 - handling share) × decay multiplier`. With the default 30% handling share, fresh bodies take 100%, rotting bodies 65% and desiccated bodies 37% of fresh time. This makes a large desiccated body slower to process than a small fresh body yielding the same biomass. At default settings and reference-level extraction speed, a fresh elephant (560 recoverable meat) takes about 106.5 in-game minutes, below the two-hour extraction target; smaller bodies take less time. Hauling, stripping and artificial-part recovery are additional. No duration cap is imposed.
 
@@ -96,7 +96,7 @@ Open **Options → Mod Settings → GeneFoundry → Raw biomass**. Sliders have 
 | Fresh extraction per 50 material | 24 minutes | 1–120 minutes | Halved to 12 minutes before other modifiers; scales with body size. |
 | Setup time per corpse | 2.4 minutes | 0–15 minutes, 0.1-minute steps | Halved to 1.2 minutes before other modifiers; adds per-body work. |
 | Work unaffected by decay | 30% | 0–100%, 1% steps | At 0%, time scales entirely with recovery. At 100%, decay does not shorten work. |
-| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Skill-speed ceiling at all skills 20; progress starts at each reference. |
+| Maximum extraction speed at level 20 | 200% | 150–300%, 1% steps | Skill-speed ceiling at Cooking 20; progress starts at Cooking 10. |
 
 The view shows current fresh/rotting/desiccated timing percentages. Corpse duration is captured when extraction starts, while meat/crop speed responds during work. Operator wastage applies at completion to all extraction bills. The corpse-specific timing sliders do not affect meat/crop bills. Settings persist across saves. Refined biomass options are grouped separately below, with an independent reset button.
 
@@ -116,7 +116,7 @@ Both corpse bills use this cell during medical recovery and extraction. A corpse
 
 ## Gene Vat rot stink
 
-During active meat, plant or corpse extraction (normal or enzymatic, at every decay stage), the current operator has a 250-tick incident check: Cooking, Medicine and Intellectual each add 5% risk when below level 10 (0/5/10/15% total). Hauling, idle time, stripping and implant recovery do not make checks. Partial check progress is retained on the vat across work sessions; active incidents suspend checks.
+During active meat, plant or corpse extraction (normal or enzymatic, at every decay stage), the current operator has a 250-tick incident check: risk is `15% × clamp((10 - Cooking) / 10, 0, 1)`, reaching zero at Cooking 10. Hauling, idle time, stripping and implant recovery do not make checks. Partial check progress is retained on the vat across work sessions; active incidents suspend checks.
 
 Each vat persists its own incident deadline and emission schedule. An incident lasts 2,500 game ticks despite interruptions, operator replacement or power loss. It emits 50 vanilla rot stink gas units at the corpse cell immediately and every 250 ticks thereafter (10 releases, 500 total). Despawned/destroyed vats emit nothing; despawned time still counts toward expiry. Existing gas disperses naturally. Vanilla controls visuals, diffusion, dissipation, exposure and lung rot; natural corpse gas is unchanged. The inspection warning appears only while an incident is active.
 
@@ -124,16 +124,16 @@ Each vat persists its own incident deadline and emission schedule. An incident l
 
 Each attempt consumes **45 raw biomass + 1 neutroamine** when preparation finishes. Success produces exactly **10 refined biomass** (22.22% material recovery); failure produces zero with no refund.
 
-Hoppers must touch a side of the refinery and face it. Multiple hoppers combine their stock; ingredient validation, bill counting and hauling remain unchanged. Qualifications remain Intellectual 5, Crafting 3 and Medicine 2. The single weighted skill is `clamp(0.60 * Intellectual + 0.25 * Crafting + 0.15 * Medicine, 5, 20)`.
+Hoppers must touch a side of the refinery and face it. Multiple hoppers combine their stock; ingredient validation, bill counting and hauling remain unchanged. Assign Research work. Qualification requires enabled Intellectual 5 only. Calculations use `clamp(Intellectual, 5, 20)`.
 
-| Weighted skill | Preparation | Operator failure |
+| Intellectual | Preparation | Operator failure |
 |---|---:|---:|
 | 5 | 90 minutes | 30% |
 | 10 | 70 minutes | 5% |
 | 15 | 50 minutes | 2.5% |
 | 20 | 30 minutes | 0% |
 
-Preparation remains 30–90 minutes; its slow end exceeds one hour and is unchanged by this balance update. Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is piecewise linear: `0.30 - 0.05 * (skill - 5)` from skill 5 to 10, then `0.05 * (20 - skill) / 10` from 10 to 20. No expert yield or preparation bonuses apply. Preparation awards existing weighted XP. Automated processing is independent: **360 minutes (6 hours)**, **20 minutes off per available gene processor**, **60-minute (1-hour) minimum**, reached with **15 processors** by default. Default automated time is `max(60, 360 - 20 × processors)` minutes: 0/1/6/12/14/15 processors give 360/340/240/120/80/60 minutes. More than 15 provide no further reduction. Existing processor allocation gives active gene assemblers priority. Power loss pauses an incomplete reaction and spoils it after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
+Preparation remains 30–90 minutes; its slow end exceeds one hour and is unchanged by this balance update. Preparation is `90 - 4 * (skill - 5)` minutes; operator failure is piecewise linear: `0.30 - 0.05 * (skill - 5)` from skill 5 to 10, then `0.05 * (20 - skill) / 10` from 10 to 20. No expert yield or preparation bonuses apply. Preparation awards Intellectual XP only. Automated processing is independent: **360 minutes (6 hours)**, **20 minutes off per available gene processor**, **60-minute (1-hour) minimum**, reached with **15 processors** by default. Default automated time is `max(60, 360 - 20 × processors)` minutes: 0/1/6/12/14/15 processors give 360/340/240/120/80/60 minutes. More than 15 provide no further reduction. Existing processor allocation gives active gene assemblers priority. Power loss pauses an incomplete reaction and spoils it after two continuous hours. Do X times counts initiated batches; Do until X targets stored output. Completion rolls once and retains the result across save/load and placement retries.
 
 Preparation interrupts when the workstation becomes unusable (including power loss), the bill is suspended/deleted or no longer eligible, or the worker is drafted. No further preparation XP is awarded and no batch ingredients are consumed on interruption. Current-job save/load retains preparation duration and remaining work; it rechecks usability and bill state when toils resume. A cancelled job starts a fresh preparation when scheduled again.
 
@@ -153,12 +153,12 @@ Green Skin has zero complexity: its unchanged single-gene fabrication cost is 10
 
 | Basic extraction route | Input and raw biomass | Approximate first-pack time, no processors |
 |---|---|---:|
-| Meat | 350 raw meat in seven 50-item batches → 49 raw biomass | 9h40 |
-| Vegetables/berries | 350 raw plant food in seven 50-item batches → 49 raw biomass | 9h40 |
-| Human corpse | One fresh body with 140 recoverable meat → 46 raw biomass | 8h47 |
-| Elephant corpse | One fresh body with 560 recoverable meat → 184 raw biomass | 10h02 |
+| Meat | 350 raw meat in seven 50-item batches → 49 raw biomass | 9h34 |
+| Vegetables/berries | 350 raw plant food in seven 50-item batches → 49 raw biomass | 9h34 |
+| Human corpse | One fresh body with 140 recoverable meat → 46 raw biomass | 8h41 |
+| Elephant corpse | One fresh body with 560 recoverable meat → 184 raw biomass | 9h57 |
 
-These sequential estimates use reference extraction skills at normal speed, 90 minutes of refinery preparation, 360 automated minutes, and about 45.8 fabrication minutes at minimum fabrication skills (Intellectual 10, Medicine 6, Crafting 4). They exclude hauling, stripping/implant recovery, interruptions, wastage and failed batches. Fifteen processors save 300 minutes from each estimate. Better skills can shorten work and reduce failure. The elephant leaves 139 raw biomass after the first batch, enough for three more refinery batches. Enzymatic meat/plants instead need five batches: 250 food plus 5 herbal medicine produces exactly 45 raw biomass.
+These sequential estimates use Cooking 10 at normal speed, 90 minutes of refinery preparation, 360 automated minutes, and 40 fabrication minutes at minimum Crafting 10. They exclude hauling, stripping/implant recovery, interruptions, wastage and failed batches. Fifteen processors save 300 minutes from each estimate. Better skills can shorten work and reduce failure. The elephant leaves 139 raw biomass after the first batch, enough for three more refinery batches. Enzymatic meat/plants instead need five batches: 250 food plus 5 herbal medicine produces exactly 45 raw biomass.
 ## Verification
 
 See [test commands and coverage](Testing.md), [storage and extraction checks](Testing.md#biomass-storage-and-extraction), and [refinery runtime checks](Testing.md#refinery).

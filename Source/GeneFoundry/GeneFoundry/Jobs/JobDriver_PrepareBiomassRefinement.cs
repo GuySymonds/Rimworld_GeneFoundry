@@ -11,7 +11,7 @@ namespace GeneFoundry.Jobs
         private const TargetIndex RefineryIndex = TargetIndex.A;
         private const TargetIndex NeutroamineIndex = TargetIndex.B;
 
-        // Match vanilla research's total base learning rate, split across operator skills.
+        // Match vanilla research's total base learning rate, awarded to Intellectual.
         private const float PreparationXpPerTick = 0.1f;
 
         private int preparationTicks;
@@ -28,8 +28,11 @@ namespace GeneFoundry.Jobs
                .Thing
                ?.TryGetComp<CompBiomassRefiner>();
 
-        internal bool CanContinuePreparation => pawn != null && !pawn.Drafted &&
+        internal bool CanContinuePreparation => pawn?.skills != null && !pawn.Drafted &&
+            !pawn.skills.GetSkill(SkillDefOf.Intellectual).TotallyDisabled &&
+            pawn.skills.GetSkill(SkillDefOf.Intellectual).Level >= 5 &&
             job.bill != null && !job.bill.DeletedOrDereferenced && job.bill.ShouldDoNow() &&
+            job.bill.recipe != null && job.bill.recipe.PawnSatisfiesSkillRequirements(pawn) &&
             job.targetA.Thing is Building_WorkTable table && table.Spawned &&
             table.UsableForBillsAfterFueling() && Refinery != null;
 
@@ -91,9 +94,7 @@ namespace GeneFoundry.Jobs
                 // Also guard learning if usability changes before this callback runs.
                 if (!CanContinuePreparation) return;
                 float experience = PreparationXpPerTick * delta;
-                pawn.skills.Learn(SkillDefOf.Intellectual, experience * 0.60f);
-                pawn.skills.Learn(SkillDefOf.Crafting, experience * 0.25f);
-                pawn.skills.Learn(SkillDefOf.Medicine, experience * 0.15f);
+                pawn.skills.Learn(SkillDefOf.Intellectual, experience);
             });
 
             preparation.WithProgressBarToilDelay(RefineryIndex);

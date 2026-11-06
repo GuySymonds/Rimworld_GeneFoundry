@@ -51,7 +51,7 @@ namespace GeneFoundry.Jobs
         {
             this.FailOnDestroyedOrNull(TargetIndex.A);
             this.FailOnBurningImmobile(TargetIndex.A);
-            this.FailOn(() => job.bill == null || job.bill.DeletedOrDereferenced ||
+            this.FailOn(() => !GeneVatSkills.Qualified(pawn) || job.bill == null || job.bill.DeletedOrDereferenced ||
                 !job.bill.ShouldDoNow() || Corpse == null || Corpse.Destroyed || !CorpseBiomassUtility.CanProcess(Corpse) ||
                 (corpsePositioned && (!Corpse.Spawned || Corpse.Position != GeneVatIngredientPlacement.CorpseCell(job.targetA.Thing))) ||
                 !job.bill.recipe.PawnSatisfiesSkillRequirements(pawn) ||

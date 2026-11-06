@@ -4,7 +4,7 @@
     <defName>GF_FabricateGenePack</defName>
     <label>fabricate genepacks</label>
     <giverClass>GeneFoundry.WorkGivers.WorkGiver_FabricateGenePack</giverClass>
-    <workType>Research</workType>
+    <workType>Crafting</workType>
     <verb>fabricate</verb>
     <gerund>fabricating genepacks</gerund>
     <priorityInType>100</priorityInType>

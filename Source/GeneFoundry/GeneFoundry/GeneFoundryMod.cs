@@ -123,11 +123,11 @@ namespace GeneFoundry
             listing.Label("Restart RimWorld to apply graphics changes. Enabled: Detailed artwork and animations. Disabled: available Simple artwork, with Detailed fallback for missing directions.");
             listing.GapLine();
             listing.Label("Raw biomass — Gene Vat");
-            listing.Label("Extraction weights: Cooking 40%, Medicine 40%, Intellectual 20%. References 10/6/4 give full yield and normal speed. Below-reference skills cause random wastage; above-reference skills improve speed only.");
+            listing.Label("Extraction requires Cooking 3. Cooking 10 gives full yield and normal speed. Lower Cooking causes random wastage; higher Cooking improves speed only.");
             Settings.expertSpeedPercent = (int)Math.Round(listing.SliderLabeled(
                 $"Maximum extraction speed at level 20: {Settings.expertSpeedPercent}%",
                 Settings.expertSpeedPercent, 150, 300, 0.75f,
-                "Skill multiplier when all three skills reach 20. Default: 200%. Each skill scales independently from its reference level to 20. Each skill contributes independently. Below reference, skill speed remains 100%. General work speed and capacities apply separately. Range: 150–300%."));
+                "Skill multiplier at Cooking 20. Default: 200%. Cooking scales from normal speed at level 10 to the configured maximum at 20. At Cooking 10 or below, skill speed remains 100%. General work speed and capacities apply separately. Range: 150–300%."));
             Settings.corpseMinutesPer50Material = (float)Math.Round(listing.SliderLabeled(
                 $"Fresh extraction per 50 material: {Settings.corpseMinutesPer50Material:0} min",
                 Settings.corpseMinutesPer50Material, 1f, 120f, 0.75f,
@@ -164,7 +164,7 @@ namespace GeneFoundry
                 $"Time reduction per gene processor: {Settings.processorReductionMinutes:0.##} min",
                 Settings.processorReductionMinutes, 0, Settings.processingMinutes, 0.75f,
                 "Each available processor removes a fixed number of in-game minutes. Default: 20 minutes. With 6-hour processing and a 1-hour minimum, 15 processors provide a benefit. Zero disables assistance. Saved percentage settings are converted to equivalent minutes.");
-            listing.Label("Preparation: 90 minutes at weighted skill 5, falling linearly to 30 at 20 (Intellectual 60%, Crafting 25%, Medicine 15%). Operator failure interpolates from 30% at skill 5 to 5% at 10, then 0% at 20. Success converts 45 raw biomass and 1 neutroamine into 10 refined biomass.");
+            listing.Label("Preparation requires Intellectual 5: 90 minutes at 5, 70 at 10 and 30 at 20. Operator failure interpolates from 30% at skill 5 to 5% at 10, then 0% at 20. Success converts 45 raw biomass and 1 neutroamine into 10 refined biomass.");
             listing.Label("Active gene assemblers have priority. Each powered processor assists at most one refinery.");
             listing.GapLine();
             listing.Label("Processing environment — all three machines");

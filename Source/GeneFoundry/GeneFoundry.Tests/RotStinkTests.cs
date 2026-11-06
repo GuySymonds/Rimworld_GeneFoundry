@@ -19,18 +19,10 @@ namespace GeneFoundry.Tests
         }
 
         [Theory]
-        [InlineData(10, 10, 10, 0f)]
-        [InlineData(9, 10, 10, .05f)]
-        [InlineData(10, 9, 10, .05f)]
-        [InlineData(10, 10, 9, .05f)]
-        [InlineData(9, 9, 10, .10f)]
-        [InlineData(9, 10, 9, .10f)]
-        [InlineData(10, 9, 9, .10f)]
-        [InlineData(9, 9, 9, .15f)]
-        [InlineData(3, 3, 2, .15f)]
-        [InlineData(20, 20, 9, .05f)]
-        public void EachSkillBelowTenAddsFivePercent(int cooking, int medicine, int intellectual, float expected)
-            => Assert.Equal(expected, BiomassCalculations.CorpseRotStinkRisk(cooking, medicine, intellectual), 5);
+        [InlineData(0,.15f)] [InlineData(3,.105f)] [InlineData(5,.075f)]
+        [InlineData(9,.015f)] [InlineData(10,0f)] [InlineData(20,0f)]
+        public void CookingRiskFallsLinearlyToTen(int cooking,float expected) =>
+            Assert.Equal(expected,BiomassCalculations.CorpseRotStinkRisk(cooking),5);
 
         [Fact]
         public void OnlyDissolutionToilNotifiesHazardAndNoDecayIsPassed()
